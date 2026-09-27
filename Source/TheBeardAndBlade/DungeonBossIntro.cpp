@@ -2,7 +2,6 @@
 #include "Components/AudioComponent.h"
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "Misc/ConfigCacheIni.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/Texture2D.h"
 
@@ -39,16 +38,6 @@ void ADungeonHero::SkipIntro()
     if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this)))
         if(!G->IsMenu()&&G->IsBossIntroActive()&&G->GetBossIntroTime()>.35f)G->FinishBossIntro();
 }
-void ADungeonHero::ToggleIntroMotion()
-{
-    if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this)))G->ToggleIntroMotion();
-}
-void ADungeonGameMode::ToggleIntroMotion()
-{
-    bIntroReducedMotion=!bIntroReducedMotion;
-    GConfig->SetBool(TEXT("DungeonAccessibility"),TEXT("ReducedIntroMotion"),bIntroReducedMotion,GGameUserSettingsIni);
-    GConfig->Flush(false,GGameUserSettingsIni);
-}
 void ADungeonGameMode::StartBossIntro()
 {
     CancelBossIntro();
@@ -57,7 +46,7 @@ void ADungeonGameMode::StartBossIntro()
     if(auto* PC=UGameplayStatics::GetPlayerController(this,0))
         if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD()))HUD->PreloadBossIntro(GetBossSpecies());
     BossIntroTime=0;
-    GConfig->GetBool(TEXT("DungeonAccessibility"),TEXT("ReducedIntroMotion"),bIntroReducedMotion,GGameUserSettingsIni);
+    // Entrances always animate; legacy saved motion preferences are ignored.
     if(auto* Cue=LoadObject<USoundBase>(nullptr,TEXT("/Game/Audio/BossIntroCue.BossIntroCue")))
         IntroAudio=UGameplayStatics::SpawnSound2D(this,Cue,(bMusicMuted||bEffectsMuted)?0:.42f,1,0,nullptr,false,true);
     if(MusicComponent)MusicComponent->SetVolumeMultiplier(0);
@@ -92,13 +81,12 @@ void ADungeonHUD::PreloadBossIntro(int32 Species)
 
 void ADungeonHUD::DrawBossIntro(ADungeonGameMode* G)
 {
-    const float T=G->GetBossIntroTime();const bool Reduced=G->IsIntroReducedMotion();
+    const float T=G->GetBossIntroTime();
     const int32 Species=G->GetBossSpecies();
     const float Fade=FMath::Clamp((6-T)/.9f,0.f,1.f),Dim=FMath::Min(T/.3f,1.f)*Fade;
     Box(0,0,1280,800,FLinearColor(0,0,0,.58f*Dim));
     Box(0,0,1280,32*Dim,FLinearColor(.01f,.015f,.02f));Box(0,800-32*Dim,1280,32*Dim,FLinearColor(.01f,.015f,.02f));
     float X=640,Angle=0,Zoom=1;
-    if(!Reduced)
     {
         if(T<.3f)X=-600;
         else if(T<1.5f){const float A=(T-.3f)/1.2f;X=FMath::Lerp(-600.f,680.f,1-FMath::Pow(1-A,1.6f));Angle=FMath::Lerp(-10.f,2.f,A);Zoom=FMath::Lerp(.9f,1.03f,A);}
@@ -108,7 +96,7 @@ void ADungeonHUD::DrawBossIntro(ADungeonGameMode* G)
     auto Noise=[](int I){return FMath::Frac(FMath::Abs(FMath::Sin(I*127.1f+311.7f)*43758.5453f));};
     auto Debris=[&](bool Front)
     {
-        if(Reduced||T<.3f)return;
+        if(T<.3f)return;
         for(int I=0;I<60;++I)
         {
             const float A=T*(2.6f+Noise(I)*1.6f)+I*2.399f;
@@ -143,20 +131,19 @@ void ADungeonHUD::DrawBossIntro(ADungeonGameMode* G)
     Debris(true);
     if(T>=2.1f)
     {
-        const float A=FMath::Clamp((T-2.1f)/.3f,0.f,1.f),TX=Reduced?640:FMath::Lerp(-800.f,640.f,1-FMath::Pow(1-A,3.f));
-        const float Pop=Reduced?1:1+.12f*(1-FMath::Clamp((T-2.4f)/.24f,0.f,1.f));
-        Fit(Prefix+TEXT("Title"),TX,650,960*Pop,225*Pop,Fade*(Reduced?A:1),0);
+        const float A=FMath::Clamp((T-2.1f)/.3f,0.f,1.f),TX=FMath::Lerp(-800.f,640.f,1-FMath::Pow(1-A,3.f));
+        const float Pop=1+.12f*(1-FMath::Clamp((T-2.4f)/.24f,0.f,1.f));
+        Fit(Prefix+TEXT("Title"),TX,650,960*Pop,225*Pop,Fade,0);
     }
-    if(!Reduced&&T>=2.4f&&T<2.55f){auto C=IntroAccent(Species,1);C.A=.10f*(1-(T-2.4f)/.15f);Box(0,0,1280,800,C);}
+    if(T>=2.4f&&T<2.55f){auto C=IntroAccent(Species,1);C.A=.10f*(1-(T-2.4f)/.15f);Box(0,0,1280,800,C);}
     Label(TEXT("CLICK / SPACE / ENTER TO SKIP"),38,758,FLinearColor(.9f,.85f,.7f,Fade),.7f);
-    Label(Reduced?TEXT("R: REDUCED MOTION ON"):TEXT("R: REDUCED MOTION OFF"),982,758,FLinearColor(.9f,.85f,.7f,Fade),.7f);
 }
 
 void ADungeonGameMode::VerifyBossIntro()
 {
 #if !UE_BUILD_SHIPPING
     int Errors=0;auto Check=[&](bool OK,const TCHAR* S){if(!OK){++Errors;UE_LOG(LogTemp,Error,TEXT("INTRO_VERIFY %s"),S);}};
-    for(int R:{3,6,9,12,15,18,21})for(float Dt:{.016f,.3f,2.f})
+    for(int R:{4,8,12,16,20,24,28})for(float Dt:{.016f,.3f,2.f})
     {
         StartPlaytestRoom(R);Tick(2.1f);Check(IsBossIntroActive()&&IsGameplayBlocked(),TEXT("Intro blocks combat"));
         const float Before=BossIntroTime;ToggleMenu();Tick(1);Check(BossIntroTime==Before,TEXT("Pause freezes timeline"));ToggleMenu();
@@ -169,10 +156,10 @@ void ADungeonGameMode::VerifyBossIntro()
     }
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
     {
-        StartPlaytestRoom(6);Tick(2.1f);Tick(.5f);ToggleMenu();
+        StartPlaytestRoom(8);Tick(2.1f);Tick(.5f);ToggleMenu();
         H->Confirm();Check(!bMenu&&IsBossIntroActive(),TEXT("Enter resumes paused intro without skipping"));
         H->SkipIntro();Check(!IsBossIntroActive()&&IsBossDialogueActive(),TEXT("Player skip hands off to dialogue"));
-        StartPlaytestRoom(21);Tick(2.1f);H->Health=0;Tick(.1f);
+        StartPlaytestRoom(28);Tick(2.1f);H->Health=0;Tick(.1f);
         Check(!IsBossIntroActive()&&!IntroAudio&&!IsBossDialogueActive(),TEXT("Death cancels intro"));
     }
     StartPlaytestRoom(1);Tick(2.1f);Check(!IsBossIntroActive()&&!IsBossDialogueActive(),TEXT("Standard rooms do not trigger intros"));

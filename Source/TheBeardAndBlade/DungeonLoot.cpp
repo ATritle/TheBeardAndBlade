@@ -17,7 +17,10 @@ const FBaseLoot Catalog[]={
  {TEXT("Frosthide"),12,0,3},{TEXT("Duskweave"),9,.04f,8},{TEXT("Copperguard"),11,0,7},{TEXT("Bonewarden"),14,0,9},
  {TEXT("Ruby Heart"),18,0,4},{TEXT("Emerald Vow"),18,0,2},{TEXT("Sapphire Ward"),18,0,3},{TEXT("Amethyst Eye"),16,0,8},
  {TEXT("Gravekeeper's Token"),20,0,5},{TEXT("Solar Seal"),18,0,10},{TEXT("Lunar Tear"),16,0,6},{TEXT("Eagle's Oath"),18,0,7},
- {TEXT("Last Cuppa"),22,0,5},{TEXT("Briarheart"),20,0,1},{TEXT("Aegis Medal"),20,0,10},{TEXT("Amber Hourglass"),16,.05f,6}
+ {TEXT("Last Cuppa"),22,0,5},{TEXT("Briarheart"),20,0,1},{TEXT("Aegis Medal"),20,0,10},{TEXT("Amber Hourglass"),16,.05f,6},
+ {TEXT("Thornblood"),0,0,0},{TEXT("Serpent's Coil"),0,0,0},{TEXT("Skyrunner"),0,0,0},{TEXT("Vampire's Vow"),0,0,0},
+ {TEXT("Iron Oath"),0,0,0},{TEXT("Amberheart"),0,0,0},{TEXT("Crimson Briar"),0,0,0},{TEXT("Venomwell"),0,0,0},
+ {TEXT("Gale Knot"),0,0,0},{TEXT("Nightfeast"),0,0,0},{TEXT("Black Bastion"),0,0,0},{TEXT("Dawnheart"),0,0,0}
 };
 }
 FString FDungeonItem::EffectText() const
@@ -40,14 +43,22 @@ float FDungeonItem::EquippedScale() const
 }
 FDungeonItem ADungeonGameMode::RollItem(int32 Definition,int32 Rarity,int32 Level)
 {
- FDungeonItem I; I.CatalogId=FMath::Clamp(Definition,0,47); I.ItemLevel=FMath::Clamp(Level,1,100);
+ FDungeonItem I; I.CatalogId=FMath::Clamp(Definition,0,59); I.ItemLevel=FMath::Clamp(Level,1,100);
  I.Rarity=FMath::Clamp(Rarity,0,4); const auto& B=Catalog[I.CatalogId]; I.Name=B.Name;
- I.Slot=I.CatalogId<24?0:I.CatalogId<36?1:2;
+ I.Slot=I.CatalogId<24?0:I.CatalogId<36?1:I.CatalogId<48?2:3;
  I.Icon=I.Slot*3+(I.CatalogId%3);
  const float Scale=(1.f+.08f*(I.ItemLevel-1))*(1.f+.3f*I.Rarity)*FMath::FRandRange(.88f,1.12f);
  if(I.Slot==0) { I.Attack=B.Power*Scale; I.Speed=B.Speed; }
  if(I.Slot==1) { I.Defense=B.Power*Scale; I.Vitality=8*Scale; I.Speed=B.Speed; }
  if(I.Slot==2) I.Vitality=B.Power*Scale;
+ if(I.Slot==3) {
+  const float Q=FMath::FRandRange(.9f,1.1f)*(1+.22f*I.Rarity);
+  switch((I.CatalogId-48)%6) {
+   case 0:I.BleedChance=.04f*Q;break; case 1:I.PoisonChance=.04f*Q;break;
+   case 2:I.StaminaBonus=.12f*Q;break; case 3:I.Leech=.02f*Q;break;
+   case 4:I.Reduction=.05f*Q;break; case 5:I.HealthBonus=.10f*Q;break;
+  }
+ }
  // Shuffle without replacement: no duplicate affix on one item.
  TArray<int32> Pool={0,1,2,3,4,5};
  for(int N=0;N<FMath::Min(I.Rarity,3);++N)
@@ -62,6 +73,7 @@ FDungeonItem ADungeonGameMode::RollItem(int32 Definition,int32 Rarity,int32 Leve
  }
  // Rare/epic signature effects let players try ailment builds before legendary drops.
  if(I.Rarity==4||(I.Rarity>=2&&FMath::FRand()<.4f)) I.Effect=B.Effect;
+ I.CoinValue=FMath::RoundToInt((30+I.ItemLevel*12)*(1+I.Rarity*1.8f)*FMath::FRandRange(.9f,1.1f));
  return I;
 }
 bool ADungeonHero::HasEffect(int32 Effect) const
@@ -69,8 +81,16 @@ bool ADungeonHero::HasEffect(int32 Effect) const
 void ADungeonHero::RebuildStats()
 {
  AttackPower=24;Armor=8;MaxHealth=150;CritChance=.05f;CritMultiplier=1.5f;AttackSpeed=StaminaRegen=1;
+ MaxStamina=100;BleedChance=PoisonChance=Leech=DamageReduction=0;
+ float HPBonus=0,SPBonus=0;
+ for(const auto& I:Equipment) if(!I.IsEmpty()) { BleedChance+=I.BleedChance;PoisonChance+=I.PoisonChance;Leech+=I.Leech;DamageReduction+=I.Reduction;HPBonus+=I.HealthBonus;SPBonus+=I.StaminaBonus; }
  for(const auto& I:Equipment) if(!I.IsEmpty()) { AttackPower+=I.Attack;Armor+=I.Defense;MaxHealth+=I.Vitality;CritChance+=I.CritChance;CritMultiplier+=I.CritDamage;AttackSpeed+=I.Speed;StaminaRegen+=I.Regen; }
  CritChance=FMath::Clamp(CritChance,0.f,.75f);AttackSpeed=FMath::Clamp(AttackSpeed,.5f,2.f);
+ MaxHealth*=1+FMath::Clamp(HPBonus,0.f,1.f);MaxStamina*=1+FMath::Clamp(SPBonus,0.f,1.f);
+ BleedChance=FMath::Clamp(BleedChance+(HasEffect(1)?.1f:0),0.f,.35f);
+ PoisonChance=FMath::Clamp(PoisonChance+(HasEffect(2)?.1f:0),0.f,.35f);
+ Leech=FMath::Clamp(Leech,0.f,.15f);DamageReduction=FMath::Clamp(DamageReduction,0.f,.5f);
+ Stamina=FMath::Clamp(Stamina,0.f,MaxStamina);
  Health=FMath::Clamp(Health,0.f,MaxHealth);
 }
 void ADungeonEnemy::UpdateAilments(float Dt)

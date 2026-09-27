@@ -9,6 +9,7 @@
 
 class UCameraComponent;
 class UTexture2D;
+class UFont;
 class UMaterialInstanceDynamic;
 class UAudioComponent;
 class USoundBase;
@@ -31,7 +32,10 @@ struct FDungeonItem
     float Attack=0, Defense=0, Vitality=0;
     int32 CatalogId=-1, ItemLevel=1, Effect=0;
     float CritChance=0,CritDamage=0,Speed=0,Regen=0;
+    int32 CoinValue=0;
+    float BleedChance=0,PoisonChance=0,StaminaBonus=0,Leech=0,Reduction=0,HealthBonus=0;
     FString Art() const { return CatalogId<0?FString::Printf(TEXT("Item_%d_%d"),Icon/3,Icon%3):FString::Printf(TEXT("Loot_%d"),CatalogId); }
+    FString BagArt() const {return CatalogId>=0&&CatalogId<24?FString::Printf(TEXT("BagWeapon_%d"),CatalogId):Art();}
     FString EffectText() const;
     float EquippedScale() const;
     FString Stats() const;
@@ -40,6 +44,14 @@ struct FDungeonItem
 };
 struct FDungeonBagEntry { FDungeonItem Item; FIntPoint Cell; };
 struct FDungeonPotion { FVector2D Position; float Age=0; };
+struct FDungeonBreakable
+{
+    FVector2D Position;
+    int32 Variant=0;
+    float BrokenAge=-1;
+    bool Collected=false,BagFull=false;
+    FDungeonItem Loot;
+};
 enum class ERewardPhase : uint8 { Closed, Opening, Ejecting, Available, Collected };
 struct FRewardPresentation
 {
@@ -107,7 +119,6 @@ public:
     void ToggleEffects();
     void Confirm();
     void SkipIntro();
-    void ToggleIntroMotion();
     void TestFinance();
     void TestMack();
     void TestWebroot();
@@ -133,6 +144,7 @@ public:
     void RebuildStats();
     bool HasEffect(int32 Effect) const;
     float CritChance=.05f,CritMultiplier=1.5f,AttackSpeed=1,StaminaRegen=1;
+    float BleedChance=0,PoisonChance=0,Leech=0,DamageReduction=0;
     int32 StrikeCount=0;
 #if !UE_BUILD_SHIPPING
     void SetReviewPose(int32 D,int32 F) { Facing=AttackDirection=D; AttackTime=.48f*(1.f-(F+.01f)/6.f); bAttackHit=true; }
@@ -144,11 +156,14 @@ public:
     bool AddToInventory(const FDungeonItem& Item);
     bool EquipFromInventory(int32 Index);
     bool Unequip(int32 Slot);
+    bool UnequipToCell(int32 Slot,FIntPoint Cell);
     bool CanPlace(FIntPoint Cell,FIntPoint Size,int32 Ignore=INDEX_NONE) const;
     bool MoveBagItem(int32 Index,FIntPoint Cell);
     bool IsInventoryOpen() const { return bInventoryOpen; }
     TArray<FDungeonBagEntry> Inventory;
     int32 SelectedItem=INDEX_NONE;
+    int64 Coins=0;
+    bool DiscardForCoins(int32 Index);
     FString InventoryMessage;
     bool IsAttacking() const { return AttackTime>0; }
     bool IsWalking() const { return bWalking; }
@@ -277,15 +292,21 @@ public:
     bool IsMenu() const { return bMenu; }
     bool HasRun() const { return bHasRun; }
     bool IsTransitioning() const { return TransitionTime>0; }
-    bool IsGameplayBlocked() const { return HasEnding()||bMenu||IsTransitioning()||IsBossIntroActive()||IsBossDialogueActive()||BossGrace>0; }
+    bool IsGameplayBlocked() const { return bTraderOpen||HasEnding()||bMenu||IsTransitioning()||IsBossIntroActive()||IsBossDialogueActive()||BossGrace>0; }
+    bool IsTraderOpen() const { return bTraderOpen; }
+    void OpenTrader();
+    void ContinueFromTrader();
+    bool BuyTraderItem(ADungeonHero* Hero,int32 Index);
+    static int64 TraderPrice(const FDungeonItem& Item) { return (FMath::Max<int64>(1,Item.CoinValue)*6+4)/5; }
+    const TArray<FDungeonItem>& GetTraderStock() const { return TraderStock; }
+    FString TraderMessage;
+    void VerifyTrader();
     bool IsBossIntroActive() const { return BossIntroTime>=0; }
     float GetBossIntroTime() const { return BossIntroTime; }
-    bool IsIntroReducedMotion() const { return bIntroReducedMotion; }
     void StartBossIntro();
     void FinishBossIntro();
     void CancelBossIntro();
     void UpdateBossIntro(float Dt);
-    void ToggleIntroMotion();
     void VerifyBossIntro();
     bool IsBossDialogueActive() const { return DialogueIndex<DialogueLines.Num(); }
     void BeginBossDialogue();
@@ -303,6 +324,11 @@ public:
     void ThrowFlashBang(ADungeonEnemy* Enemy);
     void VerifyFlashBang();
     void UpdateReward(float Dt);
+    void SpawnBreakables();
+    void StrikeBreakables(ADungeonHero* Hero);
+    bool CollectBreakableLoot(ADungeonHero* Hero);
+    void VerifyBreakables();
+    const TArray<FDungeonBreakable>& GetBreakables() const { return Breakables; }
     bool InteractReward(ADungeonHero* H);
     const FRewardPresentation& GetRewardPresentation() const { return Reward; }
     void EmitBossShot(ADungeonEnemy* E,bool Burger);
@@ -317,7 +343,7 @@ public:
     int32 GetWave() const { return Wave; }
     const TArray<TObjectPtr<ADungeonEnemy>>& GetEnemies() const { return Enemies; }
     bool HasChest() const { return bChest; }
-    bool AreDoorsOpen() const { return bLootClaimed; }
+    bool AreDoorsOpen() const { return bLootRolled||bLootClaimed; }
     bool IsLootRevealed() const { return LootTimer>0; }
     bool IsDead() const;
     bool IsBossRoom() const { return Room%DungeonProgression::RoomsPerChapter==0; }
@@ -331,7 +357,6 @@ public:
 private:
     bool bFreedomResolved=false;
     float BossIntroTime=-1;
-    bool bIntroReducedMotion=false;
     UPROPERTY() TObjectPtr<UAudioComponent> IntroAudio;
     TArray<FString> DialogueLines;
     int32 DialogueIndex=0;
@@ -353,10 +378,13 @@ private:
     float SpawnTimer=0,LootTimer=0,TransitionCooldown=0;
     bool bChest=false,bLootClaimed=false,bLootRolled=false;
     FDungeonItem Loot;
+    TArray<FDungeonBreakable> Breakables;
     FRewardPresentation Reward;
     FDungeonItem ChestLoot[3];
     bool ChestRolled[3]={false,false,false};
     bool bMenu=true,bHasRun=false;
+    bool bTraderOpen=false,bTraderVisited=false;
+    TArray<FDungeonItem> TraderStock;
     int32 EndState=0;
     float EndTime=0;
     bool bEndingCleaned=false;
@@ -376,6 +404,10 @@ public:
     virtual void DrawHUD() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     void InventoryClick();
+    void TraderClick();
+    int32 VerifyTraderUI();
+    void DrawTrader(ADungeonGameMode* G,ADungeonHero* H);
+    int32 TraderSelection=INDEX_NONE;
     void CancelInventoryGesture();
     int32 VerifyInventoryGestures(ADungeonHero* H);
     void DialogueClick();
@@ -388,6 +420,7 @@ private:
     void DrawDialogue(ADungeonGameMode* G,ADungeonHero* H);
     void DrawBossIntro(ADungeonGameMode* G);
     void DrawReward(ADungeonGameMode* G,ADungeonHero* H);
+    void DrawBreakables(ADungeonGameMode* G,ADungeonHero* H);
     void DrawBossUI(ADungeonEnemy* E);
     void DrawStatus(FVector2D P,float Stun,float Slow,float Poison,float Bleed,bool Immune,float Clock);
     void DrawCombatFX(ADungeonGameMode* G,bool Foreground);
@@ -399,6 +432,7 @@ private:
     void UpdateInventoryDrag(ADungeonHero* H);
     void DrawInventoryDrag(ADungeonHero* H);
     int32 DragItem=INDEX_NONE,LastClickedItem=INDEX_NONE;
+    int32 DragGear=INDEX_NONE,LastClickedGear=INDEX_NONE;
     bool bDragging=false;
     double LastClickTime=-1;
     FVector2D DragStart,DragGrab,DragMouse,LastClickPosition;
@@ -413,6 +447,11 @@ private:
     void KeySprite(const FString& Name,float X,float Y,float W,float H,FLinearColor Tint,bool Flip=false,float Rotation=0);
     void Box(float X,float Y,float W,float H,FLinearColor Color);
     void Label(const FString& Text,float X,float Y,FLinearColor Color,float Size=1);
+    void ItemLettering(const FString& Text,float X,float Y,FLinearColor Color,float Height=16,float MaxWidth=360);
+    void DrawItemCard(const FDungeonItem& Item,const ADungeonHero* CompareHero=nullptr);
+    void DrawAdventurerStats(const ADungeonHero* Hero);
+    float CardText(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth,float MaxHeight=48);
+    UPROPERTY() UFont* CardTypeface=nullptr;
     void Ring(FVector2D Center,float Radius,FLinearColor Color,float Width=2);
     void Shadow(FVector2D Center,float Radius,float Opacity=1.f);
     void Hero(ADungeonHero* H,float HS=1.375f);

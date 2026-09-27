@@ -121,7 +121,7 @@ void ADungeonGameMode::RunPackagedSmokeTest()
         static int Step=0,Errors=0;
         const float Time=GetWorld()->GetTimeSeconds();
         auto* Hero=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
-        if(Step==0&&Time>2&&Hero) { StartGame(); Room=3; SpawnWave(); ++Step; }
+        if(Step==0&&Time>2&&Hero) { StartGame(); Room=DungeonProgression::BossRoom(24); SpawnWave(); ++Step; }
         if(Step==1&&Time>5)
         {
             FinishBossIntro(); // This harness reviews dialogue; IntroVerify covers the cinematic.
@@ -158,8 +158,8 @@ void ADungeonGameMode::RunPackagedSmokeTest()
             Hero->Equip(RollItem(8,4,4));Hero->ToggleInventory();Hero->SelectedItem=INDEX_NONE;
             if(auto* PC=Cast<APlayerController>(Hero->GetController())) {
                 if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) Errors+=HUD->VerifyInventoryGestures(Hero);
-                int W=0,H=0;PC->GetViewportSize(W,H);float Scale=FMath::Min(W/1280.f,H/800.f);PC->SetMouseLocation((W-1280*Scale)/2+289*Scale,(H-800*Scale)/2+250*Scale);}
-            for(int I=0;I<48;++I) if(!LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/Loot_%d.Loot_%d"),I,I))) ++Errors;
+                int W=0,H=0;PC->GetViewportSize(W,H);float Scale=FMath::Min(W/1280.f,H/800.f);PC->SetMouseLocation((W-1280*Scale)/2+489*Scale,(H-800*Scale)/2+230*Scale);}
+            for(int I=0;I<60;++I) if(!LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/Loot_%d.Loot_%d"),I,I))) ++Errors;
             if(!LoadObject<UTexture2D>(nullptr,TEXT("/Game/Art/V2/InventoryFrame.InventoryFrame"))) ++Errors;
             ++Step;
         }
@@ -172,7 +172,7 @@ void ADungeonGameMode::RunPackagedSmokeTest()
         if(Step==3&&Time>6.2f){FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("Screenshots/LootEffects.png"),false,false);++Step;}
         if(Step==4&&Time>10) {
             for(auto& E:Enemies) if(E->BleedTime>0||E->PoisonTime>0||E->Health>=1000) ++Errors;
-            FFileHelper::SaveStringToFile(FString::Printf(TEXT("LOOT_SMOKE errors=%d; 49 textures; unselected hover card; ailment rendering and expiration\n"),Errors),*(FPaths::ProjectSavedDir()/TEXT("LootSmokeTest.txt")));
+            FFileHelper::SaveStringToFile(FString::Printf(TEXT("LOOT_SMOKE errors=%d; 60 item textures; ring gestures; unselected hover card; ailment rendering and expiration\n"),Errors),*(FPaths::ProjectSavedDir()/TEXT("LootSmokeTest.txt")));
             ++Step;FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);
         }
         return;

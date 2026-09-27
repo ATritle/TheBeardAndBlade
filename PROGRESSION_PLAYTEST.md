@@ -4,19 +4,19 @@ Open `TheBeardAndBlade.uproject` in UE 5.8, choose **Selected Viewport** in the 
 
 ## Campaign
 
-Each chapter has two standard rooms (two staggered waves per room), followed by one boss room. Chest choice, inventory pickup and the existing doorway transition remain required before proceeding.
+Each chapter has three standard rooms (two staggered waves per room), followed by one boss room. Opening a chest unlocks the doors; loot pickup is optional. A trader visit occurs halfway through each chapter. See TRADER_PLAYTEST.md for the coin economy.
 
 | Standard rooms | Boss room | Boss | Dungeon |
 |---|---|---|---|
-| 1–2 | 3 | Finance Guy | Forgotten Keep |
-| 4–5 | 6 | Big Mack | The Greaseworks — new kitchen dungeon |
-| 7–8 | 9 | Flash Bang Guy | Blackout Bunker |
-| 10–11 | 12 | Webroot | Webroot Hollows |
-| 13–14 | 15 | Rime | Glacial Reliquary |
-| 16–17 | 18 | Cinder | Cinder Foundry |
-| 19–20 | 21 | Twister | Stormbreach Citadel |
+| 1–3 | 4 | Finance Guy | Forgotten Keep |
+| 5–7 | 8 | Big Mack | The Greaseworks — new kitchen dungeon |
+| 9–11 | 12 | Flash Bang Guy | Blackout Bunker |
+| 13–15 | 16 | Webroot | Webroot Hollows |
+| 17–19 | 20 | Rime | Glacial Reliquary |
+| 21–23 | 24 | Cinder | Cinder Foundry |
+| 25–27 | 28 | Twister | Stormbreach Citadel |
 
-The existing endless loop continues after room 21; this update does not add an ending or save system.
+Defeating Twister in room 28 triggers the victory ending. There is no endless loop or saved campaign progress.
 
 ## New enemies
 
@@ -34,22 +34,22 @@ Focus the game viewport first. Use the number row above QWERTY (not a numeric ke
 
 | Key | Destination |
 |---|---|
-| 1 | Greaseworks standard enemies, room 4 |
-| 2 | Bunker standard enemies, room 7 |
-| 3 | Storm standard enemies, room 19 |
-| 4 / F1 / F9 | Finance Guy, room 3 |
-| 5 / F2 | Big Mack, room 6 |
-| 6 / F11 | Flash Bang Guy, room 9 |
-| 7 / F3 | Webroot, room 12 |
-| 8 / F4 | Rime, room 15 |
-| 9 / F5 | Cinder, room 18 |
-| 0 / F6 / F10 | Twister, room 21 |
-| F7 | First ice room, room 13 |
+| 1 | Greaseworks standard enemies, room 5 |
+| 2 | Bunker standard enemies, room 9 |
+| 3 | Storm standard enemies, room 25 |
+| 4 / F1 / F9 | Finance Guy, room 4 |
+| 5 / F2 | Big Mack, room 8 |
+| 6 / F11 | Flash Bang Guy, room 12 |
+| 7 / F3 | Webroot, room 16 |
+| 8 / F4 | Rime, room 20 |
+| 9 / F5 | Cinder, room 24 |
+| 0 / F6 / F10 | Twister, room 28 |
+| F7 | First ice room, room 17 |
 
 ## Validation
 
 - Development Editor build and 157 new texture imports.
-- `-DungeonVerify`: 21 sequential rooms, all seven boss introductions, reward selection/pickup and gate transitions.
+- `-DungeonVerify`: 28 sequential rooms, all seven boss introductions, reward selection/pickup and gate transitions.
 - `-SeptemberVerify`: boss attacks, Twister damage/bursts and reward/boss-spawn regressions.
 - `-FlashVerify`: facing cone, grenade fuse, exposure, effect expiry and reset.
 - `-ProgressionVerify`: all room/theme/roster mappings, 144 enemy frames, 12 effect textures, every new attack dispatch, projectile hit damage, fast-bullet swept collision and mortar fuse.

@@ -11,17 +11,17 @@ void ADungeonGameMode::StartGame()
     bMenu=false; bHasRun=true; bShowControls=false; RestartRun();
     PlaySound(TEXT("UI"));
 }
-void ADungeonHero::TestFinance() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(3); }
-void ADungeonHero::TestMack() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(6); }
-void ADungeonHero::TestWebroot() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(12); }
-void ADungeonHero::TestRime() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(15); }
-void ADungeonHero::TestCinder() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(18); }
-void ADungeonHero::TestIce() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(13); }
-void ADungeonHero::TestTwister() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(21); }
-void ADungeonHero::TestFlashBang() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(9); }
-void ADungeonHero::TestGreaseEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(4); }
-void ADungeonHero::TestBunkerEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(7); }
-void ADungeonHero::TestStormEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(19); }
+void ADungeonHero::TestFinance() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(24)); }
+void ADungeonHero::TestMack() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(28)); }
+void ADungeonHero::TestWebroot() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(25)); }
+void ADungeonHero::TestRime() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(26)); }
+void ADungeonHero::TestCinder() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(27)); }
+void ADungeonHero::TestIce() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(17); }
+void ADungeonHero::TestTwister() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(29)); }
+void ADungeonHero::TestFlashBang() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(30)); }
+void ADungeonHero::TestGreaseEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(5); }
+void ADungeonHero::TestBunkerEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(9); }
+void ADungeonHero::TestStormEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(25); }
 void ADungeonGameMode::StartPlaytestRoom(int32 Number)
 {
 #if WITH_EDITOR
@@ -36,7 +36,7 @@ void ADungeonGameMode::StartPlaytestRoom(int32 Number)
 void ADungeonGameMode::ToggleMenu()
 {
     if(HasEnding()) return;
-    if(IsTransitioning()) return;
+    if(IsTransitioning()||IsTraderOpen()) return;
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) if(H->IsInventoryOpen()) H->ToggleInventory();
     if(bMenu&&!bHasRun) { StartGame(); return; }
     bMenu=!bMenu; bShowControls=false;
@@ -45,7 +45,7 @@ void ADungeonGameMode::ToggleMenu()
 void ADungeonGameMode::StartTransition(int32 Door)
 {
     if(HasEnding()) return;
-    if(!bLootClaimed||TransitionTime>0||!Enemies.IsEmpty()||PendingSpawns>0) return;
+    if(!AreDoorsOpen()||TransitionTime>0||!Enemies.IsEmpty()||PendingSpawns>0) return;
     TransitionDoor=FMath::Clamp(Door,0,2); TransitionTime=DungeonDescent::Duration; Shots.Empty(); Splashes.Empty();
     PlaySound(TEXT("Portal"));
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) TransitionFrom=DungeonView::Project(H->GetActorLocation());
@@ -254,18 +254,31 @@ void ADungeonGameMode::VerifyCampaign()
             Check(Mapped>Previous,TEXT("Breathing strips never fold or overlap"));Previous=Mapped;}
     }
     Check(HeroBreathing::Map(FVector2D(64,40),PI,1,0).Y<38,TEXT("Visible shoulder/head lift on inhale"));H->Restart();
-    for(int Id=0;Id<48;++Id) for(int R=0;R<5;++R)
+    for(int Id=0;Id<60;++Id) for(int R=0;R<5;++R)
     {
         const auto Item=RollItem(Id,R,4);
         Check(Item.CatalogId==Id&&Item.Rarity==R&&Item.ItemLevel==4&&!Item.Name.IsEmpty(),TEXT("Catalog identity and rolled level retained"));
-        Check(Item.Slot==(Id<24?0:Id<36?1:2),TEXT("Catalog slot and footprint"));
-        Check(R!=4||Item.Effect>0,TEXT("Legendary always has signature effect"));
+        Check(Item.Slot==(Id<24?0:Id<36?1:Id<48?2:3),TEXT("Catalog slot and footprint"));
+        Check(Item.CoinValue>0,TEXT("Every rolled item has value"));
+        Check(Id>=48||R!=4||Item.Effect>0,TEXT("Legendary equipment has signature effect"));
         Check(R!=0||Item.Effect==0,TEXT("Common has no proc effect"));
         H->Equip(Item); const float Power=H->AttackPower,Speed=H->AttackSpeed,Crit=H->CritChance;
         H->Equip(Item); Check(H->AttackPower==Power&&H->AttackSpeed==Speed&&H->CritChance==Crit,TEXT("Rolled stats do not stack on repeated equip"));
     }
     H->Restart();
     {
+        H->Health=50;H->Stamina=30;
+        auto Ring=RollItem(53,4,4);H->Equip(Ring);
+        Check(H->MaxHealth>150&&H->Health==50,TEXT("Health ring raises cap without healing"));
+        H->Equip(Ring);Check(H->Health==50,TEXT("Repeated ring equip cannot heal"));
+        H->Equip(RollItem(50,4,4));Check(H->MaxStamina>100&&H->Stamina==30,TEXT("Stamina ring raises cap without refill"));
+        H->Equip(RollItem(48,4,4));Check(H->BleedChance>0&&H->BleedChance<.1f,TEXT("Ring enables a low bleed chance without a weapon proc"));
+        H->Equip(RollItem(49,4,4));Check(H->PoisonChance>0&&H->BleedChance==0,TEXT("Ring swaps remove old proc bonus"));
+        H->Equip(RollItem(52,4,4));Check(H->DamageReduction>0&&H->DamageReduction<.12f,TEXT("Protection ring mitigation"));
+        H->Equip(RollItem(51,4,4));Check(H->Leech>0&&H->Leech<.05f,TEXT("Leech ring fraction"));
+        FDungeonItem Empty;Empty.Slot=3;H->Equip(Empty);
+        Check(H->Leech==0&&H->MaxHealth==150&&H->MaxStamina==100,TEXT("Removing rings restores base caps and modifiers"));
+        H->Restart();
         const FVector2D Start=DungeonView::Project(H->GetActorLocation());
         H->MoveRight(1); H->Tick(.1f);
         Check(FMath::IsNearlyEqual(H->WalkCycle(),19.f/144.f*2.f*PI,.001f),TEXT("Walk cadence uses a 144-pixel cycle"));
@@ -279,13 +292,20 @@ void ADungeonGameMode::VerifyCampaign()
         FActorSpawnParameters P;P.SpawnCollisionHandlingOverride=ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         auto* Target=GetWorld()->SpawnActor<ADungeonEnemy>(ADungeonEnemy::StaticClass(),FVector::ZeroVector,FRotator::ZeroRotator,P);
         Target->SpawnTime=0;Target->Health=Target->MaxHealth=1000;
+        H->Equip(RollItem(51,4,4));H->Health=50;
+        const float ExpectedHealing=20*H->Leech;
+        Target->TakeDungeonDamage(20);
+        Check(FMath::IsNearlyEqual(H->Health,50+ExpectedHealing,.001f),TEXT("Ring leech heals actual damage"));
+        H->Health=H->MaxHealth;Target->TakeDungeonDamage(20);
+        Check(H->Health==H->MaxHealth,TEXT("Leech never exceeds maximum health"));
+        H->Restart();Target->Health=1000;
         Target->BleedTime=4;Target->BleedDPS=10;Target->PoisonTime=6;Target->PoisonDPS=5;Target->SlowTime=3;
         Target->UpdateAilments(2);Check(Target->Health==970,TEXT("Bleed and poison deal elapsed damage"));
         Target->UpdateAilments(10);Check(Target->Health==930&&Target->BleedTime==0&&Target->PoisonTime==0&&Target->SlowTime==0,TEXT("Long frame caps damage at ailment duration"));
         Target->UpdateAilments(10);Check(Target->Health==930,TEXT("Expired ailments stop dealing damage"));
         const auto SavedEnemies=Enemies; Enemies.Empty(); Enemies.Add(Target);
         Target->SetActorLocation(H->GetActorLocation()); Target->Health=Target->MaxHealth=1000000;
-        H->Equipment[0].Effect=1; H->Equipment[1].Effect=2;
+        H->Equipment[0].Effect=1; H->Equipment[1].Effect=2; H->RebuildStats();
         FMath::RandInit(210); int Bleeds=0,Poisons=0;
         for(int I=0;I<400;++I) {
             Target->BleedTime=Target->PoisonTime=0; PlayerAttack(H);
@@ -295,9 +315,9 @@ void ADungeonGameMode::VerifyCampaign()
         Enemies=SavedEnemies; H->Restart(); Impacts.Empty(); Blood.Empty();
         Target->Destroy();
     }
-    bool SeenLoot[9]={false};
-    for(int I=0;I<1000;++I) { const auto Item=RollChestLoot(false); SeenLoot[Item.Icon]=true; }
-    for(bool Seen:SeenLoot) Check(Seen,TEXT("Mystery pool includes all weapons, armor and amulets"));
+    bool SeenLoot[60]={false};
+    for(int I=0;I<5000;++I) { const auto Item=RollChestLoot(false); SeenLoot[Item.CatalogId]=true; }
+    for(bool Seen:SeenLoot) Check(Seen,TEXT("Mystery pool includes all equipment and rings"));
     for(int I=0;I<30;++I) Check(RollChestLoot(true).Rarity==4,TEXT("Boss mystery loot remains legendary"));
     H->MoveRight(1); H->SprintPressed(); H->Tick(.1f); H->MoveRight(0); H->SprintReleased();
     Check(FMath::IsNearlyEqual(H->Stamina,98.2f),TEXT("Sprint drains stamina"));
@@ -356,9 +376,9 @@ void ADungeonGameMode::VerifyCampaign()
     for(int R=1;R<=DungeonProgression::CampaignRooms;++R)
     {
         Check(Room==R,TEXT("Sequential room progression"));
-        Check(IsBossRoom()==(R%3==0),TEXT("Boss every third room"));
+        Check(IsBossRoom()==(R%DungeonProgression::RoomsPerChapter==0),TEXT("Boss every fourth room"));
         const int32 ExpectedThemes[]={0,6,5,1,2,3,4};
-        Check(GetBiome()==ExpectedThemes[((R-1)/3)%7],TEXT("Boss-matched three-room biome progression"));
+        Check(GetBiome()==ExpectedThemes[DungeonProgression::Chapter(R)],TEXT("Boss-matched four-room biome progression"));
         int Guard=0;
         while(!bChest&&!HasEnding()&&++Guard<20)
         {
@@ -418,7 +438,10 @@ void ADungeonGameMode::VerifyCampaign()
         PlayerInteract(H); Check(H->Inventory.Num()==1,TEXT("No second chest reward"));
         TransitionCooldown=0; H->SetActorLocation(DungeonView::Unproject(DoorPosition(Choice))); PlayerInteract(H);
         Check(IsTransitioning()&&Room==R,TEXT("Gate starts transition, not instant teleport"));
-        Tick(DungeonDescent::Duration+.1f); Check(Room==R+1&&!IsTransitioning()&&Potions.IsEmpty(),TEXT("Transition finishes and clears old potions"));
+        Tick(DungeonDescent::Duration+.1f);
+        Check(IsTraderOpen()==DungeonProgression::TraderAfter(R),TEXT("Trader schedule matches each chapter"));
+        if(IsTraderOpen())ContinueFromTrader();
+        Check(Room==R+1&&!IsTransitioning()&&Potions.IsEmpty(),TEXT("Transition finishes and clears old potions"));
     }
     H->Inventory.Empty(); for(int I=0;I<18;++I) Check(H->AddToInventory(MakeItem(0,0)),TEXT("Weapon bag capacity"));
     Check(!H->AddToInventory(MakeItem(0,0))&&H->EquipFromInventory(0),TEXT("Full bag swaps safely"));

@@ -22,4 +22,4 @@ References: https://dev.epicgames.com/documentation/unreal-engine/packaging-your
 
 ## Current limitations
 
-Early single-player playtest. No save system; the seven-chapter campaign ends after Twister in room 21. No code-signing, installer, automatic updater or online multiplayer. Source and generated assets have not been assigned an open-source license; public hosting alone does not grant broad reuse rights. Unreal Engine components remain subject to Epic's terms. See STREAMPixel_SETUP.md for the separate browser-hosting preparation checklist.
+Early single-player playtest. No save system; the seven-chapter campaign ends after Twister in room 28. No code-signing, installer, automatic updater or online multiplayer. Source and generated assets have not been assigned an open-source license; public hosting alone does not grant broad reuse rights. Unreal Engine components remain subject to Epic's terms. See STREAMPixel_SETUP.md for the separate browser-hosting preparation checklist.

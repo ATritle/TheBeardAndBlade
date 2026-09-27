@@ -5,6 +5,8 @@ namespace DungeonCombatBalance
 {
 constexpr float DodgeCost=22.f;
 constexpr float SprintCost=18.f;
+constexpr float PropLootChance=.5f;
+inline bool PropDropsLoot(float Roll) { return Roll<PropLootChance; }
 // Screen-space hurt volume used ONLY for receiving a weapon strike, not contact damage.
 inline bool MeleeHits(FVector2D Delta,FVector2D Aim,float SpriteSize,bool Boss)
 {

@@ -39,7 +39,7 @@ bool ADungeonGameMode::InteractReward(ADungeonHero* H)
     Reward.Phase=ERewardPhase::Collected; Reward.CollectedAge=0;Reward.BagFull=false;
     H->Health=FMath::Min(H->MaxHealth,H->Health+35);
     bChest=false; bLootClaimed=true; LootTimer=8; TransitionCooldown=.8f;
-    UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d item collected; doors unlocked"),Room);
+    UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d item collected"),Room);
     PlaySound(TEXT("UI")); return true;
 }
 void ADungeonGameMode::UpdateReward(float Dt)
@@ -90,8 +90,8 @@ void ADungeonHUD::DrawReward(ADungeonGameMode* G,ADungeonHero* H)
     if(R.Phase==ERewardPhase::Available)
     {
         Box(340,650,600,38,FLinearColor(.015f,.02f,.025f,.94f));
-        Label(R.BagFull?TEXT("BAG FULL - press I, discard an item, then press E to collect"):
-            TEXT("Reward on the floor - press E beside the chest or item to collect"),355,663,FLinearColor(1,.86f,.5f),.85f);
+        Label(R.BagFull?TEXT("Bag full - make space with I, or leave loot and enter an exit"):
+            TEXT("E to collect loot / You may leave it behind and enter an exit"),355,663,FLinearColor(1,.86f,.5f),.85f);
     }
 }
 
@@ -267,6 +267,7 @@ void ADungeonGameMode::VerifySeptember()
         H->SetActorLocation(DungeonView::Unproject(ChestPosition(1)));
         PlayerInteract(H); const auto Saved=Loot;
         Check(Reward.Choice==1&&Reward.Phase==ERewardPhase::Opening&&H->Inventory.Num()==36,TEXT("Opening locks choice without granting"));
+        Check(AreDoorsOpen()&&!bLootClaimed,TEXT("Opening immediately unlocks exits before pickup"));
         PlayerInteract(H);Check(Reward.Age==0&&Loot.Name==Saved.Name,TEXT("Repeated opening does not reroll"));
         ToggleMenu();Tick(10);ToggleMenu();Check(Reward.Age==0,TEXT("Menu pauses chest"));
         UpdateReward(10);Check(Reward.Phase==ERewardPhase::Available,TEXT("Long frame completes ejection"));
@@ -333,7 +334,7 @@ void ADungeonGameMode::VerifySeptember()
     H->Restart();H->Dodge();ResolveProjectile(Burger,BurgerPoint);Check(H->Health==150&&H->StunTime==0,TEXT("Immune burger hit applies no status"));
     RestartRun();Check(H->StunTime==0&&Reward.Phase==ERewardPhase::Closed,TEXT("Restart clears statuses and reward events"));
     const int Order[]={24,28,30,25,26,27,29};
-    for(int I=0;I<7;++I) { Room=(I+1)*3;Check(GetBossSpecies()==Order[I],TEXT("Approved seven-boss campaign order")); }
+    for(int I=0;I<7;++I) { Room=(I+1)*DungeonProgression::RoomsPerChapter;Check(GetBossSpecies()==Order[I],TEXT("Approved seven-boss campaign order")); }
     for(int I=0;I<7;++I) for(const TCHAR* Part:{TEXT("Portrait"),TEXT("Name"),TEXT("Border")})
     {
         const FString N=FString::Printf(TEXT("Boss%s_%d"),Part,I);
@@ -350,27 +351,40 @@ void ADungeonGameMode::VerifySeptember()
         }
         Check(bChest&&PendingSpawns==0&&Enemies.IsEmpty(),TEXT("Timed waves end before rewards"));
     };
-    StartPlaytestRoom(2);ClearTimedRoom();
+    StartPlaytestRoom(3);ClearTimedRoom();
     H->SetActorLocation(DungeonView::Unproject(ChestPosition(1)));PlayerInteract(H);Tick(2);
     Check(Enemies.IsEmpty()&&PendingSpawns==0,TEXT("Opening chest never spawns Finance Guy"));
     PlayerInteract(H);Check(bLootClaimed,TEXT("Collect reward without leaving original chest position"));
     Tick(1);H->SetActorLocation(DungeonView::Unproject(DoorPosition(1)));PlayerInteract(H);Tick(DungeonDescent::Duration+.1f);
-    Check(Room==3&&!bChest&&Reward.Phase==ERewardPhase::Closed&&Enemies.IsEmpty(),TEXT("Boss room clears all previous reward visuals"));
+    Check(Room==4&&!bChest&&Reward.Phase==ERewardPhase::Closed&&Enemies.IsEmpty(),TEXT("Boss room clears all previous reward visuals"));
     Tick(2.1f);Check(Enemies.Num()==1&&Enemies[0]->Species==24&&!bChest,TEXT("Finance spawns once only after gate transition"));
     ClearTimedRoom();Check(bChest,TEXT("Finance reward follows boss death"));
-    StartPlaytestRoom(13);ClearTimedRoom();
+    StartPlaytestRoom(17);ClearTimedRoom();
     H->Inventory.Empty();for(int I=0;I<36;++I)H->AddToInventory(RollItem(36,0,1));
     ChestRolled[0]=true;ChestLoot[0]=RollItem(36,2,13);
     H->SetActorLocation(DungeonView::Unproject(ChestPosition(0)));PlayerInteract(H);Tick(2);PlayerInteract(H);
-    Check(Reward.BagFull&&!AreDoorsOpen(),TEXT("Ice full bag visibly explains locked portals"));
+    Check(Reward.BagFull&&AreDoorsOpen(),TEXT("Ice full bag cannot lock portals"));
     H->Inventory.RemoveAt(0);PlayerInteract(H);
     Check(AreDoorsOpen()&&H->Inventory.Num()==36,TEXT("Ice pickup unlocks after making one valid slot"));
     Tick(1);H->SetActorLocation(DungeonView::Unproject(DoorPosition(0)));PlayerInteract(H);Tick(DungeonDescent::Duration+.1f);
-    Check(Room==14&&!IsTransitioning(),TEXT("First ice dungeon gate advances normally"));
+    Check(Room==18&&!IsTransitioning(),TEXT("First ice dungeon gate advances normally"));
+    // Leaving during opening or after landing must never require inventory space.
+    for(int Door=0;Door<3;++Door) {
+        StartPlaytestRoom(1);ClearTimedRoom();
+        H->Inventory.Empty();for(int I=0;I<36;++I)H->AddToInventory(RollItem(36,0,1));
+        Check(!AreDoorsOpen(),TEXT("Clear alone keeps doors locked until chest opens"));
+        H->SetActorLocation(DungeonView::Unproject(ChestPosition(Door)));PlayerInteract(H);
+        if(Door>0)UpdateReward(2);
+        Check(AreDoorsOpen()&&!bLootClaimed&&H->Inventory.Num()==36,TEXT("Optional loot does not auto-collect"));
+        H->SetActorLocation(DungeonView::Unproject(DoorPosition(Door)));PlayerInteract(H);
+        Check(IsTransitioning(),TEXT("Every exit accepts an uncollected reward"));
+        Tick(DungeonDescent::Duration+.1f);
+        Check(Room==2&&Reward.Phase==ERewardPhase::Closed&&H->Inventory.Num()==36&&!AreDoorsOpen(),TEXT("Leaving resets floor loot and door state without granting reward"));
+    }
     for(int I=0;I<7;++I)
     {
-        StartPlaytestRoom((I+1)*3);Tick(2.1f);
-        Check(Room==(I+1)*3&&Enemies.Num()==1&&Enemies[0]->Species==Order[I]&&!bChest,TEXT("Each direct boss playtest starts clean"));
+        StartPlaytestRoom((I+1)*DungeonProgression::RoomsPerChapter);Tick(2.1f);
+        Check(Room==(I+1)*DungeonProgression::RoomsPerChapter&&Enemies.Num()==1&&Enemies[0]->Species==Order[I]&&!bChest,TEXT("Each direct boss playtest starts clean"));
     }
     UE_LOG(LogTemp,Display,TEXT("SEPTEMBER_VERIFY_COMPLETE errors=%d"),Errors);
     FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);
@@ -389,7 +403,7 @@ void ADungeonGameMode::RunSeptemberSmoke()
         const int Boss=Stage/4,Part=Stage%4;
         if(Part==0)
         {
-            StartGame();Room=(Boss+1)*3;PendingSpawns=0;SpawnOneEnemy();
+            StartGame();Room=(Boss+1)*DungeonProgression::RoomsPerChapter;PendingSpawns=0;SpawnOneEnemy();
             FinishBossIntro(); // Keep the existing dialogue/combat capture timing deterministic.
             H->Health=H->MaxHealth=10000;
             if(Enemies.Num()!=1||Enemies[0]->Species!=GetBossSpecies()) ++Errors;

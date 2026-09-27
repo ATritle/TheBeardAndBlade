@@ -177,7 +177,7 @@ void ADungeonGameMode::VerifyFlashBang()
         Check(LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/September/%s.%s"),*Name,*Name))!=nullptr,TEXT("Soldier frames imported"));
     }
     Check(LoadObject<UTexture2D>(nullptr,TEXT("/Game/Art/V2/Arena5.Arena5"))!=nullptr,TEXT("Bunker imported"));
-    StartPlaytestRoom(9);Tick(2.1f);
+    StartPlaytestRoom(12);Tick(2.1f);
     Check(GetBossSpecies()==30&&GetBiome()==5&&Enemies.Num()==1,TEXT("Room 9 is bunker boss"));
     DialogueWait=0;AdvanceBossDialogue(true);BossGrace=0;
     auto* E=Enemies.IsEmpty()?nullptr:Enemies[0].Get();
@@ -203,7 +203,7 @@ void ADungeonGameMode::VerifyFlashBang()
         H->Restart();H->SetActorLocation(DungeonView::Unproject(P));H->SetFlashReviewAim(FVector2D(0,1));
         Owned.SourceEnemy.Reset();ResolveProjectile(Owned,P+FVector2D(0,100));Check(E->Action!=2,TEXT("Unowned cadet grenade never triggers boss ambush"));
     }
-    StartPlaytestRoom(21);Check(GetBossSpecies()==29&&GetBiome()==4,TEXT("Twister final and storm theme preserved"));
+    StartPlaytestRoom(28);Check(GetBossSpecies()==29&&GetBiome()==4,TEXT("Twister final and storm theme preserved"));
     UE_LOG(LogTemp,Display,TEXT("FLASH_VERIFY_COMPLETE errors=%d"),Errors);
     FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);
 #endif

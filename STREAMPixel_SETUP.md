@@ -2,9 +2,9 @@
 
 StreamPixel hosts Unreal Pixel Streaming on a remote GPU and sends video, audio, and player input through the browser. It is separate from GitHub download hosting.
 
-Both v0.3.2 archives use the same Pixel Streaming-enabled Shipping build under `Builds/v0.3.2/Windows`.
+Both v0.3.3 archives use the same Pixel Streaming-enabled Shipping build under `Builds/v0.3.3/Windows`.
 
-Upload `Builds/TheBeardAndBlade-StreamPixel-v0.3.2.zip`. Its outer folder is `Windows`, containing the launcher and all runtime content. Use this upload archive rather than the GitHub source-code ZIP or offline-layout ZIP.
+Upload `Builds/TheBeardAndBlade-StreamPixel-v0.3.3.zip`. Its outer folder is `Windows`, containing the launcher and all runtime content. Use this upload archive rather than the GitHub source-code ZIP or offline-layout ZIP.
 
 Build/rebuild procedure:
 
@@ -27,8 +27,8 @@ The user uploads and activates this build. No StreamPixel deployment or paid hos
 With PixelStreaming enabled in the project (not PixelStreaming2), close Unreal Editor and run:
 
 ```powershell
-./Tools/package_windows.ps1 -Destination "$PWD/Builds/v0.3.2"
-python Tools/zip_release.py --version v0.3.2 --streaming
+./Tools/package_windows.ps1 -Destination "$PWD/Builds/v0.3.3"
+python Tools/zip_release.py --version v0.3.3 --streaming
 ```
 
 These commands refuse to overwrite existing archives; choose a fresh destination/version for a rebuild.

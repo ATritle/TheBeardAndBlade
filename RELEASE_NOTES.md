@@ -1,3 +1,14 @@
+# v0.3.3 — loot, traders and dungeon progression
+
+- Expanded campaign to 28 rooms: Finance Guy, Big Mack, Flash Bang Guy, Webroot, Rime, Cinder and Twister now guard every fourth room.
+- Market Duelist trader visits halfway through each theme, with 3–5 offers priced at 120% of their loot value. Discarded gear credits a run-based coin wallet.
+- Redesigned inventory with adventurer portrait, equipment icons, combined-stat hover panel, readable item cards, coin values and twelve new rings.
+- Themed destructible crates, barrels and urns crumble and fade, with a 50% chance to leave loot.
+- Opening a chest unlocks the exits immediately; uncollected loot can stay on the floor. Item cards remain inside inventory/shop.
+- Boss entrance animations no longer use the reduced-motion option.
+
+Download the complete Windows ZIP to play without Unreal Editor. The separate StreamPixel ZIP contains the same Shipping runtime in the hosting upload layout. Coins and inventory reset on a new run; no persistent save system is included.
+
 # v0.3.2 — adventurer, combat and presentation update
 
 - New athletic adventurer animation set, matching resting/movement proportions, breathing, right-hand weapon attachments and updated attack poses.

@@ -50,14 +50,14 @@ void ADungeonGameMode::VerifyProgression()
 {
     int Failures=0;auto Check=[&](bool Good,const TCHAR* What){if(!Good)++Failures;UE_LOG(LogTemp,Display,TEXT("PROGRESSION %s %s"),Good?TEXT("PASS"):TEXT("FAIL"),What);};
     const int Order[]={24,28,30,25,26,27,29};const int Themes[]={0,6,5,1,2,3,4};
-    for(int R=1;R<=21;++R)
+    for(int R=1;R<=DungeonProgression::CampaignRooms;++R)
     {
-        StartPlaytestRoom(R);Check(GetBossSpecies()==Order[(R-1)/3]&&GetBiome()==Themes[(R-1)/3],TEXT("Room boss and theme mapping"));
-        Check(IsBossRoom()==(R%3==0),TEXT("Two standard rooms before every boss"));
+        StartPlaytestRoom(R);Check(GetBossSpecies()==Order[DungeonProgression::Chapter(R)]&&GetBiome()==Themes[DungeonProgression::Chapter(R)],TEXT("Room boss and theme mapping"));
+        Check(IsBossRoom()==(R%DungeonProgression::RoomsPerChapter==0),TEXT("Three standard rooms before every boss"));
         Tick(2.1f);Check(!Enemies.IsEmpty(),TEXT("Room spawns enemies"));
         for(auto& E:Enemies)Check(IsBossRoom()?E->bBoss&&E->Species==GetBossSpecies():!E->bBoss&&E->Species>=DungeonProgression::RosterBase(GetBiome())&&E->Species<DungeonProgression::RosterBase(GetBiome())+6,TEXT("Correct room roster"));
     }
-    StartPlaytestRoom(4);Tick(2.1f);auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
+    StartPlaytestRoom(5);Tick(2.1f);auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
     for(int S=31;S<=48;++S)
     {
         for(int F=0;F<8;++F)Check(LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/Progression/ThemeEnemy_%d_%d.ThemeEnemy_%d_%d"),S,F,S,F))!=nullptr,TEXT("Enemy animation texture imported"));

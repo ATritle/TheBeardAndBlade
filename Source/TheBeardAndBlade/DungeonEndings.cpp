@@ -97,7 +97,7 @@ void ADungeonGameMode::RunEndingPreview()
         static int Stage=0,Errors=0;const float Time=GetWorld()->GetTimeSeconds();
         auto* Hero=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));if(!Hero)return;
         auto Check=[&](bool OK){if(!OK)++Errors;};
-        if(Stage==0&&Time>2){StartGame();Room=21;PendingSpawns=0;SpawnOneEnemy();Check(IsBossIntroActive());++Stage;}
+        if(Stage==0&&Time>2){StartGame();Room=DungeonProgression::CampaignRooms;PendingSpawns=0;SpawnOneEnemy();Check(IsBossIntroActive());++Stage;}
         if(Stage==1&&Time>3)
         {
             DialogueWait=0;AdvanceBossDialogue(true);BossGrace=0;
@@ -123,7 +123,7 @@ void ADungeonGameMode::RunEndingPreview()
     static int Stage=0;const float Time=GetWorld()->GetTimeSeconds();
     if(Stage==0&&Time>2)
     {
-        StartPlaytestRoom(Victory?21:8);
+        StartPlaytestRoom(Victory?DungeonProgression::CampaignRooms:8);
         if(Death)if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))H->Health=0;
         FinishRun(Victory);++Stage;
     }
@@ -147,16 +147,16 @@ void ADungeonGameMode::VerifyEndings()
     RestartFromEnding();Check(HasEnding(),TEXT("Input guard prevents accidental restart"));
     ToggleMenu();Check(!bMenu&&HasEnding(),TEXT("Pause cannot hide ending"));
     Tick(1);H->Confirm();Check(!HasEnding()&&H->Health==H->MaxHealth&&Room==1&&PendingSpawns>0,TEXT("Enter starts fresh run"));
-    for(int R:{3,18,21})
+    for(int R:{4,24,28})
     {
         StartPlaytestRoom(R);Tick(2.1f);DialogueWait=0;AdvanceBossDialogue(true);BossGrace=0;
         const auto Batch=Enemies;for(auto& E:Batch)if(IsValid(E)){E->SpawnTime=0;E->TakeDungeonDamage(100000);}
-        if(R<21)Check(!HasEnding()&&bChest,TEXT("Earlier bosses still award chests"));
+        if(R<DungeonProgression::CampaignRooms)Check(!HasEnding()&&bChest,TEXT("Earlier bosses still award chests"));
         else
         {
             Check(IsVictory()&&IsGameplayBlocked()&&!bChest,TEXT("Real final boss kill triggers victory"));
             FinishRun(false);Check(IsVictory(),TEXT("Outcome is latched exactly once"));
-            Tick(1.1f);NextRoom();Check(Room==21&&!IsTransitioning(),TEXT("No room 22 after campaign victory"));
+            Tick(1.1f);NextRoom();Check(Room==DungeonProgression::CampaignRooms&&!IsTransitioning(),TEXT("No room 29 after campaign victory"));
             const float Health=H->Health;H->ReceiveHit(10000);H->Attack();Check(H->Health==Health&&!H->IsAttacking(),TEXT("Ending blocks attacks and incoming damage"));
             RestartFromEnding();Check(!HasEnding()&&Room==1&&H->Inventory.IsEmpty(),TEXT("Victory restart clears previous run"));
         }
