@@ -1,0 +1,33 @@
+{
+  "tool": "built-in image_gen",
+  "jobs": [
+    {
+      "state": "walk",
+      "direction": "SW",
+      "input": "walk-SW-v2.png",
+      "file": "walk-SW-right-hand-v3.png",
+      "prompt": "Use case: precise-object-edit. Edit target: attached Rustblade Squire walk atlas. Correct the WRONG HANDEDNESS in EVERY cell. FRONT LEFT / SOUTHWEST facing: face visible, nose aimed lower-left. His ANATOMICAL RIGHT shoulder and right arm are on the VIEWER'S LEFT of his chest. Put sword in that viewer-left hand throughout. Viewer-right hand must be EMPTY. Move single shoulder pauldron to the right shoulder (viewer-left). Exactly ONE sword per character, gripped by anatomical RIGHT HAND ONLY. Left hand never touches hilt or blade; no two-handed poses, no hand swap anywhere in cycle. Trace shoulder to elbow to wrist to ensure right hand holds sword in every frame including anticipation, strike and recovery. Preserve character identity, pixel art rendering, rust helmet, burgundy ragged tunic, bone body, broad rusty blade, direction and action sequence. 16 walking frames arranged exactly 4 columns x 4 rows, full alternating gait. Do not mirror whole character. Repaint only equipment/arm anatomy necessary to correct hand continuity. Keep generous transparent gutters and no sword outside its cell, shrink all sprites uniformly slightly if needed. Truly transparent RGBA background, no scenery, labels, grid lines or extra items. Left fist OPEN/EMPTY visibly in every pose. Keep all body and weapon silhouettes separate from neighboring cells."
+    },
+    {
+      "state": "attack",
+      "direction": "SW",
+      "input": "attack-SW-v2.png",
+      "file": "attack-SW-right-hand-v3.png",
+      "prompt": "Use case: precise-object-edit. Edit target: attached Rustblade Squire attack atlas. Correct the WRONG HANDEDNESS in EVERY cell. FRONT LEFT / SOUTHWEST facing: face visible, nose aimed lower-left. His ANATOMICAL RIGHT shoulder and right arm are on the VIEWER'S LEFT of his chest. Put sword in that viewer-left hand throughout. Viewer-right hand must be EMPTY. Move single shoulder pauldron to the right shoulder (viewer-left). Exactly ONE sword per character, gripped by anatomical RIGHT HAND ONLY. Left hand never touches hilt or blade; no two-handed poses, no hand swap anywhere in cycle. Trace shoulder to elbow to wrist to ensure right hand holds sword in every frame including anticipation, strike and recovery. Preserve character identity, pixel art rendering, rust helmet, burgundy ragged tunic, bone body, broad rusty blade, direction and action sequence. 24 single-handed sword-attack frames arranged exactly 4 columns x 6 rows; anticipation, one strike, followthrough, recovery; right arm performs whole swing. Do not mirror whole character. Repaint only equipment/arm anatomy necessary to correct hand continuity. Keep generous transparent gutters and no sword outside its cell, shrink all sprites uniformly slightly if needed. Truly transparent RGBA background, no scenery, labels, grid lines or extra items. Left fist OPEN/EMPTY visibly in every pose. Keep all body and weapon silhouettes separate from neighboring cells."
+    },
+    {
+      "state": "walk",
+      "direction": "NW",
+      "input": "walk-NW.png",
+      "file": "walk-NW-right-hand-v3.png",
+      "prompt": "Use case: precise-object-edit. Edit target: attached Rustblade Squire walk atlas. Correct the WRONG HANDEDNESS in EVERY cell. BACK LEFT / NORTHWEST facing: back visible, nose aimed upper-left. His ANATOMICAL RIGHT shoulder/right arm are on the VIEWER'S RIGHT side of his back (the farther arm). Keep pauldron on that viewer-right shoulder; sword must connect to that SAME shoulder through right elbow and right wrist. Viewer-left near arm is LEFT arm and must stay EMPTY. Sword can pass behind torso, never transfer to near left hand. Exactly ONE sword per character, gripped by anatomical RIGHT HAND ONLY. Left hand never touches hilt or blade; no two-handed poses, no hand swap anywhere in cycle. Trace shoulder to elbow to wrist to ensure right hand holds sword in every frame including anticipation, strike and recovery. Preserve character identity, pixel art rendering, rust helmet, burgundy ragged tunic, bone body, broad rusty blade, direction and action sequence. 16 walking frames arranged exactly 4 columns x 4 rows, full alternating gait. Do not mirror whole character. Repaint only equipment/arm anatomy necessary to correct hand continuity. Keep generous transparent gutters and no sword outside its cell, shrink all sprites uniformly slightly if needed. Truly transparent RGBA background, no scenery, labels, grid lines or extra items. Left fist OPEN/EMPTY visibly in every pose. Keep all body and weapon silhouettes separate from neighboring cells."
+    },
+    {
+      "state": "attack",
+      "direction": "NW",
+      "input": "attack-NW-v2.png",
+      "file": "attack-NW-right-hand-v3.png",
+      "prompt": "Use case: precise-object-edit. Edit target: attached Rustblade Squire attack atlas. Correct the WRONG HANDEDNESS in EVERY cell. BACK LEFT / NORTHWEST facing: back visible, nose aimed upper-left. His ANATOMICAL RIGHT shoulder/right arm are on the VIEWER'S RIGHT side of his back (the farther arm). Keep pauldron on that viewer-right shoulder; sword must connect to that SAME shoulder through right elbow and right wrist. Viewer-left near arm is LEFT arm and must stay EMPTY. Sword can pass behind torso, never transfer to near left hand. Exactly ONE sword per character, gripped by anatomical RIGHT HAND ONLY. Left hand never touches hilt or blade; no two-handed poses, no hand swap anywhere in cycle. Trace shoulder to elbow to wrist to ensure right hand holds sword in every frame including anticipation, strike and recovery. Preserve character identity, pixel art rendering, rust helmet, burgundy ragged tunic, bone body, broad rusty blade, direction and action sequence. 24 single-handed sword-attack frames arranged exactly 4 columns x 6 rows; anticipation, one strike, followthrough, recovery; right arm performs whole swing. Do not mirror whole character. Repaint only equipment/arm anatomy necessary to correct hand continuity. Keep generous transparent gutters and no sword outside its cell, shrink all sprites uniformly slightly if needed. Truly transparent RGBA background, no scenery, labels, grid lines or extra items. Left fist OPEN/EMPTY visibly in every pose. Keep all body and weapon silhouettes separate from neighboring cells."
+    }
+  ]
+}

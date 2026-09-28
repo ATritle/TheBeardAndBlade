@@ -1,0 +1,17 @@
+{
+  "generator": "built-in image_gen",
+  "walkCorrections": [
+    {
+      "file": "walk-N.png",
+      "prompt": "Edit this EXACT 4x4 walking sprite sheet. Keep the same north-facing back-view skeleton, sixteen poses, palette, equipment and pixels as closely as possible. Fix the clipping: give each skeleton AND its entire sword at least 30 pixels of transparent padding inside EVERY cell on all four sides. Reduce each full sprite's size uniformly about 18 percent, recenter it in its existing cell, preserving its pose. Restore the complete blade tip on last-column cells. Preserve real alpha transparency, no background, no shadow, no labels, no added grid lines. Keep the same 4-column 4-row layout and equal cell spacing. Do not change facing or redesign the character."
+    },
+    {
+      "file": "walk-NE.png",
+      "prompt": "Edit this EXACT 4x4 walking sprite sheet. Keep the same northeast-facing rear three-quarter skeleton, sixteen poses, palette and equipment. Fix the clipping: give each skeleton AND full sword at least 30 pixels of transparent padding inside EVERY cell on all four sides. Reduce each whole sprite's size uniformly about 20 percent, recenter inside its existing cell. Restore complete sword tips in last-column cells. Same 4-column 4-row layout, equal spacing, real transparent alpha, no background, no shadow, no labels or grid. Do not change facing or character identity."
+    },
+    {
+      "file": "walk-SW.png",
+      "prompt": "Correct this walking animation sheet's FACING. It is incorrectly facing screen right. Re-author the SAME skeleton character and 16 walk poses facing DOWN-LEFT, SOUTHWEST, a front three-quarter view. His skull nose, chest, knees and toes must point toward the LOWER LEFT of the image. Preserve anatomical RIGHT-hand sword; do not just mirror the whole image. The empty left hand must remain the left hand. Preserve dented iron kettle helmet, dark burgundy torn tabard, bare bone feet, brown leather belt, rusty broad short sword, exact pixel art style and proportions. 4x4 evenly spaced atlas on TRUE TRANSPARENT alpha background, NO shadows or text. All16 cells same DOWN-LEFT direction, full body and sword with 12percent cell padding. Sixteen distinct consecutive alternating-leg walking poses: first8 advance one leg, second8 advance opposite leg. Preserve same cycle pacing."
+    }
+  ]
+}

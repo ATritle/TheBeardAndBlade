@@ -1,0 +1,13 @@
+{
+  "walk-N.png": "walk-N-v2.png",
+  "walk-NE.png": "walk-NE-v2.png",
+  "walk-SW.png": "walk-SW-right-hand-v3.png",
+  "attack-N.png": "attack-N-v2.png",
+  "attack-NE.png": "attack-NE-v2.png",
+  "attack-E.png": "attack-E-v2.png",
+  "attack-S.png": "attack-S-v2.png",
+  "attack-SW.png": "attack-SW-right-hand-v5.png",
+  "attack-W.png": "attack-W-v2.png",
+  "attack-NW.png": "attack-NW-right-hand-v4.png",
+  "walk-NW.png": "walk-NW-right-hand-v4.png"
+}
