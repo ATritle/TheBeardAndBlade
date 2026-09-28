@@ -1,0 +1,221 @@
+{
+  "tool": "built-in image_gen",
+  "jobs": [
+    {
+      "file": "walk-N.png",
+      "state": "walk",
+      "direction": "N",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing NORTH: full rear view, back visible, head aimed up-screen, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Back visible: right weapon hand on viewer-RIGHT/far shoulder side, LEFT empty hand on viewer-left. Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-N-clean.png",
+      "state": "attack-a",
+      "direction": "N",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing NORTH: full rear view, back visible, head aimed up-screen, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Back visible: right weapon hand on viewer-RIGHT/far shoulder side, LEFT empty hand on viewer-left. First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-N.png",
+      "state": "attack-b",
+      "direction": "N",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing NORTH: full rear view, back visible, head aimed up-screen, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Back visible: right weapon hand on viewer-RIGHT/far shoulder side, LEFT empty hand on viewer-left. Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-NE.png",
+      "state": "walk",
+      "direction": "NE",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing NORTHEAST: rear-right three-quarter, aimed upper-right, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-NE.png",
+      "state": "attack-a",
+      "direction": "NE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing NORTHEAST: rear-right three-quarter, aimed upper-right, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-NE.png",
+      "state": "attack-b",
+      "direction": "NE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing NORTHEAST: rear-right three-quarter, aimed upper-right, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-E.png",
+      "state": "walk",
+      "direction": "E",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing EAST: right-facing side profile, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-E.png",
+      "state": "attack-a",
+      "direction": "E",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing EAST: right-facing side profile, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-E.png",
+      "state": "attack-b",
+      "direction": "E",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing EAST: right-facing side profile, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-SE.png",
+      "state": "walk",
+      "direction": "SE",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing SOUTHEAST: front-right three-quarter, aimed lower-right, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-SE.png",
+      "state": "attack-a",
+      "direction": "SE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing SOUTHEAST: front-right three-quarter, aimed lower-right, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-SE.png",
+      "state": "attack-b",
+      "direction": "SE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing SOUTHEAST: front-right three-quarter, aimed lower-right, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-S.png",
+      "state": "walk",
+      "direction": "S",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing SOUTH: full front view, aimed down-screen, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Front visible: right weapon hand on viewer-LEFT, empty left hand on viewer-right. Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-S.png",
+      "state": "attack-a",
+      "direction": "S",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing SOUTH: full front view, aimed down-screen, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Front visible: right weapon hand on viewer-LEFT, empty left hand on viewer-right. First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-S.png",
+      "state": "attack-b",
+      "direction": "S",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing SOUTH: full front view, aimed down-screen, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Front visible: right weapon hand on viewer-LEFT, empty left hand on viewer-right. Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-SW.png",
+      "state": "walk",
+      "direction": "SW",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing SOUTHWEST: front-left three-quarter, aimed lower-left, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Front visible: right weapon hand on viewer-LEFT, empty left hand on viewer-right. Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-SW.png",
+      "state": "attack-a",
+      "direction": "SW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing SOUTHWEST: front-left three-quarter, aimed lower-left, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Front visible: right weapon hand on viewer-LEFT, empty left hand on viewer-right. First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-SW.png",
+      "state": "attack-b",
+      "direction": "SW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing SOUTHWEST: front-left three-quarter, aimed lower-left, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Front visible: right weapon hand on viewer-LEFT, empty left hand on viewer-right. Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-W.png",
+      "state": "walk",
+      "direction": "W",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing WEST: left-facing side profile, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-W-right.png",
+      "state": "attack-a",
+      "direction": "W",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing WEST: left-facing side profile, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-W.png",
+      "state": "attack-b",
+      "direction": "W",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing WEST: left-facing side profile, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand.  Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "walk-NW.png",
+      "state": "walk",
+      "direction": "NW",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 16 animation sprite poses in exactly4columns x4rows. ALL poses facing NORTHWEST: rear-left three-quarter, back visible, aimed upper-left, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Back visible: right weapon hand on viewer-RIGHT/far shoulder side, LEFT empty hand on viewer-left. Heavy alternating WALK loop: visible left planted/right swing then right planted/left swing; knee flex, heel lift, torso weight shift, scarf and chain subtle lag. Full16distinct poses, smooth wrap. Short-chain mace hangs by RIGHT foot and sways slightly, never swings overhead. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious square canvas. Count exactly16 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-a-NW-right.png",
+      "state": "attack-a",
+      "direction": "NW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing NORTHWEST: rear-left three-quarter, back visible, aimed upper-left, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Back visible: right weapon hand on viewer-RIGHT/far shoulder side, LEFT empty hand on viewer-left. First HALF of short-chain SWEEP attack. Frames1-4 plant feet from ready stance.5-8 draw right fist and mace back for readable anticipation.9-12 swing mace across a short forward arc toward target, ending extended STRIKE pose. Left hand stays empty. The chain connects right fist to ONE mace ball continuously. No second ball, no hand swaps. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    },
+    {
+      "file": "attack-b-NW.png",
+      "state": "attack-b",
+      "direction": "NW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Reference is Chainbound Bailiff design and equipment only. Make 12 animation sprite poses in exactly4columns x3rows. ALL poses facing NORTHWEST: rear-left three-quarter, back visible, aimed upper-left, without changing facing midcycle. Same broad undead armored jailer, vertical iron cage helmet, worn burgundy cloth, iron shoulderplates, torso chains, leatherbelt, bare skeletal feet. One short-chain spiked mace always held by ANATOMICAL RIGHT hand, empty left hand. Back visible: right weapon hand on viewer-RIGHT/far shoulder side, LEFT empty hand on viewer-left. Second HALF of same short-chain SWEEP attack. Start with right arm and mace fully extended in forward STRIKE pose toward target, then followthrough and slow exposed recovery, lowering ball to right foot, ending ready stance. This is recovery only; do not wind up or attack twice. Left hand empty, same right hand gripping chain throughout. Match pixel-art detail and muted metal/burgundy palette exactly. Stable scale, stable foot baseline, constant cage proportions and mace size. ALL character AND mace-chain inside eachcell,35percent transparent margins between complete silhouettes; no weapon in nextcell. Crisp OPAQUE pixel-art cutouts and genuinely transparent alpha0 background, no fog, halo, brown vignette, floor or shadows, no lettering, no UI. Use spacious landscape4:3 canvas. Count exactly12 poses. Do not mirror arms/equipment to change facing."
+    }
+  ]
+}
