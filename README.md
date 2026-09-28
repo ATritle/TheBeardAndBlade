@@ -1,6 +1,15 @@
 # The Beard and Blade
 
-A Windows pixel-art dungeon crawler built with Unreal Engine 5.8.
+A pixel-art dungeon crawler starring a bearded adventurer armed with steel, stubbornness, and an explosive cup of tea.
+Explore seven themed dungeon floors through branching rooms and four-way doorways. Chart your discoveries with the Emerald Atlas, backtrack through cleared chambers, and choose which unexplored path to brave next. Somewhere ahead, a boss awaits—but the doorway won’t give away the surprise.
+Break props for loot, collect fallen enemies’ coins, and trade for stronger equipment. Build your adventurer around powerful weapons, armor, rings, and amulets with bonuses such as bleed, poison, life leech, attack speed, and movement.
+Features
+- Seven distinct dungeon themes with persistent room exploration and hidden boss encounters.
+- Seven unusual bosses: Finance Guy, Big Mack, Flash Bang Guy, Webroot, Rime, Cinder, and Twister.
+- Action-focused combat with melee attacks, dodging, sprinting, throwable tea, and the charged FREEDOM ability.
+- Eight equipment slots, multiple loot rarities, and detailed stat comparisons.
+- A coin-and-trader economy: buy upgrades, sell unwanted gear, or leave items behind to recover later.
+- Detailed pixel-art presentation, animated boss introductions, atmospheric music, and recorded sound effects.
 
 ## Play
 
