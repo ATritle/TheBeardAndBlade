@@ -1,5 +1,19 @@
 # StreamPixel setup
 
+## Latest test build — September 28, 2026
+
+Upload `Builds/TheBeardAndBlade-StreamPixel-test-2026-09-28.zip` for the latest
+adventurer locomotion and Rime Empress voice updates. This is a dated test build,
+not a replacement GitHub release tag. The existing v0.4.0 archives remain intact.
+The ZIP contains the complete Shipping runtime under `Windows/`, with Pixel
+Streaming enabled. Select `Windows/TheBeardAndBlade.exe` if prompted.
+
+Reproduce with `Tools/package_windows.ps1 -Destination "$PWD/Builds/test-2026-09-28"`
+and `python Tools/zip_release.py --version test-2026-09-28 --streaming`.
+Use a fresh destination if that build already exists.
+
+## Published v0.4.0 build
+
 StreamPixel hosts Unreal Pixel Streaming on a remote GPU and sends video, audio, and player input through the browser. It is separate from GitHub download hosting.
 
 Both v0.4.0 archives use the same Pixel Streaming-enabled Shipping build under `Builds/v0.4.0/Windows`.

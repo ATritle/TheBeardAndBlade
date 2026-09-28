@@ -1,0 +1,42 @@
+{
+  "FoleyRimeAttack0": {
+    "source": "weirdwarriornosieslol.mp3",
+    "start": 0.28,
+    "end": 1.43,
+    "seconds": 1.15,
+    "peak": 0.48,
+    "license": "CC0",
+    "artist": "SkyRae",
+    "url": "https://opengameart.org/content/female-warrior-cheer"
+  },
+  "FoleyRimePain0": {
+    "source": "female_hurt_grunts_groans_1.ogg",
+    "start": 0.32,
+    "end": 1.17,
+    "seconds": 0.85,
+    "peak": 0.4799999999999999,
+    "license": "CC0",
+    "artist": "AuraVoice / Nocturnal_Vanguard",
+    "url": "https://opengameart.org/content/female-hurt-grunts-groans"
+  },
+  "FoleyRimePain1": {
+    "source": "female_hurt_grunts_groans_1.ogg",
+    "start": 4.89,
+    "end": 6.14,
+    "seconds": 1.25,
+    "peak": 0.48,
+    "license": "CC0",
+    "artist": "AuraVoice / Nocturnal_Vanguard",
+    "url": "https://opengameart.org/content/female-hurt-grunts-groans"
+  },
+  "FoleyRimePain2": {
+    "source": "female_hurt_grunts_groans_1.ogg",
+    "start": 9.29,
+    "end": 10.33,
+    "seconds": 1.04,
+    "peak": 0.4799999999999999,
+    "license": "CC0",
+    "artist": "AuraVoice / Nocturnal_Vanguard",
+    "url": "https://opengameart.org/content/female-hurt-grunts-groans"
+  }
+}

@@ -162,6 +162,7 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
     if(E->Species>=31) { FireThemeAttack(E); return; }
     const auto& S=DungeonRoster::Get(E->Species);
     PlaySound(E->Species==24?TEXT("Paper"):S.AttackStyle==0?TEXT("Sword"):S.AttackStyle==4?TEXT("Explosion"):S.AttackStyle==2?TEXT("Roll"):TEXT("Magic"),.65f);
+    if(E->Species==26)PlaySound(TEXT("RimeAttack"),.70f);
     const FVector2D P=DungeonView::Project(E->GetActorLocation());
     if(E->Species==19)
     {
@@ -315,10 +316,10 @@ void ADungeonGameMode::VerifyCampaign()
         const FVector2D Start=DungeonView::Project(H->GetActorLocation());
         H->MoveRight(1); H->Tick(.1f);
         Check(FMath::IsNearlyEqual(H->WalkCycle(),19.f/144.f*2.f*PI,.001f),TEXT("Walk cadence uses a 144-pixel cycle"));
-        Check(H->GetAnimationFrame()==0,TEXT("Walking no longer skips poses at 0.1 seconds"));
+        Check(H->GetAnimationFrame()==1,TEXT("Eight-frame walk advances one pose over 19 pixels"));
         H->Restart(); H->MoveRight(1); H->SprintPressed(); H->Tick(.1f);
         Check(FMath::IsNearlyEqual(float(DungeonView::Project(H->GetActorLocation()).X-Start.X),38.f,.01f),TEXT("Sprint retains 2x movement"));
-        Check(FMath::IsNearlyEqual(H->WalkCycle(),38.f/1.54f/144.f*2.f*PI,.001f),TEXT("Sprint cadence is slower than translation"));
+        Check(FMath::IsNearlyEqual(H->WalkCycle(),38.f/224.f*2.f*PI,.001f),TEXT("Sprint uses a longer 224-pixel stride"));
         H->Restart();
     }
     {

@@ -168,7 +168,8 @@ public:
     int32 StrikeCount=0;
 #if !UE_BUILD_SHIPPING
     void SetReviewPose(int32 D,int32 F) { Facing=AttackDirection=D; AttackTime=.48f*(1.f-(F+.01f)/6.f); bAttackHit=true; }
-    void SetWalkReviewPose(int32 D,int32 F) { Facing=D;AttackTime=PowerCastTime=RollTime=0;bWalking=true;WalkDistance=(F+.01f)*24;IdleBreathBlend=0; }
+    void SetWalkReviewPose(int32 D,int32 F) { Facing=D;AttackTime=PowerCastTime=RollTime=0;bWalking=true;WalkDistance=(F+.01f)*18;IdleBreathBlend=0;MoveBlend=1;RunBlend=0;GaitTravel=FVector2D(FMath::Sin(D*PI/4),-FMath::Cos(D*PI/4)); }
+    void SetSprintReviewPose() { RunBlend=1; }
     void SetIdleReviewPose(int32 D,float Phase) { Facing=D;AttackTime=PowerCastTime=RollTime=HurtTime=0;bWalking=false;IdleBreathBlend=1;BreathPhase=Phase; }
     void SetFlashReviewAim(FVector2D Direction) { Aim=Direction;Facing=DungeonView::Direction(Aim); }
 #endif
@@ -188,8 +189,14 @@ public:
     bool IsAttacking() const { return AttackTime>0; }
     bool IsWalking() const { return bWalking; }
     float WalkCycle() const { return WalkDistance/144.f*2.f*PI; }
+    float GetMoveBlend() const { return MoveBlend; }
+    float GetRunBlend() const { return RunBlend; }
+    FVector2D GetGaitTravel() const { return GaitTravel; }
     int32 GetFacingDirection() const { return IsCasting()?PowerDirection:IsAttacking()?AttackDirection:Facing; }
     int32 GetAnimationFrame() const;
+    int32 GetLocomotionFrame() const { return bWalking?FMath::FloorToInt(WalkDistance/18.f)%8:2; }
+    bool IsRunAnimation() const { return bWalking&&RunBlend>.5f; }
+    FVector2D GetVisualFacing() const { const float A=GetFacingDirection()*PI/4;return FVector2D(FMath::Sin(A),-FMath::Cos(A)); }
     float GetAttackProgress() const { return 1.f-AttackTime/.48f; }
     FVector2D GetAim() const { return IsCasting()?PowerAim:IsAttacking()?AttackAim:Aim; }
     float Health=150,MaxHealth=150,AttackPower=24,Armor=8,HurtTime=0;
@@ -214,7 +221,8 @@ private:
     FVector2D RollAim=FVector2D(1,0);
     bool bSprinting=false,bWalking=false,bAttackHit=false;
     bool bInventoryOpen=false;
-    float FootstepDistance=0;
+    float FootstepDistance=0,MoveBlend=0,RunBlend=0;
+    FVector2D GaitTravel=FVector2D::ZeroVector;
     int32 Facing=4,AttackDirection=4;
     FVector2D Aim=FVector2D(0,1),AttackAim=FVector2D(0,1);
 };

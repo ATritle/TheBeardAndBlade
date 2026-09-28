@@ -1,4 +1,6 @@
 #include "DungeonActors.h"
+#include "HeroLocomotion.h"
+#include "HeroLocomotionSockets.h"
 #include "DungeonEnemyAudio.h"
 #include "DungeonInventoryLayout.h"
 #include "InventoryGlyphMetrics.h"
@@ -99,7 +101,7 @@ void ADungeonHero::Restart()
     CritChance=.05f;CritMultiplier=1.5f;AttackSpeed=StaminaRegen=MovementSpeed=1;StrikeCount=0;
     Stamina=MaxStamina=100; StaminaDelay=0; bExhausted=false;
     BleedChance=PoisonChance=Leech=DamageReduction=0;
-    InputX=InputY=WalkDistance=FootstepDistance=0; IdleBreathBlend=BreathPhase=0;bSprinting=bWalking=false; Aim=FVector2D(0,1); Facing=4;
+    InputX=InputY=WalkDistance=FootstepDistance=MoveBlend=RunBlend=0;GaitTravel=FVector2D::ZeroVector; IdleBreathBlend=BreathPhase=0;bSprinting=bWalking=false; Aim=FVector2D(0,1); Facing=4;
     RollTime=RollCooldown=PowerCooldown=PowerCastTime=0; bTeaReleased=false;
     StunTime=SlowTime=StatusClock=FlashBlindTime=0;
     SetActorLocation(DungeonView::Unproject(FVector2D(640,520)));
@@ -147,11 +149,17 @@ void ADungeonHero::Tick(float Dt)
     const FVector2D Next=DungeonView::Clamp(P+Move*(190.f*Dt+190.f*SprintSeconds)*MovementSpeed*(IsAttacking()?.5f:1.f)*(SlowTime>0?.6f:1.f));
     UpdateStamina(Dt,Sprinting);
     bWalking=FVector2D::Distance(Next,P)>.01f;
-    // Cadence is independent of 2x sprint translation: walk ~8 fps, sprint ~10 fps.
-    const float GaitStep=FVector2D::Distance(Next,P)/((Sprinting?1.54f:1.f)*MovementSpeed);
+    MoveBlend=HeroLocomotion::Blend(MoveBlend,bWalking?1.f:0.f,Dt,bWalking?15.f:12.f);
+    RunBlend=HeroLocomotion::Blend(RunBlend,Sprinting&&bWalking?1.f:0.f,Dt,10.f);
+    if(bWalking) { GaitTravel=(Next-P).GetSafeNormal();Facing=DungeonView::Direction(GaitTravel); }
+    // Playback tracks actual displacement, including boots/slow/attack modifiers.
+    // A longer sprint stride keeps the legs from simply cycling twice as fast.
+    const float GaitStep=FVector2D::Distance(Next,P)*144.f/HeroLocomotion::Stride(Sprinting?1.f:0.f);
+    const int OldContact=FMath::FloorToInt(WalkDistance/72.f);
     WalkDistance+=GaitStep;
-    FootstepDistance+=GaitStep;
-    if(bWalking&&FootstepDistance>=72) { FootstepDistance=FMath::Fmod(FootstepDistance,72.f); if(auto* G=Mode(this)) G->PlaySound(TEXT("Step"),.28f,FMath::FRandRange(.97f,1.03f)); }
+    if(bWalking&&FMath::FloorToInt(WalkDistance/72.f)>OldContact&&!IsAttacking()&&!IsCasting())
+        if(auto* G=Mode(this))G->PlaySound(TEXT("Step"),Sprinting?.28f:.24f,FMath::FRandRange(.97f,1.03f));
+    WalkDistance=FMath::Fmod(WalkDistance,144.f);
     SetActorLocation(DungeonView::Unproject(Next));
     if(Dt>SMALL_NUMBER) ScreenVelocity=(Next-P)/Dt;
     if(auto* PC=Cast<APlayerController>(GetController()))
@@ -167,7 +175,7 @@ void ADungeonHero::Tick(float Dt)
                 if(Delta.SizeSquared()>144)
                 {
                     Aim=Delta.GetSafeNormal();
-                    Facing=DungeonView::Direction(Aim);
+                    if(!bWalking)Facing=DungeonView::Direction(Aim);
                 }
             }
         }
@@ -187,7 +195,7 @@ int32 ADungeonHero::GetAnimationFrame() const
 {
     if(IsCasting()) return FMath::Clamp((int32)(GetCastProgress()*6),0,5);
     if(IsAttacking()) return FMath::Clamp((int32)(GetAttackProgress()*6),0,5);
-    return bWalking?((int32)(WalkDistance/24.f)%6):0;
+    return GetLocomotionFrame();
 }
 void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
 {
@@ -255,7 +263,7 @@ void ADungeonHero::Attack()
         return;
     }
     if(Health<=0||IsAttacking()||IsRolling()||IsCasting()) return;
-    AttackTime=.48f; bAttackHit=false; AttackAim=Aim; AttackDirection=Facing;
+    AttackTime=.48f; bAttackHit=false; AttackAim=Aim; AttackDirection=DungeonView::Direction(AttackAim);
     if(QuipCooldown<=0&&FMath::FRand()<.35f)
     {
         AttackQuip=TEXT("Take this you C*NT!"); QuipTime=1.5f; QuipCooldown=4.f;
@@ -345,7 +353,7 @@ void ADungeonHero::TransitionWalk(FVector2D From,FVector2D To,float Progress,flo
     SetActorLocation(DungeonView::Unproject(FMath::Lerp(From,To,Progress)));
     Facing=DungeonView::Direction(To-From); Aim=(To-From).GetSafeNormal(); bWalking=true;
     // Compressed screen-space stair travel still advances a slow, readable gait.
-    WalkDistance=Progress*FVector2D::Distance(From,To)*GaitScale; AttackTime=RollTime=PowerCastTime=HurtTime=0; IdleBreathBlend=0;
+    WalkDistance=Progress*FVector2D::Distance(From,To)*GaitScale; AttackTime=RollTime=PowerCastTime=HurtTime=0; IdleBreathBlend=0;RunBlend=0;MoveBlend=1;
 }
 void ADungeonHero::Equip(const FDungeonItem& Item)
 {
@@ -370,7 +378,7 @@ void ADungeonEnemy::TakeDungeonDamage(float Damage)
     auto* G=Mode(this);
     const FVector2D P=DungeonView::Project(GetActorLocation());
     if(G) G->AddImpact(P,Damage);
-    if(G) G->PlaySound(DungeonEnemyAudio::Hit(Species,Health<=0),.65f,FMath::FRandRange(.97f,1.03f));
+    if(G) G->PlaySound(DungeonEnemyAudio::Hit(Species,Health<=0),.65f,Species==26?1.f:FMath::FRandRange(.97f,1.03f));
     if(auto* H=Player(this))
     {
         auto Push=(P-DungeonView::Project(H->GetActorLocation())).GetSafeNormal();
@@ -885,13 +893,19 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     const int32 D=H->GetFacingDirection();
     const bool Action=H->IsAttacking()||H->IsCasting();
     const int32 View=Action?AthleticHeroSockets::AttackView(D,H->GetAnimationFrame()):D;
-    const int32 F=Action?AthleticHeroSockets::AttackPose[D][H->GetAnimationFrame()]:H->IsWalking()?H->GetAnimationFrame():AthleticHeroSockets::IdleFrame[D];
-    const float BreathWeight=H->Health>0&&!H->IsAttacking()&&!H->IsCasting()&&!H->IsRolling()?FMath::Max(H->IdleBreathBlend,H->IsWalking()?.18f:0.f):0;
+    const int32 F=Action?AthleticHeroSockets::AttackPose[D][H->GetAnimationFrame()]:H->GetLocomotionFrame();
+    const bool Running=!Action&&H->IsRunAnimation();
+    const float BreathWeight=H->Health>0&&!H->IsAttacking()&&!H->IsCasting()&&!H->IsRolling()?FMath::Max(H->IdleBreathBlend,H->IsWalking()?.08f:0.f):0;
     const float FacingX=D==0||D==4?0:D<4?1.f:-1.f;
-    auto Pose=[&](FVector2D Q){return HeroBreathing::Map(Q,H->BreathPhase,BreathWeight,FacingX);};
-    const float Bob=H->IsWalking()?FMath::Sin(H->WalkCycle()*2.f)*.6f:0.f;
-    P.Y+=Bob;
-    FString Name=FString::Printf(TEXT("Athletic_%s%s_%d_%d"),Action?TEXT("Attack"):TEXT("Walk"),View%2?TEXT("Diagonal"):TEXT("Cardinal"),View/2,F);
+    auto Pose=[&](FVector2D Q){
+        Q=HeroBreathing::Map(Q,H->BreathPhase,BreathWeight,FacingX);
+        // Authored locomotion already contains weight transfer and forward lean.
+        // Only idle breathing is additive: never distort knees/feet with strip bobbing.
+        return Q;
+    };
+    const float Bob=0; // Body motion must not lift the planted soles or shadow.
+    FString Name=Action?FString::Printf(TEXT("Athletic_Attack%s_%d_%d"),View%2?TEXT("Diagonal"):TEXT("Cardinal"),View/2,F):
+        FString::Printf(TEXT("Locomotion_%s_%d_%d"),Running?TEXT("Run"):TEXT("Walk"),D,F);
     Shadow(P+FVector2D(0,-2-Bob),28*DescentScale,Opacity);
     // Native alpha avoids the old body mask and its mismatched silhouette.
     auto DrawBody=[&]() { if(auto* T=Texture(Name)) for(int Row=0;Row<128;Row+=2)
@@ -921,10 +935,10 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         Sprite(ItemArt(H->Equipment[2].Icon),Charm.X-7*HS,Charm.Y-7*HS,14*HS,14*HS,Fade);
     }
     const auto A=H->GetAim();
-    const FVector2D Socket=H->IsAttacking()?AthleticHeroSockets::Attack[View][F]:AthleticHeroSockets::Walk[D][F];
+    const FVector2D Socket=H->IsAttacking()?AthleticHeroSockets::Attack[View][F]:HeroLocomotionSockets::Hand[D][F+(Running?8:0)];
     const FVector2D Origin=P-FVector2D(64,116)*HS;
     const FVector2D Hand=Origin+Pose(Socket)*HS;
-    const float Angle=H->IsAttacking()?AthleticHeroSockets::Angles[View][F]:(D<=4?145.f:215.f);
+    const float Angle=H->IsAttacking()?AthleticHeroSockets::Angles[View][F]:(D<=4||D==7?145.f:215.f);
     if(!H->Equipment[0].IsEmpty())
     {
         const FVector2D Pivot=H->Equipment[0].CatalogId<0?HeroSockets::Grip(H->Equipment[0].Icon)/128.:HeroSockets::CatalogGrip(H->Equipment[0].CatalogId);
@@ -938,7 +952,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         // its handle across the near (left) arm or move the grip to that hand.
         if(Behind) DrawBody();
         // Re-draw only the gripping fingers over the handle, never a second hero.
-        if(auto* T=Texture(Name))
+        if(auto* T=Texture(Name);T&&!Behind)
         {
             const auto TL=Origin+Pose(Socket-FVector2D(2.5f,2.5f))*HS,BR=Origin+Pose(Socket+FVector2D(2.5f,2.5f))*HS;
             DrawTexture(T,Offset.X+TL.X*Scale,Offset.Y+TL.Y*Scale,(BR.X-TL.X)*Scale,(BR.Y-TL.Y)*Scale,
@@ -1475,18 +1489,35 @@ void ADungeonHUD::DrawHUD()
     Sprite(G->IsAtlasFloor()?(G->GetBiome()==0?FString(TEXT("AtlasChamber")):FString::Printf(TEXT("AtlasChamber%d"),G->GetBiome())):G->GetBiome()==0?FString(TEXT("Arena")):FString::Printf(TEXT("Arena%d"),G->GetBiome()),0,0,1280,800);
     if(G->IsBossIntroActive()){DrawBossIntro(G);return;}
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("LocomotionPreview")))
+    {
+        Box(0,0,1280,800,FLinearColor(.035f,.045f,.05f,1));
+        const auto Position=H->GetActorLocation();H->HurtTime=0;
+        Label(TEXT("ADVENTURER / EIGHT-DIRECTION WALK + RUN"),30,15,Gold);
+        for(int D=0;D<8;++D)for(int Run=0;Run<2;++Run)
+        {
+            const int Row=(D/4)*2+Run;const float X=160+(D%4)*320,Y=195+Row*190;
+            const int Frame=FMath::FloorToInt(GetWorld()->GetTimeSeconds()*(Run?12.f:10.f))%8;
+            H->SetActorLocation(DungeonView::Unproject(FVector2D(X,Y)));
+            H->SetWalkReviewPose(D,Frame);if(Run)H->SetSprintReviewPose();Hero(H,1.2f);
+            Label(FString::Printf(TEXT("%s / D%d / %d"),Run?TEXT("RUN"):TEXT("WALK"),D,Frame),X-65,Y+12,Pale,.8f);
+        }
+        H->SetActorLocation(Position);return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("DungeonHeroReviewPreview")))
     {
         int Group=0;FParse::Value(FCommandLine::Get(),TEXT("DungeonBiome="),Group);
         Box(0,0,1280,800,FLinearColor(.035f,.045f,.05f,1));
         const auto Position=H->GetActorLocation();H->HurtTime=0;
         Label(Group>=2?TEXT("ATHLETIC HERO / WALK / HAND ANCHORS"):TEXT("ATHLETIC HERO / ATTACK / HAND ANCHORS"),30,15,Gold);
-        for(int R=0;R<4;++R)for(int F=0;F<6;++F)
+        const int Frames=Group>=2?8:6;const float Gap=1240.f/Frames;
+        for(int R=0;R<4;++R)for(int F=0;F<Frames;++F)
         {
             const int D=(Group%2)*4+R;
-            H->SetActorLocation(DungeonView::Unproject(FVector2D(130+F*207,195+R*193)));
+            H->SetActorLocation(DungeonView::Unproject(FVector2D(90+F*Gap,195+R*193)));
             if(Group>=2)H->SetWalkReviewPose(D,F);else H->SetReviewPose(D,F);
-            Hero(H,1.25f);Label(FString::Printf(TEXT("D%d / F%d"),D,F),75+F*207,198+R*193,Pale,.75f);
+            if(Group>=2&&FParse::Param(FCommandLine::Get(),TEXT("SprintReview")))H->SetSprintReviewPose();
+            Hero(H,1.1f);Label(FString::Printf(TEXT("D%d / F%d"),D,F),55+F*Gap,198+R*193,Pale,.75f);
         }
         H->SetActorLocation(Position);return;
     }

@@ -1,5 +1,6 @@
 #include "DungeonActors.h"
 #include "DungeonEnemyAudio.h"
+#include "HeroLocomotion.h"
 #include "Components/AudioComponent.h"
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,6 +17,8 @@
 namespace {
 struct FFoleyFamily {const TCHAR* Name;int Count;};
 const FFoleyFamily FoleyFamilies[]={
+    // Only the opening yell: variants 1/2 said "ALRIGHT"/"YES".
+    {TEXT("RimeAttack"),1},{TEXT("RimePain"),3},
     {TEXT("HumanPain"),3},{TEXT("HumanDeath"),3},{TEXT("HumanSpawn"),2},
     {TEXT("DronePain"),2},{TEXT("DroneDeath"),2},{TEXT("DroneFlight"),1},
     {TEXT("Rifle"),3},{TEXT("Grenade"),1},
@@ -34,7 +37,7 @@ void ADungeonGameMode::PlaySound(const FString& Name,float Volume,float Pitch)
     if(bEffectsMuted||!GetWorld()) return;
     const double Now=GetWorld()->GetTimeSeconds();
     // Volley and AoE callbacks can fire many times in one frame. Limit each cue.
-    const double Gap=Name==TEXT("DroneFlight")?2.3:Name.EndsWith(TEXT("Spawn"))?.24:Name.EndsWith(TEXT("Pain"))?.18:Name.EndsWith(TEXT("Death"))?.13:.055;
+    const double Gap=Name.StartsWith(TEXT("Rime"))?.65:Name==TEXT("DroneFlight")?2.3:Name.EndsWith(TEXT("Spawn"))?.24:Name.EndsWith(TEXT("Pain"))?.18:Name.EndsWith(TEXT("Death"))?.13:.055;
     if(const double* Last=LastSoundTime.Find(Name)) if(Now-*Last<Gap) return;
     LastSoundTime.Add(Name,Now);
     FString AssetName=Name;
@@ -113,6 +116,59 @@ void ADungeonHero::ToggleEffects() { if(auto* G=Cast<ADungeonGameMode>(UGameplay
 // Explicit unattended release check; absent this flag it never alters gameplay.
 void ADungeonGameMode::RunPackagedSmokeTest()
 {
+#if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("LocomotionPreview"))) {
+        static int Stage=0;const float T=GetWorld()->GetTimeSeconds();
+        if(Stage==0&&T>1) { StartGame();DisableAtlas();bMenu=false;PendingSpawns=0;CancelBossIntro();DialogueLines.Empty();BossGrace=0;++Stage; }
+        if(Stage>=1&&Stage<=16&&T>2+(Stage-1)*.12f) {
+            FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/FString::Printf(TEXT("Screenshots/LocomotionV2/Frame%02d.png"),Stage-1),false,false);++Stage;
+        }
+        if(Stage==17&&T>4.5f) { FPlatformMisc::RequestExit(false);++Stage; }
+        return;
+    }
+#endif
+    if(FParse::Param(FCommandLine::Get(),TEXT("LocomotionVerify"))) {
+        static bool Done=false;if(Done)return;
+        auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));if(!H)return;
+        Done=true;int Errors=0;
+        auto Check=[&](bool OK){if(!OK)++Errors;};
+        StartGame();DisableAtlas();bMenu=false;PendingSpawns=0;CancelBossIntro();DialogueLines.Empty();BossGrace=0;
+        for(int D=0;D<8;++D) {
+            for(const TCHAR* State:{TEXT("Walk"),TEXT("Run")})for(int F=0;F<8;++F) {
+                const FString Name=FString::Printf(TEXT("Locomotion_%s_%d_%d"),State,D,F);
+                auto* Texture=LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/%s.%s"),*Name,*Name));
+                Check(Texture&&Texture->Filter==TF_Nearest&&Texture->NeverStream);
+            }
+        }
+        for(bool Sprint:{false,true}) {
+            float Phase[2];
+            for(int Rate=0;Rate<2;++Rate) {
+                H->Restart();H->SetActorLocation(DungeonView::Unproject(FVector2D(300,450)));H->MovementSpeed=1.2f;H->MoveRight(1);if(Sprint)H->SprintPressed();
+                const int Steps=Rate?60:30;for(int I=0;I<Steps;++I)H->Tick(.5f/Steps);
+                Phase[Rate]=H->WalkCycle();
+                const float Expected=FMath::Fmod(190.f*.5f*1.2f*(Sprint?2:1)/HeroLocomotion::Stride(Sprint?1:0),1.f)*2*PI;
+                Check(FMath::IsNearlyEqual(Phase[Rate],Expected,.003f));
+            }
+            Check(FMath::IsNearlyEqual(Phase[0],Phase[1],.003f));
+        }
+        H->MoveRight(0);const float Phase=H->WalkCycle();H->Tick(.1f);Check(FMath::IsNearlyEqual(Phase,H->WalkCycle()));
+        H->Restart();H->SetActorLocation(DungeonView::Unproject(FVector2D(1170,450)));H->MoveRight(1);H->Tick(.1f);Check(!H->IsWalking()&&H->WalkCycle()==0);
+        for(int D=0;D<8;++D) {
+            H->Restart();H->SetActorLocation(DungeonView::Unproject(FVector2D(640,450)));
+            H->MoveRight(FMath::Sin(D*PI/4));H->MoveForward(FMath::Cos(D*PI/4));H->Tick(.05f);
+            Check(H->GetFacingDirection()==D);
+            Check(H->GetLocomotionFrame()>=0&&H->GetLocomotionFrame()<8);
+        }
+        H->TransitionWalk(FVector2D(640,450),FVector2D(640,400),.5f);Check(!H->IsRunAnimation()&&H->GetFacingDirection()==0);
+#if !UE_BUILD_SHIPPING
+        H->Restart();H->SetFlashReviewAim(FVector2D(1,0));H->MoveForward(1);H->Tick(.05f);
+        Check(H->GetFacingDirection()==0&&H->GetAim().Equals(FVector2D(1,0)));
+        H->Attack();Check(H->IsAttacking()&&H->GetFacingDirection()==2);
+        H->CancelCombatActions();H->MoveForward(0);H->Tick(.05f);Check(!H->IsWalking());
+#endif
+        UE_LOG(LogTemp,Display,TEXT("LOCOMOTION_VERIFY errors=%d; 128 authored frames; eight movement-facing directions; speed modifiers; 60/120Hz; idle; walls; doorway walk"),Errors);
+        FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("EconomyReview"))) {
         static int Stage=0;const float T=GetWorld()->GetTimeSeconds();
         auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));if(!H)return;
@@ -252,11 +308,13 @@ void ADungeonGameMode::RunPackagedSmokeTest()
         static bool Done=false;if(Done)return;Done=true;
         int Errors=0;
         const bool WasMuted=bEffectsMuted;bEffectsMuted=false;
+        if(FoleyCount(TEXT("RimeAttack"))!=1)++Errors;
         for(int Species:{30,37,38,39,41,42}) {
             if(!DungeonEnemyAudio::Human(Species)||FString(DungeonEnemyAudio::Hit(Species,true))!=TEXT("Hit")||FString(DungeonEnemyAudio::Hit(Species,false))!=TEXT("HumanPain"))++Errors;
         }
         if(DungeonEnemyAudio::Human(40)||FString(DungeonEnemyAudio::Hit(40,true))!=TEXT("DroneDeath")||FString(DungeonEnemyAudio::Spawn(40))!=TEXT("DroneFlight"))++Errors;
         if(FString(DungeonEnemyAudio::Hit(25,true))!=TEXT("EnemyDeath"))++Errors;
+        if(FString(DungeonEnemyAudio::Hit(26,false))!=TEXT("RimePain")||FString(DungeonEnemyAudio::Hit(26,true))!=TEXT("Hit"))++Errors;
         if(DungeonEnemyAudio::Human(24)||FString(DungeonEnemyAudio::Hit(24,true))!=TEXT("Hit")||FString(DungeonEnemyAudio::Hit(24,false))!=TEXT("Hit")||FString(DungeonEnemyAudio::Spawn(24))!=TEXT("Paper"))++Errors;
         int Assets=0;
         for(const auto& Entry:FoleyFamilies) {

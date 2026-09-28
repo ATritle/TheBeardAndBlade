@@ -24,7 +24,7 @@ bool ADungeonHero::ApplyFlashBang(FVector2D Explosion,float Radius)
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
     if(Health<=0||!G||G->IsGameplayBlocked()||IsInventoryOpen()||G->IsFreedomActive()) return false;
-    if(!FlashBang::Exposed(DungeonView::Project(GetActorLocation()),GetAim(),Explosion,Radius)) return false;
+    if(!FlashBang::Exposed(DungeonView::Project(GetActorLocation()),GetVisualFacing(),Explosion,Radius)) return false;
     // No chained stun extension while recovering from the same encounter's flash.
     if(FlashBlindTime>0) return false;
     CancelCombatActions(); StunTime=FMath::Max(StunTime,.6f);
