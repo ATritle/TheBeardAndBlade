@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "attempts": [
+    {
+      "output": "attack-N-clean-v3.png",
+      "prompt": "Use case: background-extraction and precise-object-edit. Edit attached Graveglass Slinger NORTH attack sprite atlas. Remove ALL brown ambient background, brown glow, vignette and fog from EVERY cell. True clean RGBA transparency: EVERY background pixel alpha0, solid opaque character pixels, clean hard pixel-art silhouette edges. Keep teal highlights INSIDE urns but no outer halo. Preserve EXACTLY24 poses in4columns6rows, character costume and existing right-hand sling orientation, north rear facing allframes, no changes to anatomy or poses. Layout correction: uniformly reduce each complete character+extended sling to70percent of its current size and center within its OWN cell, maintaining the same ground pivot relative to eachcell. Generous fully transparent gutters, entire sling contained in its cell, no neighboring sprite fragments or touching poses. Do not paint black or brown background; output actual transparent PNG. No labels, shadows or ground. Maintain pixel-art detail. Retain all24 including loading anticipation throw recovery.",
+      "selected": false
+    },
+    {
+      "output": "attack-N-clean-v4.png",
+      "prompt": "Image1 is correct CLEAN TRANSPARENT pixel art reference. Image2 provides24north-facing throw poses ONLY, its brown background/glow is DEFECTIVE and must NOT be copied. Build corrected24pose attack atlas on ACTUAL FULLY TRANSPARENT alpha0 background. Match image1 crisp OPAQUE sprite treatment, no semitransparent brown pixels outside silhouettes. Exactly4columns6rows on squarecanvas, each small character at most60percent cellwidth andheight including sling. Same character, north/backview, burgundy hood, teal urns, sling inRIGHT hand(viewerRIGHT) ALL24poses. Copy motion sequence from image2 but clean isolated cutouts likeimage1. No ambientlight, halo, fog, spotlight, gradients, backing rectangles, groundshadow. Empty gutter allaroundeach fullpose. Transparent RGBA PNG, clean game-ready sprite cutouts. Important: this is sprite extraction, not an illustration of a sprite sheet.",
+      "selected": true
+    },
+    {
+      "output": "attack-N-clean-v5.png",
+      "prompt": "Edit target attached transparent north-throw atlas. Keep this clean transparency and right-hand pose artwork. It has only20poses arranged4columns5rows. REQUIRED output:24poses exactly4columns6rows. Add a sixth bottom row containing four subtle empty-sling recovery poses ending in same ready stance as firstframe. Preserve original20poses. Use portrait2:3canvas with full transparent cell gutters. Uniformly shrink character/sling silhouettes a little ifneeded so each has20px clear margin and cannot reach neighboring cell. No ambient glow or brown pixels outside sprite, no ground shadow, keep background alpha0. Do not recolor costumes or change right-hand sling assignment. Six complete rows, each4poses, all24 separate. No labels.",
+      "selected": false
+    }
+  ],
+  "selectedPlayback": "20 authored source poses plus4final recovery holds; clipRows metadata required for extraction"
+}

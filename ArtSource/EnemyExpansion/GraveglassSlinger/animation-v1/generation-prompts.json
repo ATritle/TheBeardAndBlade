@@ -1,0 +1,177 @@
+{
+  "tool": "built-in image_gen",
+  "jobs": [
+    {
+      "file": "walk-N.png",
+      "direction": "N",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing north, back directly toward camera. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-right next to right backpack strap; near viewer-left hand empty. Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-N-clean-v4.png",
+      "direction": "N",
+      "state": "attack",
+      "columns": 4,
+      "rows": 5,
+      "frames": 20,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing north, back directly toward camera. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-right next to right backpack strap; near viewer-left hand empty. Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout.",
+      "playbackFrames": 24
+    },
+    {
+      "file": "walk-NE.png",
+      "direction": "NE",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing northeast, back-right three-quarter view, faces upper-right. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-NE.png",
+      "direction": "NE",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing northeast, back-right three-quarter view, faces upper-right. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "walk-E.png",
+      "direction": "E",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing east, right-facing profile. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-E.png",
+      "direction": "E",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing east, right-facing profile. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "walk-SE.png",
+      "direction": "SE",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing southeast, front-right three-quarter view. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-SE-v2.png",
+      "direction": "SE",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing southeast, front-right three-quarter view. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "walk-S.png",
+      "direction": "S",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing south, directly front-facing. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-left; viewer-right empty hand. Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-S.png",
+      "direction": "S",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing south, directly front-facing. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-left; viewer-right empty hand. Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "walk-SW.png",
+      "direction": "SW",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing southwest, front-left three-quarter view. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-left; viewer-right empty hand. Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-SW.png",
+      "direction": "SW",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing southwest, front-left three-quarter view. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-left; viewer-right empty hand. Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "walk-W.png",
+      "direction": "W",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing west, left-facing profile. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-W.png",
+      "direction": "W",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing west, left-facing profile. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views.  Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "walk-NW.png",
+      "direction": "NW",
+      "state": "walk",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 16-frame walking loop, EXACTLY4columns4rows sprite sheet. EVERY pose facing northwest, back-left three-quarter view, faces upper-left; back visible, RIGHT hand on viewer-right farther side. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-right next to right backpack strap; near viewer-left hand empty. Continuous alternating left/right planted steps, foot lift and passing, subtle cloth/urn bounce, complete cycle seamless tofirst. Distinct16poses, no duplicates. No attack or thrown urn in walking. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output square atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "attack-NW.png",
+      "direction": "NW",
+      "state": "attack",
+      "columns": 4,
+      "rows": 6,
+      "frames": 24,
+      "prompt": "Use case: identity-preserve. Attached reference identifies GRAVEGLASS SLINGER ONLY. Create 24-frame ranged throwing attack, EXACTLY4columns6rows sprite sheet. EVERY pose facing northwest, back-left three-quarter view, faces upper-left; back visible, RIGHT hand on viewer-right farther side. Never rotate to another direction midcycle. Same undead grave robber, burgundy hood and cape, iron half mask teal eyes, skeletal thin body, sandals, two teal cracked urns on back leather harness, small belt urn. SAME pixel art and consistent proportions as reference. Sling stays ANATOMICAL RIGHT hand ALLposes; left hand empty when walking, only loads pouch in attack. Do not mirror for other views. Right weapon wrist viewer-right next to right backpack strap; near viewer-left hand empty. Frames1-4 load small urn into sling;5-10 right arm swings sling preparing throw;11-12 release (empty sling follows);13-20 right-arm followthrough;21-24 recover to initial stance. Projectiles are separate assets: do not include flying urn or effects in this character atlas. Attached backpack urns remain attached. Right arm completes entire attack, never handswap. Transparent RGBA background. Uniform grid with30percent empty margin inside EACH cell; all limbs and sling contained insidecell, no cell overlap. Character occupies at most65percent cell height,width. Same body size across allframes, crisp edges, no labels, guides, shadows, ground or text. Output portrait2:3 atlas. Count every cell. Reference anatomy and costume only, not reference turnaround layout."
+    },
+    {
+      "file": "projectile-v2.png",
+      "state": "projectile",
+      "direction": "FX",
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "prompt": "Use case: stylized-concept. Pixel-art animated effect matching teal cracked urns in attached Graveglass Slinger reference. One cracked teal-glowing soulglass urn tumbling in flight toward screen-right through a full rotation, subtle short teal spirit trail. Constant urn size, no character. EXACTLY12 chronological cells in4columns3rows. Every frame separate with generous transparent margins, effect expands within fixed cell not across neighbors. True RGBA transparent background, same detailed compact pixel-art as reference, no words or grid. Read left-to-right then top-to-bottom. Every cell includes visible particles including final fade sample; avoid totallyempty cells."
+    },
+    {
+      "file": "hero-impact.png",
+      "state": "hero-impact",
+      "direction": "FX",
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "prompt": "Use case: stylized-concept. Pixel-art animated effect matching teal cracked urns in attached Graveglass Slinger reference. Soulglass urn strikes adventurer: independent impact VFX ONLY, no hero shown. Frames intact urn contact, glass shatters outward, compact teal spirit flash, dissipating sparks then near-clear final frame. No ground residue. EXACTLY12 chronological cells in4columns3rows. Every frame separate with generous transparent margins, effect expands within fixed cell not across neighbors. True RGBA transparent background, same detailed compact pixel-art as reference, no words or grid. Read left-to-right then top-to-bottom. Every cell includes visible particles including final fade sample; avoid totallyempty cells."
+    },
+    {
+      "file": "ground-impact.png",
+      "state": "ground-impact",
+      "direction": "FX",
+      "columns": 4,
+      "rows": 4,
+      "frames": 16,
+      "prompt": "Use case: stylized-concept. Pixel-art animated effect matching teal cracked urns in attached Graveglass Slinger reference. Soulglass urn strikes ground/wall: independent impact VFX ONLY, no character or floor painted. Frames intact urn contact, outward glass fragments, teal soul puff, shards settling then fading. No damaging puddle or lingering hazard. EXACTLY16 chronological cells in4columns4rows. Every frame separate with generous transparent margins, effect expands within fixed cell not across neighbors. True RGBA transparent background, same detailed compact pixel-art as reference, no words or grid. Read left-to-right then top-to-bottom. Every cell includes visible particles including final fade sample; avoid totallyempty cells."
+    }
+  ]
+}

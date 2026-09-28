@@ -1,0 +1,10 @@
+{
+  "tool": "built-in image_gen",
+  "edits": [
+    {
+      "input": "attack-N.png",
+      "output": "attack-N-v2.png",
+      "prompt": "Edit ONLY first row of attached Graveglass Slinger attack-N atlas. All24 cells must show anatomical RIGHT hand on VIEWER-RIGHT holding leather sling. First row currently switches sling to viewer-left WRONG. Correct first4 cells to match RIGHT-HAND grip seen in rows2-6. Left/viewer-left hand may load urn into right-hand sling but never hold sling itself. Keep exact back-facing direction, hood, two backpack urns, all24poses grid4x6, same transparency and pixelart. Preserve remaining20frames unchanged. Improve margins ifneeded without truncating sling. No extra weapon."
+    }
+  ]
+}
