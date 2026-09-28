@@ -41,7 +41,7 @@ void ADungeonGameMode::ResolveProjectile(const FDungeonShot& S,FVector2D At)
     {
         FDungeonSplash FX;FX.Position=At;FX.Art=S.Art==40?48:S.Art==42?50:S.Art==43||S.Art==46?51:49;
         FX.Radius=FMath::Max(30.f,S.BlastRadius);Splashes.Add(FX);
-        PlaySound(S.Style==14?TEXT("Explosion"):TEXT("Magic"),.45f);
+        PlaySound(S.Style==14?(S.Art==43?TEXT("Grenade"):TEXT("Explosion")):TEXT("Magic"),.45f);
         if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
         {
             auto D=DungeonView::Project(H->GetActorLocation())-FVector2D(0,S.HitHeight)-At;D.Y/=.65f;

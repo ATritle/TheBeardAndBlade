@@ -50,6 +50,21 @@ void ADungeonHUD::Orb(FVector2D C,float Fraction,FLinearColor Color)
 void ADungeonHUD::DrawVitals(ADungeonHero* H)
 {
     const FLinearColor Gold(.94f,.69f,.3f),Pale(.85f,.9f,.86f);
+    if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));G&&G->IsAtlasFloor()){
+        // Split the HUD into corners, keeping the southern passage unobstructed.
+        Sprite(TEXT("InventoryFrame"),20,704,290,82);
+        Orb(FVector2D(68,744),H->Health/H->MaxHealth,FLinearColor(.95f,.045f,.065f));
+        Orb(FVector2D(256,744),H->Stamina/H->MaxStamina,FLinearColor(.045f,.38f,1));
+        CardText(FString::Printf(TEXT("%.0f / %.0f"),H->Health,H->MaxHealth),111,726,Pale,16,102,22,true);
+        CardText(FString::Printf(TEXT("%.0f / %.0f"),H->Stamina,H->MaxStamina),111,752,Gold,16,102,22,true);
+        Sprite(TEXT("InventoryFrame"),965,704,290,82);
+        KeySprite(TEXT("TeaFX_0"),987,711,52,48,H->GetPowerCooldown()<=0?FLinearColor::White:FLinearColor(.4f,.4f,.4f));
+        Sprite(TEXT("HUDEagle"),1080,713,60,45,G->FreedomKills>=15?FLinearColor::White:FLinearColor(.5f,.5f,.5f));
+        Sprite(TEXT("AtlasMapIcon"),1176,710,48,48);
+        CardText(TEXT("RMB"),983,759,Gold,14,60,18,true);CardText(TEXT("MMB"),1080,759,Gold,14,60,18,true);CardText(TEXT("M  MAP"),1170,759,Gold,14,60,18,true);
+        Box(991,777,45*(1-H->GetPowerCooldown()/10.f),2,Gold);for(int I=0;I<15;++I)Box(1080+I*4,777,3,2,I<G->FreedomKills?Gold:FLinearColor(.12f,.16f,.16f));
+        return;
+    }
     // Nine-slice the panel so intricate corners remain proportionate on a wide HUD.
     if(auto* Panel=Texture(TEXT("HUD_Panel")))
     {

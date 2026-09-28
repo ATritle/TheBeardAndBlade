@@ -1,0 +1,436 @@
+{
+  "FoleyStep0": {
+    "source": "AudioSource/Foley/Footsteps/Fantozzi-footsteps/flac/Fantozzi-StoneL1.flac",
+    "seconds": 0.37117913832199545,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyStep1": {
+    "source": "AudioSource/Foley/Footsteps/Fantozzi-footsteps/flac/Fantozzi-StoneL2.flac",
+    "seconds": 0.33163265306122447,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyStep2": {
+    "source": "AudioSource/Foley/Footsteps/Fantozzi-footsteps/flac/Fantozzi-StoneL3.flac",
+    "seconds": 0.3309297052154195,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyStep3": {
+    "source": "AudioSource/Foley/Footsteps/Fantozzi-footsteps/flac/Fantozzi-StoneR1.flac",
+    "seconds": 0.3566666666666667,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyStep4": {
+    "source": "AudioSource/Foley/Footsteps/Fantozzi-footsteps/flac/Fantozzi-StoneR2.flac",
+    "seconds": 0.3226077097505669,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyStep5": {
+    "source": "AudioSource/Foley/Footsteps/Fantozzi-footsteps/flac/Fantozzi-StoneR3.flac",
+    "seconds": 0.34206349206349207,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleySword0": {
+    "source": "AudioSource/Foley/Swishes/swishes/swish-5.wav",
+    "seconds": 0.11596371882086168,
+    "sample_rate": 44100,
+    "peak": 0.75,
+    "loop": false
+  },
+  "FoleySword1": {
+    "source": "AudioSource/Foley/Swishes/swishes/swish-7.wav",
+    "seconds": 0.15287981859410432,
+    "sample_rate": 44100,
+    "peak": 0.75,
+    "loop": false
+  },
+  "FoleySword2": {
+    "source": "AudioSource/Foley/Swishes/swishes/swish-8.wav",
+    "seconds": 0.15365079365079365,
+    "sample_rate": 44100,
+    "peak": 0.75,
+    "loop": false
+  },
+  "FoleySword3": {
+    "source": "AudioSource/Foley/Swishes/swishes/swish-9.wav",
+    "seconds": 0.16308390022675737,
+    "sample_rate": 44100,
+    "peak": 0.75,
+    "loop": false
+  },
+  "FoleyEquip0": {
+    "source": "AudioSource/Foley/Weapons/sfx/seax-unsheathe-01.wav",
+    "seconds": 0.48426303854875286,
+    "sample_rate": 44100,
+    "peak": 0.6,
+    "loop": false
+  },
+  "FoleyEquip1": {
+    "source": "AudioSource/Foley/Weapons/sfx/seax-unsheathe-03.wav",
+    "seconds": 0.2869160997732426,
+    "sample_rate": 44100,
+    "peak": 0.6,
+    "loop": false
+  },
+  "FoleyStep6": {
+    "source": "AudioSource/Foley/Expansion/Steps/stone01.ogg",
+    "seconds": 0.29346938775510206,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyDoor0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/world/door.wav",
+    "seconds": 0.7424943310657597,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyInventoryOpen0": {
+    "source": "AudioSource/Foley/Expansion/Inventory/inventory_sound_effects/leather_inventory.wav",
+    "seconds": 0.9939455782312925,
+    "sample_rate": 44100,
+    "peak": 0.4,
+    "loop": false
+  },
+  "FoleyInventoryClose0": {
+    "source": "AudioSource/Foley/Expansion/Inventory/inventory_sound_effects/cloth-inventory.wav",
+    "seconds": 0.47276643990929706,
+    "sample_rate": 44100,
+    "peak": 0.35,
+    "loop": false
+  },
+  "FoleyPaper0": {
+    "source": "AudioSource/Foley/Expansion/Inventory/inventory_sound_effects/turn_page.wav",
+    "seconds": 0.6352834467120182,
+    "sample_rate": 44100,
+    "peak": 0.4,
+    "loop": false
+  },
+  "FoleyUI0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/inventory/wood-small.wav",
+    "seconds": 0.22963718820861678,
+    "sample_rate": 44100,
+    "peak": 0.32,
+    "loop": false
+  },
+  "FoleyRoll0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/inventory/cloth-heavy.wav",
+    "seconds": 0.3073922902494331,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyChest0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/world/door.wav",
+    "seconds": 0.7424943310657597,
+    "sample_rate": 44100,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyMagic0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/battle/magic1.wav",
+    "seconds": 0.6404761904761904,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyPortal0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/battle/magic1.wav",
+    "seconds": 0.6404761904761904,
+    "sample_rate": 44100,
+    "peak": 0.45000000000000007,
+    "loop": false
+  },
+  "FoleyExplosion0": {
+    "source": "AudioSource/Foley/Expansion/Explosion.ogg",
+    "seconds": 2.2,
+    "sample_rate": 44100,
+    "peak": 0.75,
+    "loop": false
+  },
+  "FoleyTeaSplash0": {
+    "source": "AudioSource/Foley/Expansion/Explosion.ogg",
+    "seconds": 1.25,
+    "sample_rate": 44100,
+    "peak": 0.6,
+    "loop": false
+  },
+  "FoleyFlashBang0": {
+    "source": "AudioSource/Foley/Expansion/Explosion.ogg",
+    "seconds": 0.65,
+    "sample_rate": 44100,
+    "peak": 0.7,
+    "loop": false
+  },
+  "FoleyHit0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/NPC/beetle/bite-small.wav",
+    "seconds": 0.371125,
+    "sample_rate": 48000,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleySpawn0": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/grunt1.wav",
+    "seconds": 0.9645804988662131,
+    "sample_rate": 44100,
+    "peak": 0.4,
+    "loop": false
+  },
+  "FoleySpawn1": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/grunt2.wav",
+    "seconds": 0.8890476190476191,
+    "sample_rate": 44100,
+    "peak": 0.4,
+    "loop": false
+  },
+  "FoleyEnemyDeath0": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/deathb.wav",
+    "seconds": 1.209909297052154,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyEnemyDeath1": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/deathd.wav",
+    "seconds": 0.6821315192743764,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyEnemyDeath2": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/deathe.wav",
+    "seconds": 0.8309070294784581,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyEnemyDeath3": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/deathr.wav",
+    "seconds": 1.3938775510204082,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyEnemyDeath4": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/deaths.wav",
+    "seconds": 0.633968253968254,
+    "sample_rate": 44100,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyEnemyPain0": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/painb.wav",
+    "seconds": 0.7949433106575964,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyEnemyPain1": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/paind.wav",
+    "seconds": 0.31056689342403626,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyEnemyPain2": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/paine.wav",
+    "seconds": 0.4918140589569161,
+    "sample_rate": 44100,
+    "peak": 0.44999999999999996,
+    "loop": false
+  },
+  "FoleyEnemyPain3": {
+    "source": "AudioSource/Foley/Expansion/Monsters/monster/pains.wav",
+    "seconds": 0.5520181405895691,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyPropBreak0": {
+    "source": "AudioSource/Foley/Expansion/Break/impcrunch/impactcrunch01.mp3.flac",
+    "seconds": 0.5817233560090703,
+    "sample_rate": 44100,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyPropBreak1": {
+    "source": "AudioSource/Foley/Expansion/Break/impcrunch/impactcrunch02.mp3.flac",
+    "seconds": 0.831859410430839,
+    "sample_rate": 44100,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyPropBreak2": {
+    "source": "AudioSource/Foley/Expansion/Break/impcrunch/impactcrunch03.mp3.flac",
+    "seconds": 0.6824943310657596,
+    "sample_rate": 44100,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyPropBreak3": {
+    "source": "AudioSource/Foley/Expansion/Break/impcrunch/impactcrunch04.mp3.flac",
+    "seconds": 0.6658730158730158,
+    "sample_rate": 44100,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyPropBreak4": {
+    "source": "AudioSource/Foley/Expansion/Break/impcrunch/impactcrunch05.mp3.flac",
+    "seconds": 1.1189569160997732,
+    "sample_rate": 44100,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyThrow0": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/battle/swing.wav",
+    "seconds": 0.14746031746031746,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyThrow1": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/battle/swing2.wav",
+    "seconds": 0.11213151927437642,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyThrow2": {
+    "source": "AudioSource/Foley/Expansion/RPG/RPG Sound Pack/battle/swing3.wav",
+    "seconds": 0.11870748299319728,
+    "sample_rate": 44100,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyHumanPain0": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_Good_00.wav",
+    "seconds": 0.6933333333333334,
+    "sample_rate": 48000,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyHumanDeath0": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_DyingBreath_00.wav",
+    "seconds": 2.026666666666667,
+    "sample_rate": 48000,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyHumanPain1": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_Good_01.wav",
+    "seconds": 0.6826666666666666,
+    "sample_rate": 48000,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyHumanDeath1": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_DyingBreath_01.wav",
+    "seconds": 2.8,
+    "sample_rate": 48000,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyHumanPain2": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_Good_02.wav",
+    "seconds": 1.1306666666666667,
+    "sample_rate": 48000,
+    "peak": 0.45,
+    "loop": false
+  },
+  "FoleyHumanDeath2": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_DyingBreath_02.wav",
+    "seconds": 2.8,
+    "sample_rate": 48000,
+    "peak": 0.55,
+    "loop": false
+  },
+  "FoleyHumanSpawn0": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_Evil_01.wav",
+    "seconds": 0.9706666666666667,
+    "sample_rate": 48000,
+    "peak": 0.35,
+    "loop": false
+  },
+  "FoleyDronePain0": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Robot/Robot2_00.wav",
+    "seconds": 1.7085833333333333,
+    "sample_rate": 48000,
+    "peak": 0.4,
+    "loop": false
+  },
+  "FoleyDroneDeath0": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Robot/Robot2_02.wav",
+    "seconds": 1.250625,
+    "sample_rate": 48000,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyHumanSpawn1": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Human/Human_Evil_02.wav",
+    "seconds": 1.0260416666666667,
+    "sample_rate": 48000,
+    "peak": 0.35,
+    "loop": false
+  },
+  "FoleyDronePain1": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Robot/Robot2_01.wav",
+    "seconds": 1.3638541666666666,
+    "sample_rate": 48000,
+    "peak": 0.4,
+    "loop": false
+  },
+  "FoleyDroneDeath1": {
+    "source": "AudioSource/Foley/Expansion/Voices/Wav/Robot/Robot2_03.wav",
+    "seconds": 1.0160625,
+    "sample_rate": 48000,
+    "peak": 0.5,
+    "loop": false
+  },
+  "FoleyDroneFlight0": {
+    "source": "AudioSource/Foley/Expansion/Motor.flac",
+    "seconds": 1.8219727891156463,
+    "sample_rate": 44100,
+    "peak": 0.35,
+    "loop": false
+  },
+  "FoleyGrenade0": {
+    "source": "AudioSource/Foley/Expansion/Explosion.ogg",
+    "seconds": 2.7999773242630384,
+    "sample_rate": 44100,
+    "peak": 0.7,
+    "loop": false
+  },
+  "FoleyRifle0": {
+    "source": "AudioSource/Foley/Expansion/Firearms/Prepared SFX Library/AR-15/D_32P.wav",
+    "seconds": 1.1,
+    "sample_rate": 96000,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyRifle1": {
+    "source": "AudioSource/Foley/Expansion/Firearms/Prepared SFX Library/AR-15/D_24P.wav",
+    "seconds": 1.1,
+    "sample_rate": 96000,
+    "peak": 0.65,
+    "loop": false
+  },
+  "FoleyRifle2": {
+    "source": "AudioSource/Foley/Expansion/Firearms/Prepared SFX Library/AK-47/C_28P.wav",
+    "seconds": 1.1,
+    "sample_rate": 96000,
+    "peak": 0.65,
+    "loop": false
+  }
+}

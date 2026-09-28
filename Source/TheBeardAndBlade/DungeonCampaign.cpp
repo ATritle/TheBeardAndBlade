@@ -5,6 +5,8 @@
 #include "Engine/World.h"
 #include "Engine/Texture2D.h"
 #include "HAL/PlatformMisc.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 void ADungeonGameMode::StartGame()
 {
@@ -25,7 +27,9 @@ void ADungeonHero::TestStormEnemies() { if(auto* G=Cast<ADungeonGameMode>(UGamep
 void ADungeonGameMode::StartPlaytestRoom(int32 Number)
 {
 #if WITH_EDITOR
-    StartGame();Room=FMath::Clamp(Number,1,DungeonProgression::CampaignRooms);SpawnWave();
+    StartGame();Number=FMath::Clamp(Number,1,DungeonProgression::CampaignRooms);
+    if(FParse::Param(FCommandLine::Get(),TEXT("LegacyProgression"))){DisableAtlas();Room=Number;SpawnWave();}
+    else {InitializeAtlasFloor(FMath::Rand(),DungeonProgression::Chapter(Number));EnterAtlasRoom(Number%DungeonProgression::RoomsPerChapter==0?5:1,-1);}
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
     {
         H->Equip(RollItem(0,3,Room));H->Equip(RollItem(24,3,Room));H->Health=H->MaxHealth;
@@ -35,8 +39,9 @@ void ADungeonGameMode::StartPlaytestRoom(int32 Number)
 }
 void ADungeonGameMode::ToggleMenu()
 {
+    if(bAtlasMap){bAtlasMap=false;return;}
     if(HasEnding()) return;
-    if(IsTransitioning()||IsTraderOpen()) return;
+    if(IsTransitioning()||IsAtlasTravel()||IsTraderOpen()) return;
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) if(H->IsInventoryOpen()) H->ToggleInventory();
     if(bMenu&&!bHasRun) { StartGame(); return; }
     bMenu=!bMenu; bShowControls=false;
@@ -47,7 +52,7 @@ void ADungeonGameMode::StartTransition(int32 Door)
     if(HasEnding()) return;
     if(!AreDoorsOpen()||TransitionTime>0||!Enemies.IsEmpty()||PendingSpawns>0) return;
     TransitionDoor=FMath::Clamp(Door,0,2); TransitionTime=DungeonDescent::Duration; Shots.Empty(); Splashes.Empty();
-    PlaySound(TEXT("Portal"));
+    PlaySound(TEXT("Door"),.65f);
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) TransitionFrom=DungeonView::Project(H->GetActorLocation());
 }
 void ADungeonEnemy::Tick(float Dt)
@@ -65,6 +70,11 @@ void ADungeonEnemy::Tick(float Dt)
     if(Species==28||Species==29) { TickNewBoss(Dt,H,G); return; }
     const float MoveScale=SlowTime>0?.65f:1.f;
     if(SpawnTime>0) { SpawnTime=FMath::Max(0.f,SpawnTime-Dt); return; }
+    // Short mechanical flight cues, never an unmanaged looping component.
+    if(Species==40) {
+        FlightSoundCooldown-=Dt;
+        if(FlightSoundCooldown<=0) { G->PlaySound(TEXT("DroneFlight"),.16f);FlightSoundCooldown=2.4f; }
+    }
     const FVector2D P=DungeonView::Project(GetActorLocation()),Target=DungeonView::Project(H->GetActorLocation());
     if(ChargeTime>0)
     {
@@ -254,11 +264,11 @@ void ADungeonGameMode::VerifyCampaign()
             Check(Mapped>Previous,TEXT("Breathing strips never fold or overlap"));Previous=Mapped;}
     }
     Check(HeroBreathing::Map(FVector2D(64,40),PI,1,0).Y<38,TEXT("Visible shoulder/head lift on inhale"));H->Restart();
-    for(int Id=0;Id<60;++Id) for(int R=0;R<5;++R)
+    for(int Id=0;Id<DungeonLootCatalog::Count;++Id) for(int R=0;R<5;++R)
     {
         const auto Item=RollItem(Id,R,4);
         Check(Item.CatalogId==Id&&Item.Rarity==R&&Item.ItemLevel==4&&!Item.Name.IsEmpty(),TEXT("Catalog identity and rolled level retained"));
-        Check(Item.Slot==(Id<24?0:Id<36?1:Id<48?2:3),TEXT("Catalog slot and footprint"));
+        Check(Item.Slot==(Id<24?0:Id<36?1:Id<48?2:Id<60?3:4+(Id-60)/3),TEXT("Catalog slot and footprint"));
         Check(Item.CoinValue>0,TEXT("Every rolled item has value"));
         Check(Id>=48||R!=4||Item.Effect>0,TEXT("Legendary equipment has signature effect"));
         Check(R!=0||Item.Effect==0,TEXT("Common has no proc effect"));
@@ -267,6 +277,29 @@ void ADungeonGameMode::VerifyCampaign()
     }
     H->Restart();
     {
+        for(int S=4;S<8;++S) {
+            const auto Item=RollItem(60+(S-4)*3,0,4);
+            H->Health=50;H->Stamina=30;H->Equip(Item);
+            Check(S!=4||H->MaxStamina>100,TEXT("Head increases stamina capacity"));
+            Check(S!=5||H->AttackSpeed>1,TEXT("Hands increase attack speed"));
+            Check(S!=6||H->Armor>8,TEXT("Legs increase armor"));
+            Check(S!=7||H->MovementSpeed>1,TEXT("Feet increase movement"));
+            Check(H->Health==50&&H->Stamina==30,TEXT("Expanded gear does not refill resources"));
+            FDungeonItem Empty;Empty.Slot=S;H->Equip(Empty);
+            Check(H->MaxStamina==100&&H->AttackSpeed==1&&H->Armor==8&&H->MovementSpeed==1,TEXT("Removing new gear restores base stats"));
+        }
+        for(int N=0;N<100;++N) {
+            const auto Stock=CreateTraderStock(10);TSet<int> IDs;
+            Check(Stock.Num()>=3&&Stock.Num()<=5&&Stock[0].Rarity>=3,TEXT("Trader has 3-5 items and a featured Epic"));
+            for(const auto& Item:Stock) {
+                Check(Item.Rarity>=2&&Item.ItemLevel==12&&Item.CoinValue>0&&!IDs.Contains(Item.CatalogId),TEXT("Premium stock is Rare+ unique and two levels higher"));
+                Check(TraderPrice(Item)>Item.CoinValue,TEXT("Trader sells above discard value"));IDs.Add(Item.CatalogId);
+            }
+        }
+        H->Equip(RollItem(69,4,4));const float Move=H->MovementSpeed;
+        const auto StartPos=DungeonView::Project(H->GetActorLocation());H->MoveRight(1);H->Tick(.1f);
+        Check(FMath::IsNearlyEqual(float(DungeonView::Project(H->GetActorLocation()).X-StartPos.X),19.f*Move,.01f),TEXT("Boot movement affects actual walking"));
+        H->Restart();Check(H->MovementSpeed==1&&H->Equipment[7].IsEmpty(),TEXT("Restart clears new gear"));
         H->Health=50;H->Stamina=30;
         auto Ring=RollItem(53,4,4);H->Equip(Ring);
         Check(H->MaxHealth>150&&H->Health==50,TEXT("Health ring raises cap without healing"));
@@ -315,7 +348,7 @@ void ADungeonGameMode::VerifyCampaign()
         Enemies=SavedEnemies; H->Restart(); Impacts.Empty(); Blood.Empty();
         Target->Destroy();
     }
-    bool SeenLoot[60]={false};
+    bool SeenLoot[DungeonLootCatalog::Count]={false};
     for(int I=0;I<5000;++I) { const auto Item=RollChestLoot(false); SeenLoot[Item.CatalogId]=true; }
     for(bool Seen:SeenLoot) Check(Seen,TEXT("Mystery pool includes all equipment and rings"));
     for(int I=0;I<30;++I) Check(RollChestLoot(true).Rarity==4,TEXT("Boss mystery loot remains legendary"));

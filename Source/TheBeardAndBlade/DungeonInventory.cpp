@@ -34,7 +34,7 @@ void ADungeonHUD::UpdateInventoryDrag(ADungeonHero* H)
     {
         const int Index=DragItem;
         bool Dropped=false;
-        if(!FromGear)for(int Slot=0;Slot<4;++Slot)
+        if(!FromGear)for(int Slot=0;Slot<DungeonLootCatalog::EquipmentSlots;++Slot)
             if(GearAt(DragMouse)==Slot)
                 if(H->Inventory[Index].Item.Slot==Slot) Dropped=H->EquipFromInventory(Index);
         if(!Dropped&&In(DragMouse,BagX,BagY,360,360))
@@ -62,11 +62,13 @@ void ADungeonHUD::DrawInventoryDrag(ADungeonHero* H)
         if(Cell.X>=0&&Cell.Y>=0&&Cell.X+Size.X<=6&&Cell.Y+Size.Y<=6)
             Box(BagX+Cell.X*60,BagY+Cell.Y*60,Size.X*60-2,Size.Y*60-2,Valid?FLinearColor(0,.4f,.1f,.45f):FLinearColor(.7f,0,0,.45f));
     }
-    if(!FromGear)for(int Slot=0;Slot<4;++Slot) if(GearAt(DragMouse)==Slot)
+    if(!FromGear)for(int Slot=0;Slot<DungeonLootCatalog::EquipmentSlots;++Slot) if(GearAt(DragMouse)==Slot)
     {
         Valid=Item.Slot==Slot;Box(Gear(Slot).X,Gear(Slot).Y,80,80,Valid?FLinearColor(0,.4f,.1f,.45f):FLinearColor(.7f,0,0,.45f));
     }
-    Sprite(Item.BagArt(),P.X+3,P.Y+3,Size.X*60-8,Size.Y*60-8,FLinearColor(1,1,1,.8f));
+    const float W=Size.X*60-8,Ht=Size.Y*60-8,Icon=FMath::Min(W,Ht);
+    if(Item.Slot==0)Sprite(Item.BagArt(),P.X+3,P.Y+3,W,Ht,FLinearColor(1,1,1,.8f));
+    else Sprite(Item.BagArt(),P.X+3+(W-Icon)/2,P.Y+3+(Ht-Icon)/2,Icon,Icon,FLinearColor(1,1,1,.8f));
 }
 int32 ADungeonHUD::VerifyInventoryGestures(ADungeonHero* H)
 {
@@ -104,6 +106,16 @@ int32 ADungeonHUD::VerifyInventoryGestures(ADungeonHero* H)
     H->Inventory.Empty();H->Equip(ADungeonGameMode::RollItem(26,4));
     Drag(350,450,786,498);Check(!H->Equipment[1].IsEmpty()&&H->Inventory.IsEmpty());
     Drag(350,450,666,378);Check(H->Equipment[1].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3));
+    for(int S=4;S<DungeonLootCatalog::EquipmentSlots;++S) {
+        H->Inventory.Empty();FDungeonItem Empty;Empty.Slot=S;H->Equip(Empty);
+        const int ID=60+(S-4)*3;H->AddToInventory(ADungeonGameMode::RollItem(ID,3,4));
+        const auto P=DungeonInventoryLayout::Gear(S)+FVector2D(30,30);
+        Drag(476,198,P.X,P.Y);Check(H->Equipment[S].CatalogId==ID&&H->Inventory.IsEmpty());
+        CancelInventoryGesture();Mouse(P.X,P.Y);InventoryClick();InventoryClick();
+        Check(H->Equipment[S].IsEmpty()&&H->Inventory.Num()==1);
+        CancelInventoryGesture();Mouse(476,198);InventoryClick();InventoryClick();Check(H->Equipment[S].CatalogId==ID);
+        Drag(P.X,P.Y,666,388);Check(H->Equipment[S].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3));
+    }
     H->Inventory=Bag;H->Equipment=Gear;H->RebuildStats();H->Health=HP;H->Stamina=SP;H->SelectedItem=INDEX_NONE;H->InventoryMessage.Empty();CancelInventoryGesture();
     return Errors;
 }

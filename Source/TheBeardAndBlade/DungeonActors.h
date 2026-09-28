@@ -7,6 +7,7 @@
 #include "DungeonDescent.h"
 #include "DungeonActors.generated.h"
 
+namespace DungeonLootCatalog { constexpr int32 Count=72,EquipmentSlots=8; }
 class UCameraComponent;
 class UTexture2D;
 class UFont;
@@ -31,7 +32,7 @@ struct FDungeonItem
     int32 Slot=0, Icon=0, Rarity=0;
     float Attack=0, Defense=0, Vitality=0;
     int32 CatalogId=-1, ItemLevel=1, Effect=0;
-    float CritChance=0,CritDamage=0,Speed=0,Regen=0;
+    float CritChance=0,CritDamage=0,Speed=0,Regen=0,Movement=0;
     int32 CoinValue=0;
     float BleedChance=0,PoisonChance=0,StaminaBonus=0,Leech=0,Reduction=0,HealthBonus=0;
     FString Art() const { return CatalogId<0?FString::Printf(TEXT("Item_%d_%d"),Icon/3,Icon%3):FString::Printf(TEXT("Loot_%d"),CatalogId); }
@@ -39,11 +40,12 @@ struct FDungeonItem
     FString EffectText() const;
     float EquippedScale() const;
     FString Stats() const;
-    FIntPoint Size() const { return Slot==0?FIntPoint(1,2):Slot==1?FIntPoint(2,2):FIntPoint(1,1); }
+    FIntPoint Size() const { return Slot==0||Slot==6?FIntPoint(1,2):Slot==1?FIntPoint(2,2):FIntPoint(1,1); }
     bool IsEmpty() const { return Name.IsEmpty(); }
 };
 struct FDungeonBagEntry { FDungeonItem Item; FIntPoint Cell; };
 struct FDungeonPotion { FVector2D Position; float Age=0; };
+struct FDungeonCoinDrop { FVector2D Position; int32 Amount=0; float Age=0; };
 struct FDungeonBreakable
 {
     FVector2D Position;
@@ -62,6 +64,23 @@ struct FRewardPresentation
     FVector2D Landing=FVector2D::ZeroVector;
 };
 struct FDungeonBlood { FVector2D Position; float Age=0,Size=80; int32 Variant=0; bool bRemains=false; };
+enum class EAtlasRoom : uint8 { Entrance, Combat, Trader, Reward, Boss };
+// Run-local snapshots; rooms can only be left after combat, so enemies need no respawn snapshot.
+struct FAtlasRoom
+{
+    FIntPoint Cell;
+    EAtlasRoom Type=EAtlasRoom::Combat;
+    int32 Links[4]={-1,-1,-1,-1}; // north, east, south, west
+    int32 Depth=0;
+    bool Visited=false,Cleared=false,Chest=false,LootRolled=false,LootClaimed=false,StockMade=false;
+    FRewardPresentation Reward;
+    FDungeonItem Loot,ChestLoot[3];
+    bool ChestRolled[3]={false,false,false};
+    TArray<FDungeonBreakable> Props;
+    TArray<FDungeonPotion> Potions;
+    TArray<FDungeonCoinDrop> Coins;
+    TArray<FDungeonItem> Stock;
+};
 struct FDungeonImpact
 {
     FVector2D Position;
@@ -115,6 +134,7 @@ public:
     void UpdateStamina(float Dt,bool Sprinting);
     void SpendStamina(float Amount);
     void Menu();
+    void ToggleAtlas();
     void ToggleMusic();
     void ToggleEffects();
     void Confirm();
@@ -143,7 +163,7 @@ public:
     void Equip(const FDungeonItem& Item);
     void RebuildStats();
     bool HasEffect(int32 Effect) const;
-    float CritChance=.05f,CritMultiplier=1.5f,AttackSpeed=1,StaminaRegen=1;
+    float CritChance=.05f,CritMultiplier=1.5f,AttackSpeed=1,StaminaRegen=1,MovementSpeed=1;
     float BleedChance=0,PoisonChance=0,Leech=0,DamageReduction=0;
     int32 StrikeCount=0;
 #if !UE_BUILD_SHIPPING
@@ -163,7 +183,7 @@ public:
     TArray<FDungeonBagEntry> Inventory;
     int32 SelectedItem=INDEX_NONE;
     int64 Coins=0;
-    bool DiscardForCoins(int32 Index);
+    bool DiscardItem(int32 Index);
     FString InventoryMessage;
     bool IsAttacking() const { return AttackTime>0; }
     bool IsWalking() const { return bWalking; }
@@ -225,6 +245,7 @@ public:
     FVector2D ChargeAim=FVector2D::ZeroVector;
     float Health=50,MaxHealth=50,HurtTime=0,SpawnTime=.6f,Windup=0,Recovery=0,FreedomImmuneTime=0;
     float WalkDistance=0;
+    float FlightSoundCooldown=0;
     int32 Facing=2;
     int32 AnimationFrame() const;
     bool bBoss=false,bWalking=false;
@@ -250,6 +271,8 @@ public:
     void PlayerAttack(ADungeonHero* Hero);
     void PlaySound(const FString& Name,float Volume=1.f,float Pitch=1.f);
     void UpdateAudio();
+    void RefreshMusicVolume();
+    void StopMusic();
     void RunPackagedSmokeTest();
     void ToggleMusic();
     void ToggleEffects();
@@ -292,11 +315,39 @@ public:
     bool IsMenu() const { return bMenu; }
     bool HasRun() const { return bHasRun; }
     bool IsTransitioning() const { return TransitionTime>0; }
-    bool IsGameplayBlocked() const { return bTraderOpen||HasEnding()||bMenu||IsTransitioning()||IsBossIntroActive()||IsBossDialogueActive()||BossGrace>0; }
+    bool IsGameplayBlocked() const { return bAtlasMap||AtlasTravelTime>0||AtlasArrivalTime>0||bTraderOpen||HasEnding()||bMenu||IsTransitioning()||IsBossIntroActive()||IsBossDialogueActive()||BossGrace>0; }
+    bool IsAtlasFloor() const { return bAtlasActive; }
+    bool IsAtlasMapOpen() const { return bAtlasMap; }
+    bool IsAtlasTravel() const { return AtlasTravelTime>0||AtlasArrivalTime>0; }
+    const TArray<FAtlasRoom>& GetAtlasRooms() const { return AtlasRooms; }
+    int32 GetAtlasRoom() const { return AtlasCurrent; }
+    void InitializeAtlasFloor(int32 Seed,int32 Chapter=0);
+    int32 GetAtlasChapter() const { return AtlasChapter; }
+    void SaveAtlasRoom();
+    void EnterAtlasRoom(int32 Index,int32 EntryDoor);
+    void ToggleAtlasMap();
+    bool AtlasInteract(ADungeonHero* Hero);
+    void StartAtlasTravel(int32 Direction);
+    void TickAtlasTravel(float Dt);
+    void DisableAtlas();
+    void VerifyAtlas();
+    void RunAtlasReview();
+    float AtlasHeroOpacity() const;
+    float AtlasBlackout() const;
+    bool AtlasHasDoor(int32 D) const;
+    bool AtlasIsDescentDoor(int32 D) const;
+    static FVector2D AtlasDoor(int32 D);
+    static FVector2D AtlasDirection(int32 D);
     bool IsTraderOpen() const { return bTraderOpen; }
     void OpenTrader();
     void ContinueFromTrader();
     bool BuyTraderItem(ADungeonHero* Hero,int32 Index);
+    bool SellTraderItem(ADungeonHero* Hero,int32 Index);
+    static int64 TraderSellPrice(const FDungeonItem& Item) { return FMath::Max<int64>(1,Item.CoinValue/2); }
+    bool DropInventoryItem(ADungeonHero* Hero,const FDungeonItem& Item);
+    void UpdateCoinDrops(float Dt);
+    void VerifyEconomy();
+    const TArray<FDungeonCoinDrop>& GetCoinDrops() const { return CoinDrops; }
     static int64 TraderPrice(const FDungeonItem& Item) { return (FMath::Max<int64>(1,Item.CoinValue)*6+4)/5; }
     const TArray<FDungeonItem>& GetTraderStock() const { return TraderStock; }
     FString TraderMessage;
@@ -343,18 +394,25 @@ public:
     int32 GetWave() const { return Wave; }
     const TArray<TObjectPtr<ADungeonEnemy>>& GetEnemies() const { return Enemies; }
     bool HasChest() const { return bChest; }
-    bool AreDoorsOpen() const { return bLootRolled||bLootClaimed; }
+    bool AreDoorsOpen() const { return bAtlasActive?AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Cleared:bLootRolled||bLootClaimed; }
     bool IsLootRevealed() const { return LootTimer>0; }
     bool IsDead() const;
-    bool IsBossRoom() const { return Room%DungeonProgression::RoomsPerChapter==0; }
+    bool IsBossRoom() const { return bAtlasActive?AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Boss:Room%DungeonProgression::RoomsPerChapter==0; }
     const FDungeonItem& GetLoot() const { return Loot; }
     const TArray<FDungeonImpact>& GetImpacts() const { return Impacts; }
     static FDungeonItem MakeItem(int32 Icon,int32 Rarity);
     static FDungeonItem RollChestLoot(bool Boss,int32 Level=1);
     static FDungeonItem RollItem(int32 Definition,int32 Rarity,int32 Level=1);
+    static TArray<FDungeonItem> CreateTraderStock(int32 Level);
     static FVector2D DoorPosition(int32 I) { return FVector2D(340+I*300,170); }
     static FVector2D ChestPosition(int32 I) { return FVector2D(390+I*250,440); }
 private:
+    bool bAtlasActive=false,bAtlasMap=false;
+    TArray<FAtlasRoom> AtlasRooms;
+    int32 AtlasCurrent=0,AtlasTravelDoor=0,AtlasChapter=0;
+    float AtlasTravelTime=0,AtlasArrivalTime=0;
+    bool bAtlasDescending=false;
+    FVector2D AtlasTravelFrom,AtlasArrivalFrom,AtlasArrivalTo;
     bool bFreedomResolved=false;
     float BossIntroTime=-1;
     UPROPERTY() TObjectPtr<UAudioComponent> IntroAudio;
@@ -370,6 +428,7 @@ private:
     UPROPERTY() TMap<FString,TObjectPtr<USoundBase>> Sounds;
     UPROPERTY() TObjectPtr<UAudioComponent> MusicComponent;
     TMap<FString,double> LastSoundTime;
+    TMap<FString,int32> LastFoleyVariant;
     FString MusicName;
     bool bMusicMuted=false,bEffectsMuted=false;
     float MasterVolume=1.f;
@@ -395,6 +454,7 @@ private:
     TArray<FDungeonSplash> Splashes;
     TArray<FDungeonImpact> Impacts;
     TArray<FDungeonPotion> Potions;
+    TArray<FDungeonCoinDrop> CoinDrops;
 };
 UCLASS()
 class THEBEARDANDBLADE_API ADungeonHUD : public AHUD
@@ -407,6 +467,8 @@ public:
     void TraderClick();
     int32 VerifyTraderUI();
     void DrawTrader(ADungeonGameMode* G,ADungeonHero* H);
+    void DrawAtlas(ADungeonGameMode* G,ADungeonHero* H);
+    void DrawAtlasDoors(ADungeonGameMode* G,ADungeonHero* H);
     int32 TraderSelection=INDEX_NONE;
     void CancelInventoryGesture();
     int32 VerifyInventoryGestures(ADungeonHero* H);
@@ -427,6 +489,7 @@ private:
     void SpeechBubble(FVector2D Position,FVector2D Size,FVector2D Speaker);
     void DrawVitals(ADungeonHero* H);
     void DrawPotions(ADungeonGameMode* G);
+    void DrawCoinDrops(ADungeonGameMode* G);
     void Orb(FVector2D Center,float Fraction,FLinearColor Color);
     void DrawInventory(ADungeonHero* H);
     void UpdateInventoryDrag(ADungeonHero* H);
@@ -448,9 +511,10 @@ private:
     void Box(float X,float Y,float W,float H,FLinearColor Color);
     void Label(const FString& Text,float X,float Y,FLinearColor Color,float Size=1);
     void ItemLettering(const FString& Text,float X,float Y,FLinearColor Color,float Height=16,float MaxWidth=360);
-    void DrawItemCard(const FDungeonItem& Item,const ADungeonHero* CompareHero=nullptr);
+    void DrawItemCard(const FDungeonItem& Item,const ADungeonHero* CompareHero=nullptr,bool TraderComparison=false);
+    void DrawTraderComparison(const FDungeonItem& Offered,const FDungeonItem& Equipped);
     void DrawAdventurerStats(const ADungeonHero* Hero);
-    float CardText(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth,float MaxHeight=48);
+    float CardText(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth,float MaxHeight=48,bool Centered=false);
     UPROPERTY() UFont* CardTypeface=nullptr;
     void Ring(FVector2D Center,float Radius,FLinearColor Color,float Width=2);
     void Shadow(FVector2D Center,float Radius,float Opacity=1.f);

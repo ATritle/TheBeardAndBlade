@@ -11,9 +11,9 @@ void ADungeonGameMode::SpawnBreakables()
     // No collision volume is added, so props cannot trap the player or enemies.
     TArray<FVector2D> Sites;
     for(int Side=0;Side<2;++Side)for(int Row=0;Row<4;++Row)
-        Sites.Add(FVector2D(Side?1125:155,290+Row*100));
+        Sites.Add(FVector2D(Side?1125:155,bAtlasActive?(Row<2?275+Row*60:585+(Row-2)*60):290+Row*100));
     for(int I=Sites.Num()-1;I>0;--I)Sites.Swap(I,FMath::RandRange(0,I));
-    const int Count=FMath::RandRange(4,6);
+    const int Count=FMath::RandRange(2,3);
     for(int I=0;I<Count;++I) {
         FDungeonBreakable B;B.Position=Sites[I]+FVector2D(FMath::FRandRange(-12.f,12.f),FMath::FRandRange(-10.f,10.f));
         B.Variant=I%3;Breakables.Add(B);
@@ -27,7 +27,7 @@ void ADungeonGameMode::StrikeBreakables(ADungeonHero* H)
         B.BrokenAge=0;
         // Once-only roll, ordinary rarity odds even in a boss room; no kill/proc rewards.
         if(DungeonCombatBalance::PropDropsLoot(FMath::FRand()))B.Loot=RollChestLoot(false,Room);
-        PlaySound(TEXT("Hit"),.55f,.8f);
+        PlaySound(TEXT("PropBreak"),.6f,FMath::FRandRange(.97f,1.03f));
     }
 }
 bool ADungeonGameMode::CollectBreakableLoot(ADungeonHero* H)
@@ -92,7 +92,7 @@ void ADungeonGameMode::VerifyBreakables()
     for(int D=0;D<8;++D){const FVector2D Aim(FMath::Cos(D*PI/4),FMath::Sin(D*PI/4));Check(DungeonCombatBalance::MeleeHits(Aim*65,Aim,80,false),TEXT("Eight-direction prop reach"));Check(!DungeonCombatBalance::MeleeHits(Aim*200,Aim,80,false),TEXT("Distant props remain intact"));}
     for(int Chapter=0;Chapter<7;++Chapter) {
         Room=Chapter*DungeonProgression::RoomsPerChapter+1;Wave=1;SpawnBreakables();
-        Check(Breakables.Num()>=4&&Breakables.Num()<=6,TEXT("Random prop count"));
+        Check(Breakables.Num()>=2&&Breakables.Num()<=3,TEXT("Halved random prop count"));
         for(const auto& B:Breakables) {
             Check(B.Position.X<180||B.Position.X>1100,TEXT("Wall lane placement"));
             for(int D=0;D<3;++D)Check(FVector2D::Distance(B.Position,DoorPosition(D))>150,TEXT("Door clearance"));

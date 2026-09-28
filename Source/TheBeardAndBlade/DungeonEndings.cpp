@@ -56,7 +56,7 @@ void ADungeonHUD::DrawEnding(ADungeonGameMode* G)
     };
     if(G->IsVictory())
     {
-        CenterLine(TEXT("Seven guardians silenced. Twenty-one chambers conquered."),607,.95f);
+        CenterLine(TEXT("Seven guardians silenced. Seven dungeon floors conquered."),607,.95f);
         CenterLine(TEXT("Through frost, fire and flying paperwork, the bearded adventurer kept his blade sharp"),633,.9f);
         CenterLine(TEXT("and his tea hotter. At last, the storm fell silent. He raised his cup to the dawn:"),657,.9f);
         CenterLine(TEXT("\"Not a bad day's work. Now, who's putting the kettle on?\""),681,.9f);

@@ -1,4 +1,5 @@
 #include "DungeonActors.h"
+#include "DungeonEnemyAudio.h"
 #include "DungeonInventoryLayout.h"
 #include "InventoryGlyphMetrics.h"
 #include "DungeonCombatBalance.h"
@@ -53,6 +54,9 @@ FString FDungeonItem::Stats() const
     if(Attack>0) S+=FString::Printf(TEXT("+%d ATTACK  "),(int32)Attack);
     if(Defense>0) S+=FString::Printf(TEXT("+%d ARMOR  "),(int32)Defense);
     if(Vitality>0) S+=FString::Printf(TEXT("+%d HEALTH"),(int32)Vitality);
+    if(StaminaBonus>0)S+=FString::Printf(TEXT(" +%.1f%% STAMINA"),StaminaBonus*100);
+    if(Speed!=0)S+=FString::Printf(TEXT(" %+.1f%% ATTACK SPEED"),Speed*100);
+    if(Movement>0)S+=FString::Printf(TEXT(" +%.1f%% MOVEMENT"),Movement*100);
     return S;
 }
 ADungeonHero::ADungeonHero()
@@ -84,14 +88,15 @@ void ADungeonHero::BeginPlay()
 void ADungeonHero::Restart()
 {
     CancelCombatActions();
-    Equipment.SetNum(4);
+    Equipment.Empty();Equipment.SetNum(DungeonLootCatalog::EquipmentSlots);
+    for(int S=0;S<Equipment.Num();++S)Equipment[S].Slot=S;
     Equipment[0]=ADungeonGameMode::MakeItem(0,0); Equipment[0].Attack=0; Equipment[0].Name=TEXT("Old Iron Sword");
     Equipment[1]=ADungeonGameMode::MakeItem(3,0); Equipment[1].Defense=0; Equipment[1].Vitality=0; Equipment[1].Name=TEXT("Traveler's Leathers");
     Equipment[2]=FDungeonItem(); Equipment[2].Slot=2; Equipment[2].Icon=6;
     Equipment[3]=FDungeonItem(); Equipment[3].Slot=3;
     Inventory.Empty(); Coins=0;SelectedItem=INDEX_NONE; bInventoryOpen=false; InventoryMessage.Empty();
     Health=MaxHealth=150; AttackPower=24; Armor=8; HurtTime=Invulnerable=AttackTime=0;
-    CritChance=.05f;CritMultiplier=1.5f;AttackSpeed=StaminaRegen=1;StrikeCount=0;
+    CritChance=.05f;CritMultiplier=1.5f;AttackSpeed=StaminaRegen=MovementSpeed=1;StrikeCount=0;
     Stamina=MaxStamina=100; StaminaDelay=0; bExhausted=false;
     BleedChance=PoisonChance=Leech=DamageReduction=0;
     InputX=InputY=WalkDistance=FootstepDistance=0; IdleBreathBlend=BreathPhase=0;bSprinting=bWalking=false; Aim=FVector2D(0,1); Facing=4;
@@ -139,14 +144,14 @@ void ADungeonHero::Tick(float Dt)
         !DungeonView::Clamp(P+Move).Equals(P,.001f);
     // Split the final sprint frame so speed never exceeds the stamina available.
     const float SprintSeconds=Sprinting?FMath::Min(Dt,Stamina/DungeonCombatBalance::SprintCost):0;
-    const FVector2D Next=DungeonView::Clamp(P+Move*(190.f*Dt+190.f*SprintSeconds)*(IsAttacking()?.5f:1.f)*(SlowTime>0?.6f:1.f));
+    const FVector2D Next=DungeonView::Clamp(P+Move*(190.f*Dt+190.f*SprintSeconds)*MovementSpeed*(IsAttacking()?.5f:1.f)*(SlowTime>0?.6f:1.f));
     UpdateStamina(Dt,Sprinting);
     bWalking=FVector2D::Distance(Next,P)>.01f;
     // Cadence is independent of 2x sprint translation: walk ~8 fps, sprint ~10 fps.
-    const float GaitStep=FVector2D::Distance(Next,P)/(Sprinting?1.54f:1.f);
+    const float GaitStep=FVector2D::Distance(Next,P)/((Sprinting?1.54f:1.f)*MovementSpeed);
     WalkDistance+=GaitStep;
     FootstepDistance+=GaitStep;
-    if(bWalking&&FootstepDistance>=72) { FootstepDistance=FMath::Fmod(FootstepDistance,72.f); if(auto* G=Mode(this)) G->PlaySound(TEXT("Step"),.35f,FMath::FRandRange(.9f,1.1f)); }
+    if(bWalking&&FootstepDistance>=72) { FootstepDistance=FMath::Fmod(FootstepDistance,72.f); if(auto* G=Mode(this)) G->PlaySound(TEXT("Step"),.28f,FMath::FRandRange(.97f,1.03f)); }
     SetActorLocation(DungeonView::Unproject(Next));
     if(Dt>SMALL_NUMBER) ScreenVelocity=(Next-P)/Dt;
     if(auto* PC=Cast<APlayerController>(GetController()))
@@ -186,13 +191,15 @@ int32 ADungeonHero::GetAnimationFrame() const
 }
 void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
 {
+    I->BindKey(EKeys::M,IE_Pressed,this,&ADungeonHero::ToggleAtlas);
     I->BindAxis("MoveForward",this,&ADungeonHero::MoveForward);
     I->BindAxis("MoveRight",this,&ADungeonHero::MoveRight);
     I->BindAction("Attack",IE_Pressed,this,&ADungeonHero::Attack);
     I->BindAction("PowerMove",IE_Pressed,this,&ADungeonHero::PowerMove);
     I->BindAction("Freedom",IE_Pressed,this,&ADungeonHero::Freedom);
-    I->BindAction("ToggleMusic",IE_Pressed,this,&ADungeonHero::ToggleMusic);
-    I->BindAction("ToggleEffects",IE_Pressed,this,&ADungeonHero::ToggleEffects);
+    // Reserve M for the atlas even if an older user config still maps it to music.
+    I->BindKey(EKeys::F8,IE_Pressed,this,&ADungeonHero::ToggleMusic);
+    // SFX mute is a visible menu control, not an accidental N press beside Map.
     I->BindAction("Interact",IE_Pressed,this,&ADungeonHero::Interact);
     I->BindAction("Inventory",IE_Pressed,this,&ADungeonHero::ToggleInventory);
     I->BindAction("Dodge",IE_Pressed,this,&ADungeonHero::Dodge);
@@ -253,7 +260,7 @@ void ADungeonHero::Attack()
     {
         AttackQuip=TEXT("Take this you C*NT!"); QuipTime=1.5f; QuipCooldown=4.f;
     }
-    if(auto* G=Mode(this)) G->PlaySound(TEXT("Sword"),.8f,FMath::FRandRange(.92f,1.08f));
+    if(auto* G=Mode(this)) G->PlaySound(TEXT("Sword"),.7f,FMath::FRandRange(.97f,1.03f));
 }
 void ADungeonHero::Interact() { if(!bInventoryOpen) if(auto* G=Mode(this)) G->PlayerInteract(this); }
 void ADungeonHero::ToggleInventory()
@@ -263,7 +270,7 @@ void ADungeonHero::ToggleInventory()
     if(Health<=0) return;
     bInventoryOpen=!bInventoryOpen; InventoryMessage.Empty();
     if(auto* PC=Cast<APlayerController>(GetController())) if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) HUD->CancelInventoryGesture();
-    if(auto* G=Mode(this)) G->PlaySound(TEXT("UI"),.4f);
+    if(auto* G=Mode(this)) G->PlaySound(bInventoryOpen?TEXT("InventoryOpen"):TEXT("InventoryClose"),.4f);
 }
 bool ADungeonHero::CanPlace(FIntPoint Cell,FIntPoint Size,int32 Ignore) const
 {
@@ -363,7 +370,7 @@ void ADungeonEnemy::TakeDungeonDamage(float Damage)
     auto* G=Mode(this);
     const FVector2D P=DungeonView::Project(GetActorLocation());
     if(G) G->AddImpact(P,Damage);
-    if(G) G->PlaySound(Health<=0?TEXT("Death"):TEXT("Hit"),.75f,FMath::FRandRange(.9f,1.1f));
+    if(G) G->PlaySound(DungeonEnemyAudio::Hit(Species,Health<=0),.65f,FMath::FRandRange(.97f,1.03f));
     if(auto* H=Player(this))
     {
         auto Push=(P-DungeonView::Project(H->GetActorLocation())).GetSafeNormal();
@@ -384,6 +391,8 @@ void ADungeonGameMode::BeginPlay()
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteEffects"),bEffectsMuted,GGameUserSettingsIni);
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("AtlasVerify"))) { VerifyAtlas();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("EconomyVerify"))) { VerifyEconomy(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TraderVerify"))) { VerifyTrader(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("BreakablesVerify"))) { VerifyBreakables(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("SeptemberVerify"))) { VerifySeptember(); return; }
@@ -404,6 +413,7 @@ void ADungeonGameMode::BeginPlay()
 void ADungeonGameMode::Tick(float Dt)
 {
     Super::Tick(Dt);
+    RunAtlasReview();
     RunEndingPreview();
     if(!HasEnding()&&IsDead()) FinishRun(false);
     if(HasEnding()) { UpdateEnding(Dt);UpdateAudio();return; }
@@ -579,7 +589,8 @@ void ADungeonGameMode::Tick(float Dt)
     }
 #endif
     if(IsBossIntroActive()) { UpdateBossIntro(Dt);return; }
-    if(bMenu||bTraderOpen) return;
+    if(bMenu||bTraderOpen||bAtlasMap) return;
+    if(IsAtlasTravel()){TickAtlasTravel(Dt);return;}
     if(IsBossDialogueActive()) { DialogueWait=FMath::Max(0.f,DialogueWait-Dt); return; }
     if(BossGrace>0) { BossGrace=FMath::Max(0.f,BossGrace-Dt); return; }
     if(auto* H=Player(this))
@@ -608,6 +619,7 @@ void ADungeonGameMode::Tick(float Dt)
     Impacts.RemoveAll([](const FDungeonImpact& I){return I.Life<=0;});
     if(IsDead()) return;
     UpdatePotions(Dt);
+    UpdateCoinDrops(Dt);
     UpdateReward(Dt);
     for(auto& Prop:Breakables)if(Prop.BrokenAge>=0)Prop.BrokenAge+=Dt;
     UpdateProjectiles(Dt);
@@ -632,6 +644,7 @@ void ADungeonGameMode::CompleteRoom()
     if(!Enemies.IsEmpty()||PendingSpawns>0||bChest||bLootClaimed) return;
     if(Room>=DungeonProgression::CampaignRooms) { FinishRun(!IsDead());return; }
     SpawnTimer=0;
+    if(bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent))AtlasRooms[AtlasCurrent].Cleared=true;
     Reward=FRewardPresentation();bChest=true;
     UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d reward ready; no live or queued enemies"),Room);
 }
@@ -659,7 +672,7 @@ void ADungeonGameMode::SpawnOneEnemy()
         E->MaxHealth=E->Health=DungeonCombatBalance::SpawnHealth(S.HP,Room,E->bBoss);
         Enemies.Add(E);
         if(E->bBoss) { E->SpawnTime=0; BeginBossDialogue(); }
-        PlaySound(TEXT("Spawn"),.4f,E->bBoss?.65f:1.f);
+        PlaySound(DungeonEnemyAudio::Spawn(E->Species),.4f,DungeonEnemyAudio::Human(E->Species)?1.f:E->bBoss?.65f:1.f);
     }
 }
 void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
@@ -707,6 +720,10 @@ void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
     }
     if(!IsFreedomActive()) FreedomKills=FMath::Min(15,FreedomKills+1);
     if(E->bBoss||FMath::FRand()<.12f) { FDungeonPotion P; P.Position=DungeonView::Clamp(DungeonView::Project(E->GetActorLocation())); Potions.Add(P); }
+    if(FMath::FRand()<(E->bBoss?.85f:.40f)) {
+        FDungeonCoinDrop C;C.Position=DungeonView::Clamp(DungeonView::Project(E->GetActorLocation()));
+        C.Amount=FMath::RandRange(E->bBoss?80:12,E->bBoss?140:28)*(DungeonProgression::Chapter(Room)+1);CoinDrops.Add(C);
+    }
     Enemies.Remove(E); E->Destroy();
     if(Enemies.IsEmpty()&&PendingSpawns==0)
     {
@@ -733,22 +750,23 @@ FDungeonItem ADungeonGameMode::MakeItem(int32 Icon,int32 Rarity)
     if(I.Slot==0) I.Attack=(6+I.Icon*3)*Mult;
     if(I.Slot==1) { I.Defense=(5+(I.Icon-3)*2)*Mult; I.Vitality=5*Mult; }
     if(I.Slot==2) I.Vitality=(20+(I.Icon-6)*8)*Mult;
-    I.CoinValue=FMath::RoundToInt(25*Mult);
+    I.CoinValue=FMath::RoundToInt(37.5f*Mult);
     return I;
 }
 FDungeonItem ADungeonGameMode::RollChestLoot(bool Boss,int32 Level)
 {
     const int32 Roll=FMath::RandRange(1,100);
     const int32 Rarity=Roll<=35?0:Roll<=65?1:Roll<=85?2:Roll<=97?3:4;
-    return RollItem(FMath::RandRange(0,59),Boss?4:Rarity,Level);
+    return RollItem(FMath::RandRange(0,DungeonLootCatalog::Count-1),Boss?4:Rarity,Level);
 }
 void ADungeonGameMode::PlayerInteract(ADungeonHero* H)
 {
     if(!H) return;
     if(H->IsInventoryOpen()||IsGameplayBlocked()||H->IsRolling()) return;
     if(IsDead()) { RestartRun(); return; }
+    if(bAtlasActive&&AtlasInteract(H))return;
     // Exits remain usable even while an uncollected reward is on the floor.
-    if(AreDoorsOpen()&&TransitionCooldown<=0)
+    if(!bAtlasActive&&AreDoorsOpen()&&TransitionCooldown<=0)
     {
         for(int32 I=0;I<3;++I) if(FVector2D::Distance(DungeonView::Project(H->GetActorLocation()),DoorPosition(I))<95)
         { StartTransition(I); return; }
@@ -767,7 +785,7 @@ void ADungeonGameMode::NextRoom()
     Reward=FRewardPresentation();
     if(auto* H=Player(this)) H->StunTime=H->SlowTime=H->FlashBlindTime=0;
     Blood.Empty();
-    Potions.Empty();
+    Potions.Empty();CoinDrops.Empty();
     DialogueLines.Empty(); DialogueIndex=0; DialogueWait=BossGrace=0;
     bChest=bLootClaimed=bLootRolled=false; LootTimer=0; ++Room; Wave=1;
     for(bool& Rolled:ChestRolled) Rolled=false;
@@ -777,21 +795,23 @@ void ADungeonGameMode::NextRoom()
 }
 void ADungeonGameMode::RestartRun()
 {
+    DisableAtlas();
     bTraderOpen=bTraderVisited=false;TraderStock.Empty();TraderMessage.Empty();
     EndState=0;EndTime=0;bEndingCleaned=false;
     CancelBossIntro();
     Reward=FRewardPresentation();
     Blood.Empty(); FreedomKills=0; FreedomTime=0; bFreedomResolved=false;
-    Potions.Empty();
+    Potions.Empty();CoinDrops.Empty();
     DialogueLines.Empty(); DialogueIndex=0; DialogueWait=BossGrace=0;
     for(auto& E:Enemies) if(IsValid(E)) E->Destroy();
     Enemies.Empty(); Impacts.Empty(); Room=Wave=1; bChest=bLootClaimed=bLootRolled=false; LootTimer=0;
     TransitionTime=TransitionCooldown=0; Shots.Empty(); Splashes.Empty(); for(bool& Rolled:ChestRolled) Rolled=false;
     if(auto* H=Player(this)) H->Restart();
-    SpawnWave();
+    if(!FParse::Param(FCommandLine::Get(),TEXT("LegacyProgression")))InitializeAtlasFloor(FMath::Rand());else SpawnWave();
 }
 FString ADungeonGameMode::GetObjective() const
 {
+    if(bAtlasActive)return TEXT("Explore the keep / M atlas / E interact");
     if(IsDead()) return TEXT("YOU FELL  -  Press E to begin a new run");
     if(bChest) return bLootRolled?TEXT("Exits unlocked / E to collect loot or enter a glowing arch"):TEXT("Choose one mystery chest / E to open");
     if(bLootClaimed) return TEXT("Reward collected - I to equip gear / E at a glowing arch to continue");
@@ -804,6 +824,8 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
     if(auto* T=Textures.Find(Name)) return *T;
     const bool NewArt=Name.StartsWith(TEXT("Flash"))||Name.StartsWith(TEXT("Mack_"))||Name.StartsWith(TEXT("Twister_"))||Name.StartsWith(TEXT("BossPortrait_"))||Name.StartsWith(TEXT("BossName_"))||Name.StartsWith(TEXT("BossBorder_"))||Name.StartsWith(TEXT("Status_"))||Name.StartsWith(TEXT("RewardChest_"))||Name.StartsWith(TEXT("RarityGlow_"))||Name.StartsWith(TEXT("LootEffect_"))||Name.StartsWith(TEXT("BurgerSplat_"))||Name.StartsWith(TEXT("FoodDebris_"))||Name.StartsWith(TEXT("MackLanding_"));
     FString Path=FString::Printf(TEXT("/Game/Art/%s/%s.%s"),Name.StartsWith(TEXT("Ending"))?TEXT("Endings"):Name.StartsWith(TEXT("Intro"))?TEXT("Intros"):Name.StartsWith(TEXT("Theme"))?TEXT("Progression"):NewArt?TEXT("September"):TEXT("V2"),*Name,*Name);
+    const int GearId=Name.StartsWith(TEXT("Loot_"))?FCString::Atoi(*Name.Mid(5)):-1;
+    if(GearId>=60&&GearId<DungeonLootCatalog::Count)Path=FString::Printf(TEXT("/Game/Art/V2/GearSheet_%d.GearSheet_%d"),(GearId-60)/3,(GearId-60)/3);
     auto* T=LoadObject<UTexture2D>(nullptr,*Path);
 #if WITH_EDITOR
     if(T&&T->IsCompiling())
@@ -816,7 +838,9 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
 }
 void ADungeonHUD::Sprite(const FString& N,float X,float Y,float W,float H,FLinearColor Tint,float Rotation,FVector2D Pivot)
 {
-    if(auto* T=Texture(N)) DrawTexture(T,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale,0,0,1,1,Tint,BLEND_Translucent,1,false,Rotation,Pivot);
+    const int GearId=N.StartsWith(TEXT("Loot_"))?FCString::Atoi(*N.Mid(5)):-1;
+    const bool Sheet=GearId>=60&&GearId<DungeonLootCatalog::Count;
+    if(auto* T=Texture(N)) DrawTexture(T,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale,Sheet?((GearId-60)%3)/3.f:0,0,Sheet?1.f/3.f:1.f,1,Tint,BLEND_Translucent,1,false,Rotation,Pivot);
 }
 void ADungeonHUD::Box(float X,float Y,float W,float H,FLinearColor Color)
 { DrawRect(Color,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale); }
@@ -847,6 +871,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         DescentScale=DungeonDescent::Size(G->TransitionProgress());
         Opacity=DungeonDescent::Opacity(G->TransitionProgress()); HS*=DescentScale;
     }
+    if(auto* G=Mode(this);G&&G->IsAtlasTravel())Opacity=G->AtlasHeroOpacity();
     if(Opacity<=0.f) return;
     const FLinearColor Fade(1,1,1,Opacity);
     FVector2D P=DungeonView::Project(H->GetActorLocation());
@@ -1116,7 +1141,7 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
         Row(TEXT("E"),TEXT("Choose one chest / enter a gate"),572);
         Row(TEXT("I"),TEXT("Open inventory & equipment"),601);
         Row(TEXT("P"),TEXT("Pause / resume"),630);
-        Label(TEXT("A guardian awaits every FOURTH room."),173,674,Gold,.9f);
+        Row(TEXT("M"),TEXT("Emerald Atlas / dungeon map"),659);
         Button(TEXT("BACK"),705);
     }
     else
@@ -1188,7 +1213,8 @@ void ADungeonHUD::InventoryClick()
     CancelInventoryGesture();
     if(In(456,564,174,44))H->EquipFromInventory(H->SelectedItem);
     if(In(642,564,174,44)&&H->Inventory.IsValidIndex(H->SelectedItem)){
-        H->DiscardForCoins(H->SelectedItem);
+        if(auto* G=Mode(this);G&&G->IsTraderOpen())G->SellTraderItem(H,H->SelectedItem);
+        else H->DiscardItem(H->SelectedItem);
     }
 }
 void ADungeonHUD::ItemLettering(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth)
@@ -1219,7 +1245,7 @@ void ADungeonHUD::ItemLettering(const FString& Text,float X,float Y,FLinearColor
         CX+=Advance;
     }
 }
-float ADungeonHUD::CardText(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth,float MaxHeight)
+float ADungeonHUD::CardText(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth,float MaxHeight,bool Centered)
 {
     if(!Canvas||Scale<=0||Text.IsEmpty()||MaxHeight<=0)return 0;
     // Rasterize the engine's runtime font at the actual viewport size, not a scaled pixel atlas.
@@ -1252,15 +1278,16 @@ float ADungeonHUD::CardText(const FString& Text,float X,float Y,FLinearColor Col
     }
     for(int I=0;I<Lines.Num();++I){
         Lines[I].TrimEndInline();
-        FCanvasTextItem Item(Offset+FVector2D(X,Y+I*LineHeight)*Scale,FText::FromString(Lines[I]),Font,Color);
+        const float LineX=Centered?X+(MaxWidth-Width(Lines[I])/Scale)*.5f:X;
+        FCanvasTextItem Item(Offset+FVector2D(LineX,Y+I*LineHeight)*Scale,FText::FromString(Lines[I]),Font,Color);
         Item.EnableShadow(FLinearColor(0,0,0,.65f),FVector2D(0,1));
         Canvas->DrawItem(Item);
     }
     return Lines.Num()*LineHeight;
 }
-void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* CompareHero)
+void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* CompareHero,bool TraderComparison)
 {
-    const TCHAR* Types[]={TEXT("WEAPON"),TEXT("ARMOR"),TEXT("AMULET"),TEXT("RING")};
+    const TCHAR* Types[]={TEXT("WEAPON"),TEXT("ARMOR"),TEXT("AMULET"),TEXT("RING"),TEXT("HEAD"),TEXT("HANDS"),TEXT("LEGS"),TEXT("FEET")};
     Sprite(TEXT("InventoryCard"),842,104,400,628);
         const auto R=RarityColor(E.Rarity);
         CardText(E.Name,892,151,R,23,304);
@@ -1276,8 +1303,16 @@ void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* Compare
             const TCHAR* Kind=E.BleedChance>0?TEXT("BLEED CHANCE"):E.PoisonChance>0?TEXT("POISON CHANCE"):E.StaminaBonus>0?TEXT("MAX STAMINA"):E.Leech>0?TEXT("DAMAGE LEECH"):E.Reduction>0?TEXT("MITIGATION"):TEXT("MAX HEALTH");
             CardText(FString::Printf(TEXT("+%.1f%%"),V*100),996,258,Pale,30,196);
             CardText(Kind,996,296,Gold,20,196);
+        } else if(E.Slot>=4) {
+            const float V=E.Slot==4?E.StaminaBonus:E.Slot==5?E.Speed:E.Slot==6?E.Defense:E.Movement;
+            const TCHAR* Kind=E.Slot==4?TEXT("MAX STAMINA"):E.Slot==5?TEXT("ATTACK SPEED"):E.Slot==6?TEXT("ARMOR"):TEXT("MOVE SPEED");
+            CardText(E.Slot==6?FString::Printf(TEXT("+%.0f"),V):FString::Printf(TEXT("+%.1f%%"),V*100),996,258,Pale,30,196);
+            CardText(Kind,996,296,Gold,19,196);
         } else {
             CardText(E.Slot==1?FString::Printf(TEXT("+%.0f ARMOR"),E.Defense):FString::Printf(TEXT("+%.0f HEALTH"),E.Vitality),996,258,Pale,22,196);
+        }
+        if(TraderComparison&&CompareHero&&CompareHero->Equipment.IsValidIndex(E.Slot)) {
+            DrawTraderComparison(E,CompareHero->Equipment[E.Slot]);return;
         }
         Box(884,337,322,1,R);
         CardText(TEXT("BONUSES"),892,344,Gold,21,304);
@@ -1286,10 +1321,11 @@ void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* Compare
         const FLinearColor Purple(.78f,.58f,1),Green(.4f,1,.58f);
         auto Bonus=[&](float V,const TCHAR* Name,bool Percent,FLinearColor C){if(!FMath::IsNearlyZero(V))Line((Percent?FString::Printf(TEXT("%+.1f%% %s"),V*100,Name):FString::Printf(TEXT("%+.0f %s"),V,Name)),C);};
         Bonus(E.Attack,TEXT("WEAPON DAMAGE"),false,Purple);
-        if(E.Slot!=1)Bonus(E.Defense,TEXT("ARMOR"),false,Purple);
+        if(E.Slot!=1&&E.Slot!=6)Bonus(E.Defense,TEXT("ARMOR"),false,Purple);
         if(E.Slot!=2)Bonus(E.Vitality,TEXT("HEALTH"),false,Purple);
         Bonus(E.CritChance,TEXT("CRITICAL CHANCE"),true,Purple);Bonus(E.CritDamage,TEXT("CRITICAL DAMAGE"),true,Purple);
-        Bonus(E.Speed,TEXT("ATTACK SPEED"),true,Purple);Bonus(E.Regen,TEXT("STAMINA REGEN"),true,Green);
+        if(E.Slot!=5)Bonus(E.Speed,TEXT("ATTACK SPEED"),true,Purple);
+        Bonus(E.Regen,TEXT("STAMINA REGEN"),true,Green);
         if(Y==375)Line(TEXT("No bonus affixes"),Pale);
         if(E.Effect) {Y+=CardText(E.EffectText(),892,Y,Green,20,304,FMath::Max(0.f,564-Y));}
         if(E.Slot==3) {
@@ -1300,11 +1336,11 @@ void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* Compare
         if(CompareHero) {
         const auto* H=CompareHero;const auto& Current=H->Equipment[E.Slot];
         CardText(TEXT("EQUIPPED: ")+(Current.IsEmpty()?TEXT("NONE"):Current.Name),892,586,Gold,16,304);
-        const float Delta=E.Slot==0?(24+E.Attack)*(1+E.Speed)/.48f-(24+Current.Attack)*(1+Current.Speed)/.48f:E.Defense-Current.Defense;
+        const float Delta=E.Slot==0?(24+E.Attack)*(1+E.Speed)/.48f-(24+Current.Attack)*(1+Current.Speed)/.48f:E.Slot==4?100*(E.StaminaBonus-Current.StaminaBonus):E.Slot==5?100*(E.Speed-Current.Speed):E.Slot==7?100*(E.Movement-Current.Movement):E.Defense-Current.Defense;
         float FlatHP=150,BonusHP=0;
         for(int I=0;I<H->Equipment.Num();++I)if(I!=E.Slot&&!H->Equipment[I].IsEmpty()){FlatHP+=H->Equipment[I].Vitality;BonusHP+=H->Equipment[I].HealthBonus;}
         const float HealthDelta=(FlatHP+E.Vitality)*(1+FMath::Clamp(BonusHP+E.HealthBonus,0.f,1.f))-H->MaxHealth;
-        CardText(FString::Printf(TEXT("%+.1f %s"),Delta,E.Slot==0?TEXT("DPS"):TEXT("ARMOR")),892,626,Delta>=0?FLinearColor(.4f,1,.58f):FLinearColor(1,.4f,.3f),17,155);
+        CardText(FString::Printf(TEXT("%+.1f %s"),Delta,E.Slot==0?TEXT("DPS"):E.Slot==4?TEXT("% STAMINA"):E.Slot==5?TEXT("% ATK SPD"):E.Slot==7?TEXT("% MOVE"):TEXT("ARMOR")),892,626,Delta>=0?FLinearColor(.4f,1,.58f):FLinearColor(1,.4f,.3f),16,155);
         CardText(FString::Printf(TEXT("%+.0f MAX HP"),HealthDelta),1050,626,HealthDelta>=0?FLinearColor(.4f,1,.58f):FLinearColor(1,.4f,.3f),17,155);
         }
         CardText(FString::Printf(TEXT("VALUE  %d GOLD"),E.CoinValue),892,652,Gold,22,304);
@@ -1324,6 +1360,7 @@ void ADungeonHUD::DrawAdventurerStats(const ADungeonHero* H)
     Row(TEXT("Health"),FString::Printf(TEXT("%.1f / %.1f"),H->Health,H->MaxHealth),Green);
     Row(TEXT("Stamina"),FString::Printf(TEXT("%.1f / %.1f"),H->Stamina,H->MaxStamina),Green);
     Row(TEXT("Stamina recovery"),FString::Printf(TEXT("%.1f / sec"),25*H->StaminaRegen),Green);
+    Row(TEXT("Movement speed"),FString::Printf(TEXT("%+.1f%%"),100*(H->MovementSpeed-1)),Green);
     Row(TEXT("Hit damage"),FString::Printf(TEXT("%.1f - %.1f"),H->AttackPower*.9f,H->AttackPower*1.1f),Pale);
     Row(TEXT("Attacks / sec"),FString::Printf(TEXT("%.2f"),H->AttackSpeed/.48f),Pale);
     Row(TEXT("DPS (before crits)"),FString::Printf(TEXT("%.1f"),H->AttackPower*H->AttackSpeed/.48f),Pale);
@@ -1355,19 +1392,14 @@ void ADungeonHUD::DrawInventory(ADungeonHero* H)
     Sprite(TEXT("InventoryCard"),24,102,400,594);
     Sprite(TEXT("InventoryAdventurer"),84,155,280,420);
     Sprite(TEXT("InventorySatchel"),593,91,86,80);
-    CardText(FString::Printf(TEXT("COINS  %lld"),H->Coins),456,635,Gold,23,360);
+    Sprite(TEXT("CurrencyCoin"),456,626,38,38);
+    CardText(FString::Printf(TEXT("%lld"),H->Coins),506,635,Gold,23,310);
     Sprite(TEXT("InventoryFrame"),1140,63,105,40);ItemLettering(TEXT("CLOSE"),1160,70,Pale,20);
-    const TCHAR* Future[]={TEXT("InventoryHelmet"),TEXT("InventoryGloves"),TEXT("InventoryPants"),TEXT("InventoryBoots")};
-    for(int I=0;I<4;++I) {
-        float X=I%2==0?40:320,Y=I<2?166:282;
-        Sprite(TEXT("InventoryFrame"),X,Y,80,80,FLinearColor(.45f,.45f,.42f));
-        Sprite(Future[I],X+9,Y+9,62,62,FLinearColor(.6f,.6f,.6f,.85f));
-    }
-    const TCHAR* SlotArt[]={TEXT("InventorySlotWeapon"),TEXT("InventorySlotArmor"),TEXT("InventorySlotAmulet"),TEXT("InventorySlotRing")};
+    const TCHAR* SlotArt[]={TEXT("InventorySlotWeapon"),TEXT("InventorySlotArmor"),TEXT("InventorySlotAmulet"),TEXT("InventorySlotRing"),TEXT("InventoryHelmet"),TEXT("InventoryGloves"),TEXT("InventoryPants"),TEXT("InventoryBoots")};
     const FDungeonItem* Hover=nullptr;
     float MX=0,MY=0;FVector2D Mouse(-1,-1);
     if(auto* PC=GetOwningPlayerController()) if(Scale>0&&PC->GetMousePosition(MX,MY))Mouse=(FVector2D(MX,MY)-Offset)/Scale;
-    for(int S=0;S<4;++S) {
+    for(int S=0;S<DungeonLootCatalog::EquipmentSlots;++S) {
         auto P=Gear(S);const auto& E=H->Equipment[S];
         Sprite(TEXT("InventoryFrame"),P.X,P.Y,80,80);
         const bool ShowGuide=E.IsEmpty()||(bDragging&&DragGear==S);
@@ -1398,7 +1430,10 @@ void ADungeonHUD::DrawInventory(ADungeonHero* H)
     else Sprite(TEXT("InventoryCard"),842,104,400,628);
     if(H->Inventory.IsValidIndex(H->SelectedItem)) {
         Sprite(TEXT("InventoryFrame"),456,564,174,44);ItemLettering(TEXT("EQUIP"),501,574,Pale,22,150);
-        Sprite(TEXT("InventoryFrame"),642,564,174,44);ItemLettering(TEXT("DISCARD"),675,574,Pale,22,150);
+        Sprite(TEXT("InventoryFrame"),642,564,174,44);
+        if(auto* G=Mode(this);G&&G->IsTraderOpen())
+            CardText(FString::Printf(TEXT("SELL  %lld GOLD"),G->TraderSellPrice(H->Inventory[H->SelectedItem].Item)),654,578,Pale,17,150);
+        else ItemLettering(TEXT("DROP"),689,574,Pale,22,120);
     }
     DrawInventoryDrag(H);
 }
@@ -1437,7 +1472,7 @@ void ADungeonHUD::DrawHUD()
         const float T=GetWorld()->GetTimeSeconds();
         Offset+=FVector2D(FMath::Sin(T*71)*5,FMath::Cos(T*57)*4)*Scale;
     }
-    Sprite(G->GetBiome()==0?TEXT("Arena"):FString::Printf(TEXT("Arena%d"),G->GetBiome()),0,0,1280,800);
+    Sprite(G->IsAtlasFloor()?(G->GetBiome()==0?FString(TEXT("AtlasChamber")):FString::Printf(TEXT("AtlasChamber%d"),G->GetBiome())):G->GetBiome()==0?FString(TEXT("Arena")):FString::Printf(TEXT("Arena%d"),G->GetBiome()),0,0,1280,800);
     if(G->IsBossIntroActive()){DrawBossIntro(G);return;}
 #if !UE_BUILD_SHIPPING
     if(FParse::Param(FCommandLine::Get(),TEXT("DungeonHeroReviewPreview")))
@@ -1543,7 +1578,8 @@ void ADungeonHUD::DrawHUD()
         return;
     }
 #endif
-    for(int I=0;I<3;++I)
+    if(G->IsAtlasFloor())DrawAtlasDoors(G,H);
+    for(int I=0;!G->IsAtlasFloor()&&I<3;++I)
     {
         FVector2D P=ADungeonGameMode::DoorPosition(I);
         // Align light to the measured bunker openings; interaction reach is unchanged.
@@ -1612,6 +1648,7 @@ void ADungeonHUD::DrawHUD()
         KeySprite(FString::Printf(TEXT("TeaFX_%d"),FX.Art),FX.Position.X-Size*.5f,FX.Position.Y-Size*.325f,Size,Size*.65f,FLinearColor(1,1,1,FMath::Min(1.f,FX.Life/.25f)));
     }
     DrawPotions(G);
+    DrawCoinDrops(G);
     // Draw actor sprites once, sorted by foot depth.
     TArray<AActor*> Actors; Actors.Add(H);
     for(auto& E:G->GetEnemies()) if(IsValid(E)) Actors.Add(E);
@@ -1682,8 +1719,8 @@ void ADungeonHUD::DrawHUD()
     }
     DrawCombatFX(G,true);
     Offset=StableOffset; // Shake the dungeon, never the HUD or mouse-input mapping.
-    Label(FString::Printf(TEXT("%s / ROOM %02d"),DungeonRoster::Biome(G->GetBiome()),G->GetRoom()),900,28,Gold,.85f);
-    for(int I=0;I<3&&I<H->Equipment.Num();++I)
+    if(!G->IsAtlasFloor())Label(FString::Printf(TEXT("%s / ROOM %02d"),DungeonRoster::Biome(G->GetBiome()),G->GetRoom()),900,28,Gold,.85f);
+    for(int I=0;!G->IsAtlasFloor()&&I<3&&I<H->Equipment.Num();++I)
     {
         const auto& E=H->Equipment[I]; float X=1040+I*66;
         Box(X,56,60,62,Ink); Box(X,116,60,2,RarityColor(E.Rarity));
@@ -1697,6 +1734,8 @@ void ADungeonHUD::DrawHUD()
     DrawVitals(H);
     DrawDialogue(G,H);
     if(H->IsInventoryOpen()) DrawInventory(H);
+    if(G->IsAtlasMapOpen())DrawAtlas(G,H);
+    if(G->IsAtlasTravel())Box(0,0,1280,800,FLinearColor(0,0,0,G->AtlasBlackout()));
     if(G->IsTransitioning())
     {
         const float T=G->TransitionProgress();

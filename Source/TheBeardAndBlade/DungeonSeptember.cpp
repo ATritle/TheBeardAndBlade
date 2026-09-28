@@ -242,7 +242,7 @@ void ADungeonGameMode::EmitBossShot(ADungeonEnemy* E,bool Burger)
     S.Damage=DungeonRoster::Get(E->Species).Damage; S.BlastRadius=0;
     Shots.Add(S); E->FlashTime=.085f;
     AddBossFX(S.Position,Burger?19:18);
-    PlaySound(Burger?TEXT("Throw"):FString::Printf(TEXT("Rifle%d"),E->ShotSerial%3),Burger?.4f:.85f,Burger?1.f:FMath::FRandRange(.97f,1.03f));
+    PlaySound(Burger?TEXT("Throw"):TEXT("Rifle"),Burger?.4f:.65f,Burger?1.f:FMath::FRandRange(.97f,1.03f));
 }
 void ADungeonGameMode::AddBossFX(FVector2D P,int32 Art)
 {

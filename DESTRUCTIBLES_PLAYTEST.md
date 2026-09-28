@@ -1,6 +1,6 @@
 # Dungeon destructibles — local review
 
-Each room has 4–6 randomized breakables in spaced side-wall positions, outside gate/chest paths. Three silhouettes per theme: crate, barrel and urn. Themes: treasury oak/brass, Big Mack kitchen supplies, military olive containers, Webroot moss/webs, Rime frost, Cinder scorched embers, Twister storm-blue containers.
+Each playable room has 2–3 randomized breakables in spaced side-wall positions, outside gate/chest paths. Three silhouettes per theme: crate, barrel and urn. Themes: treasury oak/brass, Big Mack kitchen supplies, military olive containers, Webroot moss/webs, Rime frost, Cinder scorched embers, Twister storm-blue containers. The Atlas trader branch opens the shop directly and has no breakables.
 
 Strike with melee to break a prop in one hit. Each prop rolls once: 50% random loot, 50% nothing (tunable via `DungeonCombatBalance::PropLootChance`). Empty props still crumble and fade, without a pickup prompt or invisible item. Sixteen matching textured fragments burst, fall, settle and fade over 1.35 seconds. Loot becomes available after 0.45 seconds. E collects the closest drop within 85 screen units; full bags leave the exact rolled item in place. Drops use standard chest rarity odds and current room level, including rings. No auto-equipping, stat card overlay, healing, kill charge or boss-guaranteed legendary reward. Props are non-blocking and don't affect room-clear objectives or exit locks.
 

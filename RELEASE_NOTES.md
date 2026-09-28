@@ -1,3 +1,15 @@
+# v0.4.0 — Emerald Atlas, expanded equipment and coin economy
+
+- Explore all seven dungeon themes through four-way doors and the Emerald Atlas map. Backtrack through persistent rooms, discover a trader branch and reward dead end, and find each hidden boss encounter.
+- Added head, hands, legs and feet equipment; premium trader stock and detailed upgrade/downgrade comparisons.
+- Enemies can drop spinning, shining gold coins. Discarded equipment stays on the dungeon floor; sell inventory items at the trader for 50% of their value. New item values increased 50%.
+- Trader portrait breathing and movement, polished inventory controls, currency and map artwork.
+- Recorded footsteps, weapons, rifle shots, doors, props, inventory, enemy and explosion effects with included third-party credits. Human death voices removed; Finance Guy uses non-vocal effects.
+- Quiet looping RPG Ambience - Dungeon by HitCtrl. Fixed room transitions raising music volume and removed the accidental N-key SFX mute shortcut.
+- Reduced prop density and retained the existing boss order: Finance Guy, Big Mack, Flash Bang Guy, Webroot, Rime, Cinder, Twister.
+
+Download the Windows ZIP to play locally without UE. Upload the separate StreamPixel ZIP (Windows folder layout) to your existing hosted project. Both use the same Pixel Streaming-enabled Windows Shipping runtime. No hosting credentials are embedded. Coins and exploration persist within a run, not across closing/restarting the game. Bright flash effects remain. StreamPixel browser validation is required after upload.
+
 # v0.3.3 — loot, traders and dungeon progression
 
 - Expanded campaign to 28 rooms: Finance Guy, Big Mack, Flash Bang Guy, Webroot, Rime, Cinder and Twister now guard every fourth room.

@@ -43,7 +43,7 @@ void ADungeonGameMode::FireThemeAttack(ADungeonEnemy* E)
         if(Grenade||Arc){S.FlightTime=.85f;S.Life=Grenade?1.65f:1.05f;}
         Shots.Add(S);
     }
-    PlaySound(Bullet?TEXT("Rifle0"):Grenade||Arc?TEXT("Throw"):TEXT("Magic"),.55f);
+    PlaySound(Bullet?TEXT("Rifle"):Grenade||Arc?TEXT("Throw"):TEXT("Magic"),.55f);
 }
 
 void ADungeonGameMode::VerifyProgression()

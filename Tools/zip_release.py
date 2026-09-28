@@ -2,7 +2,7 @@
 from pathlib import Path
 import zipfile,hashlib,argparse
 parser=argparse.ArgumentParser()
-parser.add_argument('--version',default='v0.3.3')
+parser.add_argument('--version',default='v0.4.0')
 parser.add_argument('--streaming',action='store_true',help='Use StreamPixel Windows layout and hosting checklist')
 args=parser.parse_args()
 assert all(c.isalnum() or c in '.-_' for c in args.version)

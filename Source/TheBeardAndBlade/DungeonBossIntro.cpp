@@ -30,7 +30,7 @@ namespace
 
 void ADungeonGameMode::EndPlay(const EEndPlayReason::Type Reason)
 {
-    CancelBossIntro();Super::EndPlay(Reason);
+    StopMusic();CancelBossIntro();Super::EndPlay(Reason);
 }
 
 void ADungeonHero::SkipIntro()
@@ -55,7 +55,7 @@ void ADungeonGameMode::CancelBossIntro()
 {
     BossIntroTime=-1;
     if(IntroAudio){IntroAudio->Stop();IntroAudio=nullptr;}
-    if(MusicComponent)MusicComponent->SetVolumeMultiplier(bMusicMuted?0:.23f);
+    RefreshMusicVolume();
 }
 void ADungeonGameMode::FinishBossIntro()
 {

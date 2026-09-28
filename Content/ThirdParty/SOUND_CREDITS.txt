@@ -1,0 +1,76 @@
+THE BEARD AND BLADE — THIRD-PARTY SOUND CREDITS
+
+Inventory Sound Effects — artisticdude (submitted by Ogrebane)
+https://opengameart.org/content/inventory-sound-effects
+License chosen: Creative Commons Attribution 3.0 Unported
+https://creativecommons.org/licenses/by/3.0/
+Used: leather_inventory.wav, cloth-inventory.wav, turn_page.wav.
+Adaptations: mono conversion, silence trimming, DC removal, fades, gain normalization.
+
+15 monster grunt/pain/death sounds — Michel Baradari
+https://opengameart.org/content/15-monster-gruntpaindeath-sounds
+License: Creative Commons Attribution 3.0 Unported
+https://creativecommons.org/licenses/by/3.0/
+Used: grunt1/2; deathb/d/e/r/s; painb/d/e/s.
+Adaptations: mono conversion, silence trimming, DC removal, fades, gain normalization;
+minor playback pitch variation. No endorsement by the original creators is implied.
+
+The following are licensed Creative Commons Zero 1.0:
+https://creativecommons.org/publicdomain/zero/1.0/
+
+RPG Sound Pack — artisticdude
+https://opengameart.org/content/rpg-sound-pack
+Used for doors/chests, UI, rolls, throwing, magic/teleport and impacts.
+
+Different steps on wood, stone, leaves, gravel and mud — TinyWorlds
+https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud
+Used: stone01.ogg; softened, normalized and converted to PCM.
+
+5 break, crunch impacts — Independent.nu (submitted by qubodup)
+https://opengameart.org/content/5-break-crunch-impacts
+Used: impactcrunch01–05; trimmed, normalized and converted to PCM.
+
+Explosions — EZduzziteh
+https://opengameart.org/content/explosions-4
+Used: explosion1_0.ogg; trimmed/faded shorter edits for explosion, tea and flashbang.
+
+Fantozzi's Footsteps — Fantozzi (single-step edits submitted by qubodup)
+https://opengameart.org/content/fantozzis-footsteps-grasssand-stone
+Used: Stone L1–L3 and R1–R3; softened and normalized.
+
+Swishes Sound Pack — artisticdude
+https://opengameart.org/content/swishes-sound-pack
+Used: swish 5/7/8/9, trimmed and normalized for weapon swings.
+
+Fantasy Weapons and Apparel SFX Library — Vehicle / Jan Schupke
+https://opengameart.org/content/fantasy-weapons-and-apparel-sfx-library
+Used: seax-unsheathe 01/03, trimmed and normalized for equipment swaps.
+
+Exact source-to-game filenames are recorded in AudioSource/Foley/manifest.json
+in the source repository. These licenses apply to the listed audio contributions,
+not the game's original code or artwork.
+
+The Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras,
+and Matthew Nanney. CC0: https://creativecommons.org/publicdomain/zero/1.0/
+https://opengameart.org/content/the-free-firearm-sound-library
+Used AR-15 D_32P/D_24P and AK-47 C_28P single-shot recordings.
+Modified: trimmed tails, mono conversion, level normalization and fades.
+
+Voices Sound Effects Library — Little Robot Sound Factory
+https://www.littlerobotsoundfactory.com
+https://opengameart.org/content/voices-sound-effects-library
+CC-BY 3.0: https://creativecommons.org/licenses/by/3.0/
+Used Human_Good_00–02, Human_Evil_01–02, Human_DyingBreath_00–02,
+Robot2_00–03. Modified: trimmed, normalized, mono, fades, slight runtime pitch.
+No endorsement by the original creator is implied.
+
+Engine/Mechanic working sound — jwiese
+https://opengameart.org/content/enginemechanic-working-sound
+CC0 option selected: https://creativecommons.org/publicdomain/zero/1.0/
+Used loop.flac, shortened, faded and normalized for Scout Drone flight.
+
+RPG Ambience - Dungeon — HitCtrl
+https://opengameart.org/content/rpg-ambience-dungeon
+CC-BY 3.0: https://creativecommons.org/licenses/by/3.0/
+Used for looping gameplay music. Modified: PCM16 conversion and peak attenuation;
+original loop boundaries preserved, low runtime mix gain. No endorsement implied.

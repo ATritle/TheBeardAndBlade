@@ -18,3 +18,12 @@
 *.pem
 __pycache__/
 *.pyc
+# Download caches and unused source-library recordings; curated WAVs remain tracked.
+/AudioSource/Foley/Expansion/
+/AudioSource/Foley/Footsteps/
+/AudioSource/Foley/Swishes/
+/AudioSource/Foley/Weapons/
+/AudioSource/Foley/*.zip
+/AudioSource/Foley/*.7z
+/AudioSource/Foley/Prepared/FoleyPreview.wav
+/Samples/
