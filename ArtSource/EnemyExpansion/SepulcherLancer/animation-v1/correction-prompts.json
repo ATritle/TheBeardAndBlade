@@ -1,0 +1,25 @@
+{
+  "northWalk": "Edit this exact sprite sheet. Preserve all 16 walking poses, 4x4 layout, body/cape/lance, pixel art and transparent background. Every character is seen directly FROM BEHIND facing north. Correct only coffin SHIELD perspective in all 16 cells: shield on anatomical LEFT (viewer left) must show its plain dark wooden/metal BACK with leather straps, not the decorative cross/skull front. Arm correctly behind shield, no new limbs. Keep lance in anatomical right/viewer-right hand. Ensure entire teal spear tip inside canvas with small clear top margin, no clipped tips. Do not mirror characters. Transparent alpha0, no shadows or haze.",
+  "attack": [
+    {
+      "d": "NE",
+      "p": "There are erroneously TWO coffin shields in many poses. Remove extra FRONT/right-side decorative cross/skull shield from every pose. Keep ONLY the one plain-backed strapped shield at viewer-left on anatomical LEFT arm. Anatomical RIGHT hand at viewer-right holds lance, unblocked. Back/cape perspective preserved."
+    },
+    {
+      "d": "N",
+      "p": "The middle row has an erroneous second spearhead on the BOTTOM shaft. Remove the bottom/right tip on poses5-8 and finish shaft with plain rounded dark pommel, keeping exactly ONE spearhead at top/front. All poses full rear, shield back/straps viewer-left."
+    },
+    {
+      "d": "SW",
+      "p": "Pose8 (second row fourth column) has lost its spearhead and seems to hold a stick behind the neck. Repair this pose as the next step after pose7: one complete lance held ONLY in anatomical RIGHT hand, drawn back at waist with point aimed southwest/viewer-left, shield still anatomical LEFT. Match spear and hand to neighboring poses. No extra arm."
+    },
+    {
+      "d": "W",
+      "p": "Edit this exact12-pose4x3 sprite sheet, preserve pixel art, poses, character, alpha transparency. Correct far-arm anatomy: this character faces LEFT profile. Anatomical LEFT arm holds the ONE foreground coffin shield. Anatomical RIGHT arm holds lance from the FAR side and must be occluded by torso/neck/shield where appropriate. Remove any erroneous extra near-side arm coming out of back or shield shoulder. Especially pose8 second-row right: remove extra arm visible on right behind cape; lance remains held by FAR hand hidden behind torso. Keep all12poses, onehand+lance and otherarm+shield, never two arms on same side. No other changes."
+    },
+    {
+      "d": "NW",
+      "p": "Edit this exact12-pose4x3 sprite sheet, preserve pixel art, poses, character, alpha transparency. Correct far-arm anatomy: this character faces REAR-LEFT northwest. Anatomical LEFT arm holds the ONE foreground coffin shield. Anatomical RIGHT arm holds lance from the FAR side and must be occluded by torso/neck/shield where appropriate. Remove any erroneous extra near-side arm coming out of back or shield shoulder. Especially last row: remove near-side arm emerging from ABOVE shield shoulder; lance thrust is held by far right hand, only small far gauntlet visible in front of helmet silhouette; back-right elbow may be partly visible, never disconnected. Keep all12poses, onehand+lance and otherarm+shield, never two arms on same side. No other changes."
+    }
+  ]
+}

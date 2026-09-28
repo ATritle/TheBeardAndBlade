@@ -1,0 +1,248 @@
+{
+  "tool": "Built-in image generation",
+  "jobs": [
+    {
+      "file": "walk-N-back.png",
+      "state": "walk",
+      "direction": "N",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses full REAR facing north away from viewer, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-N-fixed.png",
+      "state": "attack-a",
+      "direction": "N",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses full REAR facing north away from viewer, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-N.png",
+      "state": "attack-b",
+      "direction": "N",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses full REAR facing north away from viewer, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-NE.png",
+      "state": "walk",
+      "direction": "NE",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses rear-right three-quarter facing northeast, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-NE-fixed.png",
+      "state": "attack-a",
+      "direction": "NE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses rear-right three-quarter facing northeast, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-NE.png",
+      "state": "attack-b",
+      "direction": "NE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses rear-right three-quarter facing northeast, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-E.png",
+      "state": "walk",
+      "direction": "E",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses RIGHT profile facing east, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-E.png",
+      "state": "attack-a",
+      "direction": "E",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses RIGHT profile facing east, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-E.png",
+      "state": "attack-b",
+      "direction": "E",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses RIGHT profile facing east, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-SE.png",
+      "state": "walk",
+      "direction": "SE",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses front-right three-quarter facing southeast, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-SE.png",
+      "state": "attack-a",
+      "direction": "SE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses front-right three-quarter facing southeast, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-SE.png",
+      "state": "attack-b",
+      "direction": "SE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses front-right three-quarter facing southeast, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-S.png",
+      "state": "walk",
+      "direction": "S",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses full FRONT facing south toward viewer, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-S.png",
+      "state": "attack-a",
+      "direction": "S",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses full FRONT facing south toward viewer, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-S.png",
+      "state": "attack-b",
+      "direction": "S",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses full FRONT facing south toward viewer, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-SW.png",
+      "state": "walk",
+      "direction": "SW",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses front-left three-quarter facing southwest, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-SW-fixed.png",
+      "state": "attack-a",
+      "direction": "SW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses front-left three-quarter facing southwest, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-SW.png",
+      "state": "attack-b",
+      "direction": "SW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses front-left three-quarter facing southwest, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-W.png",
+      "state": "walk",
+      "direction": "W",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses LEFT profile facing west, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-W-fixed.png",
+      "state": "attack-a",
+      "direction": "W",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses LEFT profile facing west, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-W.png",
+      "state": "attack-b",
+      "direction": "W",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses LEFT profile facing west, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "walk-NW.png",
+      "state": "walk",
+      "direction": "NW",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly16 complete poses,4columns x4rows. ALL poses rear-left three-quarter facing northwest, never turn. 16 sequential walking poses completing one smooth gait cycle: clear alternating planted/passing legs, heel lift, weight transfer, subtle chest motion, burgundy cloth sway; shield held steady, lance close and upright; no attack. First and last join. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Square canvas."
+    },
+    {
+      "file": "attack-a-NW-fixed.png",
+      "state": "attack-a",
+      "direction": "NW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses rear-left three-quarter facing northwest, never turn. 12 sequential FIRST HALF of forward lance THRUST: poses1-4 plant feet with shield leading,5-8 lower and draw back lance in RIGHT hand,9-12 thrust point FORWARD toward facing direction, end extended. Anatomical LEFT shield stays held in guard. No throw/release of physical lance. Short forward reach, keep whole spear on canvas. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "attack-b-NW-hidden.png",
+      "state": "attack-b",
+      "direction": "NW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Sepulcher Lancer pixel-art animation. Exactly12 complete poses,4columns x3rows. ALL poses rear-left three-quarter facing northwest, never turn. 12 sequential SECOND HALF of lance THRUST: start in extended strike pose, retract RIGHT-hand lance, settle weight and return to guarded ready stance. LEFT shield remains guard throughout; no extra strike or backswing. Physical lance never leaves hand. Reference defines tall blackened plate knight, barred crown helmet, burgundy cloth, coffin shield ivory cross/skull, bone-tipped dark lance with tiny teal tip. Anatomical LEFT arm shield, anatomical RIGHT hand lance ALWAYS. In front shield viewer-right/lance viewer-left; rear shield viewer-left/lance viewer-right. Far limbs correctly occluded by body/shield, no extra arms emerging from back. Same compact crisp pixelart and palette. Do not copy background or incorrect handedness from reference. Weapon/shield sizes constant, whole body stable scale. Large clear gutters: each full character AND spear no more than70% of cell dimensions. Entire weapon, boots and glow inside own cell, no shared pixels with neighbors. TRUE transparent alpha0 background, no fog, haze, shadows, ground, borders, grid, text, motion trails or painted checkerboard. Teal only tiny crisp spear-tip accent. Landscape4:3 canvas."
+    },
+    {
+      "file": "projectile.png",
+      "state": "projectile",
+      "direction": "FX",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: stylized-concept. Sepulcher Lancer game pixel-art effects matching fifth knight bone/teal lance in reference. Exactly12 separate poses,4columns x3rows in reading order. 12 looping travel poses of ONE spectral lance, aimed EAST/right: recognizable slender bone spearhead on right, dark spectral shaft, teal ghost-fire tail streaming left. Shaft/head identical stable size/position; animate only subtle teal trail curling. No character, no physical hand. Crisp compact pixelart with restrained teal, ivory, dark charcoal. Background genuinely transparent alpha0. No fog/background haze, checkerboard, text, grids, scene or shadows. Entire effect inside each cell with25%clear margins. Landscape4:3canvas."
+    },
+    {
+      "file": "hero-impact.png",
+      "state": "hero-impact",
+      "direction": "FX",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: stylized-concept. Sepulcher Lancer game pixel-art effects matching fifth knight bone/teal lance in reference. Exactly12 separate poses,4columns x3rows in reading order. 12 sequential player-hit effects only, no person. First3 compact teal-white flash and small spectral shock ring;4-7 sharp ivory/teal spear fragments disperse outward;8-12 fragments dissolve into tiny fading teal flecks. Fixed collision center. No lingering gameplay aura. Crisp compact pixelart with restrained teal, ivory, dark charcoal. Background genuinely transparent alpha0. No fog/background haze, checkerboard, text, grids, scene or shadows. Entire effect inside each cell with25%clear margins. Landscape4:3canvas."
+    },
+    {
+      "file": "ground-impact.png",
+      "state": "ground-impact",
+      "direction": "FX",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: stylized-concept. Sepulcher Lancer game pixel-art effects matching fifth knight bone/teal lance in reference. Exactly16 separate poses,4columns x4rows in reading order. 16 sequential environment-hit effects at a fixed point. Start IMMEDIATELY with spearhead shattering on collision, not projectile approaching.1-4 ivory/teal shard burst,5-9 broken spectral shaft and spearhead pieces scatter,10-16 pieces dissolve to sparse tiny teal flecks. No actual floor/background. No target circle. Crisp compact pixelart with restrained teal, ivory, dark charcoal. Background genuinely transparent alpha0. No fog/background haze, checkerboard, text, grids, scene or shadows. Entire effect inside each cell with25%clear margins. Squarecanvas."
+    }
+  ]
+}
