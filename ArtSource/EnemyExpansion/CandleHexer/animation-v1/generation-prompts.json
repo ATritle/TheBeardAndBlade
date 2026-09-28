@@ -1,0 +1,248 @@
+{
+  "tool": "Built-in image generation",
+  "jobs": [
+    {
+      "file": "walk-N.png",
+      "state": "walk",
+      "direction": "N",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face NORTH, full rear, no dark face opening visible; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-left, free RIGHT screen-right. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-N.png",
+      "state": "attack-a",
+      "direction": "N",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face NORTH, full rear, no dark face opening visible; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-left, free RIGHT screen-right. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-N.png",
+      "state": "attack-b",
+      "direction": "N",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face NORTH, full rear, no dark face opening visible; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-left, free RIGHT screen-right. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-NE.png",
+      "state": "walk",
+      "direction": "NE",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face NORTHEAST, rear-right three-quarter; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff in far LEFT hand; right free arm on near/right side. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-NE.png",
+      "state": "attack-a",
+      "direction": "NE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face NORTHEAST, rear-right three-quarter; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff in far LEFT hand; right free arm on near/right side. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-NE.png",
+      "state": "attack-b",
+      "direction": "NE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face NORTHEAST, rear-right three-quarter; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff in far LEFT hand; right free arm on near/right side. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-E.png",
+      "state": "walk",
+      "direction": "E",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face EAST, clear right profile; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff in far LEFT hand; near RIGHT arm empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-E.png",
+      "state": "attack-a",
+      "direction": "E",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face EAST, clear right profile; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff in far LEFT hand; near RIGHT arm empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-E.png",
+      "state": "attack-b",
+      "direction": "E",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face EAST, clear right profile; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff in far LEFT hand; near RIGHT arm empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-SE.png",
+      "state": "walk",
+      "direction": "SE",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face SOUTHEAST, front-right three-quarter; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-right, free RIGHT screen-left. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-SE.png",
+      "state": "attack-a",
+      "direction": "SE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face SOUTHEAST, front-right three-quarter; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-right, free RIGHT screen-left. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-SE.png",
+      "state": "attack-b",
+      "direction": "SE",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face SOUTHEAST, front-right three-quarter; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-right, free RIGHT screen-left. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-S.png",
+      "state": "walk",
+      "direction": "S",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face SOUTH, full front; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-right, free RIGHT screen-left. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-S.png",
+      "state": "attack-a",
+      "direction": "S",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face SOUTH, full front; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-right, free RIGHT screen-left. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-S.png",
+      "state": "attack-b",
+      "direction": "S",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face SOUTH, full front; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff LEFT screen-right, free RIGHT screen-left. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-SW.png",
+      "state": "walk",
+      "direction": "SW",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face SOUTHWEST, front-left three-quarter; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT screen-right; far RIGHT screen-left empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-SW.png",
+      "state": "attack-a",
+      "direction": "SW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face SOUTHWEST, front-left three-quarter; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT screen-right; far RIGHT screen-left empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-SW.png",
+      "state": "attack-b",
+      "direction": "SW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face SOUTHWEST, front-left three-quarter; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT screen-right; far RIGHT screen-left empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-W.png",
+      "state": "walk",
+      "direction": "W",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face WEST, clear left profile; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT arm, far RIGHT arm empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-W-grip.png",
+      "state": "attack-a",
+      "direction": "W",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face WEST, clear left profile; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT arm, far RIGHT arm empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-W.png",
+      "state": "attack-b",
+      "direction": "W",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face WEST, clear left profile; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT arm, far RIGHT arm empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "walk-NW-occlusion.png",
+      "state": "walk",
+      "direction": "NW",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 16 separate FULL CHARACTER poses in 4 columns x 4 rows, read left to right then down. ALL poses face NORTHWEST, rear-left three-quarter; never turn during sequence. 16 distinct ordered hovering movement poses completing one smooth loop: gentle vertical bob, flowing robe tails alternately left/right, skeletal free arm sways subtly, staff remains held steady in left hand, candle flames flicker in place. No legs, feet, walking steps or casting. First and last poses join smoothly. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT screen-left; far RIGHT screen-right empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Square canvas."
+    },
+    {
+      "file": "attack-a-NW-hidden.png",
+      "state": "attack-a",
+      "direction": "NW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face NORTHWEST, rear-left three-quarter; never turn during sequence. 12 ordered first-half spellcasting poses: 1-4 brace and draw the empty RIGHT hand inward; 5-8 raise RIGHT casting palm gathering a small compact purple spark in palm; 9-12 extend RIGHT arm toward facing direction to RELEASE. Left hand keeps candle staff. No detached projectile (it is a separate effect), no large glow, no wave across the sheet. End in extended casting pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT screen-left; far RIGHT screen-right empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "attack-b-NW-occlusion.png",
+      "state": "attack-b",
+      "direction": "NW",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: identity-preserve. Asset: Candle Hexer animation sprite sheet. Create exactly 12 separate FULL CHARACTER poses in 4 columns x 3 rows, read left to right then down. ALL poses face NORTHWEST, rear-left three-quarter; never turn during sequence. 12 ordered second-half followthrough/recovery poses: start in extended RIGHT casting-palm pose matching preceding sheet, hold arm briefly, then gradually lower RIGHT hand to original ready posture. LEFT hand maintains staff. Do not cast a second time. No detached projectile. Finish matching hovering ready pose. The attached reference defines the same compact pixel-art character: floating burgundy ragged hood/robes, dark faceless opening, attached ivory candles with tiny violet flames, skeletal hands, short dark staff topped by candle. Equipment constraint overrides any mistaken reference pose: anatomical LEFT hand ALWAYS holds ONE candle staff, anatomical RIGHT hand ALWAYS free/casting; staff near LEFT screen-left; far RIGHT screen-right empty. No extra arms, no hand swaps, no new costume. Keep original compact crisp pixel art, limited palette, same body proportions, no blur or illustration smoothing. Every entire robe, flame, finger and staff fits inside its cell with at least 20% clear margin and generous gutters. Stable body position and scale, no floor. BACKGROUND IS TRUE TRANSPARENT ALPHA ZERO: remove the reference board background entirely, no colored haze, smoke, fog, ground shadow, outer glow clouds, checkerboard or grid, no text. Candle flames have compact opaque purple pixels only. Landscape 4:3 canvas."
+    },
+    {
+      "file": "projectile.png",
+      "state": "projectile",
+      "direction": "FX",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: stylized-concept. Pixel-art game VFX sprite sheet for Candle Hexer matching attached concept's FOURTH enemy violet/ivory magic. Exactly 12 isolated frames in 4 columns x3 rows. One small violet wax comet in each cell, all traveling EAST/right. Ivory molten wax core at right, tapering violet fire tail flowing to left. Twelve sequential looping variations in flame curl and wax flicker, constant core size and position. No character. Head must point right, never turn. Tail length within cell. Crisp compact retro pixel art, no blur. TRUE transparent alpha0 background, no backdrop, checkerboard, text, grid, smoke haze, rectangular glow, no neighboring frame overlap. Purple light only in small discrete effect pixels, not a full-image glow. Each COMPLETE effect fits with at least25% transparent margin on all sides. Landscape4:3 canvas."
+    },
+    {
+      "file": "hero-impact.png",
+      "state": "hero-impact",
+      "direction": "FX",
+      "frames": 12,
+      "columns": 4,
+      "rows": 3,
+      "prompt": "Use case: stylized-concept. Pixel-art game VFX sprite sheet for Candle Hexer matching attached concept's FOURTH enemy violet/ivory magic. Exactly 12 isolated frames in 4 columns x3 rows. Twelve sequential one-shot HIT effect poses for a violet wax comet striking the adventurer. Show ONLY effect, never player/body: 1-3 compact violet-white flash at center, 4-7 ivory wax chips radiating outward with purple sparks, 8-12 sparks and chips extinguish into smaller faint pixel flecks. Fixed impact center, no lingering aura or gameplay puddle. Crisp compact retro pixel art, no blur. TRUE transparent alpha0 background, no backdrop, checkerboard, text, grid, smoke haze, rectangular glow, no neighboring frame overlap. Purple light only in small discrete effect pixels, not a full-image glow. Each COMPLETE effect fits with at least25% transparent margin on all sides. Landscape4:3 canvas."
+    },
+    {
+      "file": "ground-impact.png",
+      "state": "ground-impact",
+      "direction": "FX",
+      "frames": 16,
+      "columns": 4,
+      "rows": 4,
+      "prompt": "Use case: stylized-concept. Pixel-art game VFX sprite sheet for Candle Hexer matching attached concept's FOURTH enemy violet/ivory magic. Exactly 16 isolated frames in 4 columns x4 rows. Sixteen sequential one-shot ENVIRONMENT IMPACT effect poses for violet wax comet striking dungeon floor or wall: 1-4 small ivory wax burst with purple flash, 5-9 outward flying wax chips and low splash, 10-16 purple flame extinguishes and wax splash dwindles to a few small flecks. Effects only, NO visible floor, ground circle or tile. Fixed center. Not a persistent damage zone. Crisp compact retro pixel art, no blur. TRUE transparent alpha0 background, no backdrop, checkerboard, text, grid, smoke haze, rectangular glow, no neighboring frame overlap. Purple light only in small discrete effect pixels, not a full-image glow. Each COMPLETE effect fits with at least25% transparent margin on all sides. Square canvas."
+    }
+  ]
+}

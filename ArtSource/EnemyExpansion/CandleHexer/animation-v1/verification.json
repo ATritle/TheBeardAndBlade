@@ -1,0 +1,10 @@
+{
+  "sourceSheets": 27,
+  "characterSourceCells": 320,
+  "effectSourceCells": 40,
+  "selectedEffectPlaybackCells": 38,
+  "emptyCells": 0,
+  "overlappingPoseMaskRows": 0,
+  "scriptPlaybackCheck": "Passed minimal-DOM check; not visual browser validation",
+  "ue5Tested": false
+}

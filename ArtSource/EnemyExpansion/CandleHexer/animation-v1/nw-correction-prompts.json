@@ -1,0 +1,25 @@
+{
+  "tool": "Built-in image generation",
+  "edits": [
+    {
+      "state": "walk",
+      "prompt": "Precise anatomy edit of attached Candle Hexer sprite sheet. Preserve 16 poses,4columns x4rows, exact character, palette, northwest facing, sizes, candle wand in LEFT hand and all robes/candles/flames. The character faces upper LEFT and we see its left side/back. The free RIGHT hand incorrectly sticks out from the BACK on the screen-RIGHT edge of each figure. REMOVE that screen-right skeletal hand AND its protruding arm in EVERY pose and reconstruct uninterrupted burgundy cloak there. Right shoulder/upper arm are on FAR side and must be fully occluded by torso. Keep RIGHT arm and hand completely HIDDEN behind the torso in ALL movement poses. Only the left skeletal wand-holding hand should be visible. No extra arms or back hands. Do NOT move or remove the left wand or its gripping hand. Do not change facing or mirror sprite. Crisp pixel-art and TRUE transparent alpha0 background, no fog, checkerboard or new glow. Ample transparent gutters; all silhouettes complete.",
+      "file": "walk-NW-occlusion.png"
+    },
+    {
+      "state": "attack-a",
+      "prompt": "Precise anatomy edit of attached Candle Hexer sprite sheet. Preserve 12 poses,4columns x3rows, exact character, palette, northwest facing, sizes, candle wand in LEFT hand and all robes/candles/flames. The character faces upper LEFT and we see its left side/back. The free RIGHT hand incorrectly sticks out from the BACK on the screen-RIGHT edge of each figure. REMOVE that screen-right skeletal hand AND its protruding arm in EVERY pose and reconstruct uninterrupted burgundy cloak there. Right shoulder/upper arm are on FAR side and must be fully occluded by torso. For casting, show at most small RIGHT fingertips/palm appearing on the SCREEN-LEFT FRONT edge near the wand, behind/partly occluded by the LEFT wand-holding hand, NOT on screen-right/back. Casting arm remains mostly hidden behind torso. Preserve the charge/release progression with tiny purple palm spark beside the wand on front-left side; recovery lowers it behind torso. No extra arms or back hands. Do NOT move or remove the left wand or its gripping hand. Do not change facing or mirror sprite. Crisp pixel-art and TRUE transparent alpha0 background, no fog, checkerboard or new glow. Ample transparent gutters; all silhouettes complete.",
+      "file": "attack-a-NW-occlusion.png"
+    },
+    {
+      "state": "attack-b",
+      "prompt": "Precise anatomy edit of attached Candle Hexer sprite sheet. Preserve 12 poses,4columns x3rows, exact character, palette, northwest facing, sizes, candle wand in LEFT hand and all robes/candles/flames. The character faces upper LEFT and we see its left side/back. The free RIGHT hand incorrectly sticks out from the BACK on the screen-RIGHT edge of each figure. REMOVE that screen-right skeletal hand AND its protruding arm in EVERY pose and reconstruct uninterrupted burgundy cloak there. Right shoulder/upper arm are on FAR side and must be fully occluded by torso. For casting, show at most small RIGHT fingertips/palm appearing on the SCREEN-LEFT FRONT edge near the wand, behind/partly occluded by the LEFT wand-holding hand, NOT on screen-right/back. Casting arm remains mostly hidden behind torso. Preserve the charge/release progression with tiny purple palm spark beside the wand on front-left side; recovery lowers it behind torso. No extra arms or back hands. Do NOT move or remove the left wand or its gripping hand. Do not change facing or mirror sprite. Crisp pixel-art and TRUE transparent alpha0 background, no fog, checkerboard or new glow. Ample transparent gutters; all silhouettes complete.",
+      "file": "attack-b-NW-occlusion.png"
+    },
+    {
+      "state": "attack-a final",
+      "file": "attack-a-NW-hidden.png",
+      "prompt": "Precise removal edit. In ALL12 poses remove the free skeletal RIGHT hand and ALL purple casting fire sticking out of the SCREEN-RIGHT BACK of this hooded character. In cells6,7,9,10,11 especially there are still fingers and a purple spark on the back-right silhouette: remove them completely. Fill their attachment with uninterrupted burgundy cloth or transparent background outside cloak. The anatomical RIGHT arm and hand must be ENTIRELY HIDDEN behind torso in ALL12 poses. There should be exactly ONE visible hand per pose: the LEFT hand grasping the candle wand on screen-left. Preserve that left gripping hand and wand exactly. Keep the existing little candle flames on the wand/shoulder candles, but NO free-floating purple fire behind back. Preserve12 poses,4columns x3rows, original camera, dimensions, purple/burgundy pixel palette, robes, transparent alpha0 background. Do not add new hands, sparks, objects or redesign anything. Only remove the erroneous rear hand/fire. Casting from far arm is occluded in this angle."
+    }
+  ]
+}
