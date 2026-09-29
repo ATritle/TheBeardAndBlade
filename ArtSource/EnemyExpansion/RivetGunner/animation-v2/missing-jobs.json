@@ -1,0 +1,30 @@
+[
+  {
+    "file": "attack-b-NE-facing-v3.png",
+    "state": "attack-b",
+    "direction": "NE",
+    "frames": 12,
+    "columns": 4,
+    "rows": 3,
+    "prompt": "Continue directly from the LAST pose of the provided attack sheet. Do NOT mirror it. Keep exactly the same side for tails, backpacks, weapons and armor. MOST IMPORTANT: ALL poses face NORTHEAST, BACK-RIGHT view away from viewer, show back and right-pointing silhouette. Reference is SAME character in the EXACT required direction. Preserve camera, facing, anatomy, equipment side and asymmetry precisely. Use case: identity-preserve. Game pixel-art animation for Rivet Gunner. Squat scrap-armored worker with a chunky industrial rivet gun, bright amber barrel indicator. Match exact reference silhouette, materials and color palette with compact crisp pixel clusters. Right hand trigger, left supports barrel, same gun always. Full body, stable proportions and size. Correct far-limb occlusion; NO extra arms or fists sprouting from back.  Exactly12 poses in4columns x3rows, row-major order. ALL poses rear-right three-quarter northeast, never turn. Attack: Single visible rivet shot with slower gameplay speed. SECOND HALF: start with extended strike/release pose, then smoothly retract and return to ready by pose12. No second attack, no replay of anticipation. Every complete character including ALL weapons fits inside its own cell with 20% clear margins on ALL sides. TRUE transparent alpha0 background; no haze, ground, shadows, painted checkerboard, text, labels, grids or trails. Do not mirror opposing directions.  Landscape4:3canvas. IMPORTANT: character art ONLY. No detached flying projectile, blast, splash, targets or other enemies in any cell. Draw release gesture or recoil, with travelling projectile supplied in separate FX asset. OVERRIDE TIMELINE: frame1 MUST be fully extended strike/release aftermath, NEVER ready stance. Row1 holds and begins recoil, row2 retracts, row3 settles to ready. ALL12frames are AFTER the attack. Do NOT draw a complete attack cycle. Do NOT draw fresh windup or a second projectile release. HAND / PERSPECTIVE LOCK: In this BACK-RIGHT view anatomical right arm is the NEAR arm, left arm is FAR. Follow the anatomical handedness specified above even if a reference board pose has a conflicting grip. Do not exchange hands or mirror the character. Shoulder and elbow of every visible hand must belong to the correct side; far limbs may be hidden naturally.",
+    "enemy": "Rivet Gunner",
+    "slug": "rivet-gunner",
+    "root": "ArtSource/EnemyExpansion/RivetGunner/animation-v2",
+    "reference": "ArtSource/EnemyExpansion/RivetGunner/animation-v2/attack-a-NE-facing-v3.png",
+    "dependsOn": "attack-a-NE-facing-v3.png"
+  },
+  {
+    "file": "attack-b-E-facing-v3.png",
+    "state": "attack-b",
+    "direction": "E",
+    "frames": 12,
+    "columns": 4,
+    "rows": 3,
+    "prompt": "Continue directly from the LAST pose of the provided attack sheet. Do NOT mirror it. Keep exactly the same side for tails, backpacks, weapons and armor. MOST IMPORTANT: ALL poses face EAST, strict RIGHT side profile; face and attack point to RIGHT edge. Reference is SAME character in the EXACT required direction. Preserve camera, facing, anatomy, equipment side and asymmetry precisely. Use case: identity-preserve. Game pixel-art animation for Rivet Gunner. Squat scrap-armored worker with a chunky industrial rivet gun, bright amber barrel indicator. Match exact reference silhouette, materials and color palette with compact crisp pixel clusters. Right hand trigger, left supports barrel, same gun always. Full body, stable proportions and size. Correct far-limb occlusion; NO extra arms or fists sprouting from back.  Exactly12 poses in4columns x3rows, row-major order. ALL poses right profile east, never turn. Attack: Single visible rivet shot with slower gameplay speed. SECOND HALF: start with extended strike/release pose, then smoothly retract and return to ready by pose12. No second attack, no replay of anticipation. Every complete character including ALL weapons fits inside its own cell with 20% clear margins on ALL sides. TRUE transparent alpha0 background; no haze, ground, shadows, painted checkerboard, text, labels, grids or trails. Do not mirror opposing directions.  Landscape4:3canvas. IMPORTANT: character art ONLY. No detached flying projectile, blast, splash, targets or other enemies in any cell. Draw release gesture or recoil, with travelling projectile supplied in separate FX asset. OVERRIDE TIMELINE: frame1 MUST be fully extended strike/release aftermath, NEVER ready stance. Row1 holds and begins recoil, row2 retracts, row3 settles to ready. ALL12frames are AFTER the attack. Do NOT draw a complete attack cycle. Do NOT draw fresh windup or a second projectile release. HAND / PERSPECTIVE LOCK: In this RIGHT profile anatomical right arm is NEAR and left arm is FAR; far arm can be occluded. Follow the anatomical handedness specified above even if a reference board pose has a conflicting grip. Do not exchange hands or mirror the character. Shoulder and elbow of every visible hand must belong to the correct side; far limbs may be hidden naturally.",
+    "enemy": "Rivet Gunner",
+    "slug": "rivet-gunner",
+    "root": "ArtSource/EnemyExpansion/RivetGunner/animation-v2",
+    "reference": "ArtSource/EnemyExpansion/RivetGunner/animation-v2/attack-a-E-facing-v3.png",
+    "dependsOn": "attack-a-E-facing-v3.png"
+  }
+]

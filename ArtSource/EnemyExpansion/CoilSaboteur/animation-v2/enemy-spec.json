@@ -1,0 +1,85 @@
+{
+  "id": "blackout-bunker-coil-saboteur",
+  "dungeon": "Blackout Bunker",
+  "dungeonKey": "blackout-bunker",
+  "name": "Coil Saboteur",
+  "provisionalTier": "Medium",
+  "combatRole": "Spell-tech",
+  "proposedBaseHP": 80,
+  "rawPrimaryDamage": 16,
+  "appearance": "Masked technician with a glowing blue coil backpack, insulated gloves and a forked conductor.",
+  "attack": "Charges then fires a slowly curving electrical orb.",
+  "projectileConcept": "Coil orb: blue-white rotating electric arcs, limited initial homing; player impact brief electrical crackle; floor/wall impact grounded sparks.",
+  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "animation": {
+    "directions": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+    ],
+    "framesPerDirection": {
+      "idle": 8,
+      "move": 16,
+      "primaryAttack": 24,
+      "hurt": 6,
+      "death": 12
+    },
+    "totalCharacterFrames": 528,
+    "primaryAttackTiming": {
+      "anticipationFrames": [
+        0,
+        9
+      ],
+      "activeFrames": [
+        10,
+        12
+      ],
+      "recoveryFrames": [
+        13,
+        23
+      ],
+      "damageOrReleaseFrame": 10
+    },
+    "fastMovementOptionalFramesPerDirection": 16
+  },
+  "combat": {
+    "windupSeconds": 0.9,
+    "recoverySeconds": 1.2,
+    "damagePolicy": "Raw attack damage before hero armor; no additional legacy 1.8 multiplier for these profiles.",
+    "contactDamage": "none; damage comes from an explicit attack event",
+    "freedomImmune": false
+  },
+  "projectile": {
+    "id": "fx-blackout-bunker-4",
+    "travelFrames": 12,
+    "adventurerImpactFrames": 12,
+    "environmentImpactFrames": 16,
+    "travelDirections": "Draw authored east-facing projectile rotated to velocity where silhouette permits; directional variants for strongly asymmetric projectiles.",
+    "speedLogicalPixelsPerSecond": 230,
+    "maxLifeSeconds": 2.6,
+    "tracking": {
+      "turnRateDegreesPerSecond": 60,
+      "maxSeconds": 0.65,
+      "cutoffDistance": 100,
+      "afterDodge": "Permanently lose target; continue on current heading; no reacquire."
+    },
+    "arc": false,
+    "areaRadius": 0,
+    "collision": "Swept segment test against hero hurt shape and environment; resolve earliest hit exactly once.",
+    "damage": "Direct hit and blast cannot both damage the same player. Apply statuses only if damage hit was accepted.",
+    "expiry": "Dissipate harmlessly; do not explode on arbitrary lifetime expiry.",
+    "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
+  },
+  "sourceProgress": {
+    "selectedSheetsSaved": 51,
+    "selectedSheetsPlanned": 51,
+    "visualReviewComplete": false,
+    "ueImportTested": false,
+    "status": "INCOMPLETE_REVIEW_DRAFT"
+  }
+}

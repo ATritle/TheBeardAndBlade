@@ -1,0 +1,65 @@
+{
+  "id": "blackout-bunker-breach-hound",
+  "dungeon": "Blackout Bunker",
+  "dungeonKey": "blackout-bunker",
+  "name": "Breach Hound",
+  "provisionalTier": "Medium",
+  "combatRole": "Melee",
+  "proposedBaseHP": 105,
+  "rawPrimaryDamage": 22,
+  "appearance": "Four-legged armored mechanical hound with red glass eye and an exposed piston jaw.",
+  "attack": "Crouches, commits to a straight pounce, then recovers.",
+  "projectileConcept": "none",
+  "assetStatus": "SOURCE_SHEETS_SAVED_REVIEW_REQUIRED",
+  "animation": {
+    "directions": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+    ],
+    "framesPerDirection": {
+      "idle": 8,
+      "move": 16,
+      "primaryAttack": 24,
+      "hurt": 6,
+      "death": 12
+    },
+    "totalCharacterFrames": 528,
+    "primaryAttackTiming": {
+      "anticipationFrames": [
+        0,
+        9
+      ],
+      "activeFrames": [
+        10,
+        12
+      ],
+      "recoveryFrames": [
+        13,
+        23
+      ],
+      "damageOrReleaseFrame": 10
+    },
+    "fastMovementOptionalFramesPerDirection": 16
+  },
+  "combat": {
+    "windupSeconds": 0.9,
+    "recoverySeconds": 1.2,
+    "damagePolicy": "Raw attack damage before hero armor; no additional legacy 1.8 multiplier for these profiles.",
+    "contactDamage": "none; damage comes from an explicit attack event",
+    "freedomImmune": false
+  },
+  "projectile": null,
+  "sourceProgress": {
+    "selectedSheetsSaved": 50,
+    "selectedSheetsPlanned": 50,
+    "visualReviewComplete": false,
+    "ueImportTested": false,
+    "status": "INCOMPLETE_REVIEW_DRAFT"
+  }
+}

@@ -1,0 +1,177 @@
+[
+  {
+    "slug": "trench-shivver",
+    "root": "ArtSource/EnemyExpansion/TrenchShivver/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/blackout-bunker-concepts.png",
+    "prompt": "Use ONLY character number 1 from LEFT on the concept board as identity reference: Trench Shivver. Lean masked bunker scavenger, padded olive jacket, short trench knife and battered goggles. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "rivet-gunner",
+    "root": "ArtSource/EnemyExpansion/RivetGunner/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/blackout-bunker-concepts.png",
+    "prompt": "Use ONLY character number 2 from LEFT on the concept board as identity reference: Rivet Gunner. Squat scrap-armored worker with a chunky industrial rivet gun, bright amber barrel indicator. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "breach-hound",
+    "root": "ArtSource/EnemyExpansion/BreachHound/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/blackout-bunker-concepts.png",
+    "prompt": "Use ONLY character number 3 from LEFT on the concept board as identity reference: Breach Hound. Four-legged armored mechanical hound with red glass eye and an exposed piston jaw. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "coil-saboteur",
+    "root": "ArtSource/EnemyExpansion/CoilSaboteur/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/blackout-bunker-concepts.png",
+    "prompt": "Use ONLY character number 4 from LEFT on the concept board as identity reference: Coil Saboteur. Masked technician with a glowing blue coil backpack, insulated gloves and a forked conductor. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "bunker-bulwark",
+    "root": "ArtSource/EnemyExpansion/BunkerBulwark/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/blackout-bunker-concepts.png",
+    "prompt": "Use ONLY character number 5 from LEFT on the concept board as identity reference: Bunker Bulwark. Broad riot-shield soldier in charcoal plate with a shoulder-mounted compact grenade launcher. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "silkfang-skitter",
+    "root": "ArtSource/EnemyExpansion/SilkfangSkitter/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/webroot-hollows-concepts.png",
+    "prompt": "Use ONLY character number 1 from LEFT on the concept board as identity reference: Silkfang Skitter. Low six-legged violet arachnid with oversized pale fangs, mossy abdomen and silk tufts. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "briar-spitter",
+    "root": "ArtSource/EnemyExpansion/BriarSpitter/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/webroot-hollows-concepts.png",
+    "prompt": "Use ONLY character number 2 from LEFT on the concept board as identity reference: Briar Spitter. Walking thorn seedpod with root feet, thorny collar and a trumpet-like plant mouth. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "mossmaw-stalker",
+    "root": "ArtSource/EnemyExpansion/MossmawStalker/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/webroot-hollows-concepts.png",
+    "prompt": "Use ONLY character number 3 from LEFT on the concept board as identity reference: Mossmaw Stalker. Root-and-bark quadruped with a hollow jaw, hanging moss and crooked branch antlers. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "sporebell-witch",
+    "root": "ArtSource/EnemyExpansion/SporebellWitch/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/webroot-hollows-concepts.png",
+    "prompt": "Use ONLY character number 4 from LEFT on the concept board as identity reference: Sporebell Witch. Bell-shaped mushroom sorceress with violet gills, woven root arms and a fungal staff. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "thornweave-sentinel",
+    "root": "ArtSource/EnemyExpansion/ThornweaveSentinel/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/webroot-hollows-concepts.png",
+    "prompt": "Use ONLY character number 5 from LEFT on the concept board as identity reference: Thornweave Sentinel. Tall woven root guardian with a spider-silk mantle, one massive thorn arm and glowing violet core. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "rimeclaw-cub",
+    "root": "ArtSource/EnemyExpansion/RimeclawCub/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/glacial-reliquary-concepts.png",
+    "prompt": "Use ONLY character number 1 from LEFT on the concept board as identity reference: Rimeclaw Cub. Compact frost beast with ivory fur, icy front claws and a small crystal spine. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "icicle-flinger",
+    "root": "ArtSource/EnemyExpansion/IcicleFlinger/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/glacial-reliquary-concepts.png",
+    "prompt": "Use ONLY character number 2 from LEFT on the concept board as identity reference: Icicle Flinger. Imp-like ice scavenger in torn blue cloth holding a bundle of oversized icicles. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "permafrost-templar",
+    "root": "ArtSource/EnemyExpansion/PermafrostTemplar/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/glacial-reliquary-concepts.png",
+    "prompt": "Use ONLY character number 3 from LEFT on the concept board as identity reference: Permafrost Templar. Heavy blue-steel cathedral knight with frosted pauldrons and a broad ice-headed hammer. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "snowveil-oracle",
+    "root": "ArtSource/EnemyExpansion/SnowveilOracle/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/glacial-reliquary-concepts.png",
+    "prompt": "Use ONLY character number 4 from LEFT on the concept board as identity reference: Snowveil Oracle. Floating masked oracle in an ivory hood with a ring of small ice fragments. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "glacierback-ram",
+    "root": "ArtSource/EnemyExpansion/GlacierbackRam/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/glacial-reliquary-concepts.png",
+    "prompt": "Use ONLY character number 5 from LEFT on the concept board as identity reference: Glacierback Ram. Large shaggy ram with a glacier ridge on its back, dark hooves and curved transparent ice horns. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "coalgnash",
+    "root": "ArtSource/EnemyExpansion/Coalgnash/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/cinder-foundry-concepts.png",
+    "prompt": "Use ONLY character number 1 from LEFT on the concept board as identity reference: Coalgnash. Low charcoal goblin-like creature with cracked ember skin, coal teeth and oversized soot-black hands. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "cinder-pitcher",
+    "root": "ArtSource/EnemyExpansion/CinderPitcher/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/cinder-foundry-concepts.png",
+    "prompt": "Use ONLY character number 2 from LEFT on the concept board as identity reference: Cinder Pitcher. Lean foundry imp in a leather smith apron carrying a bucket of glowing slag lumps. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "bellows-brute",
+    "root": "ArtSource/EnemyExpansion/BellowsBrute/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/cinder-foundry-concepts.png",
+    "prompt": "Use ONLY character number 3 from LEFT on the concept board as identity reference: Bellows Brute. Broad iron forge beast with a bellows torso, leather folds and a heavy anvil fist. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "ashen-cantor",
+    "root": "ArtSource/EnemyExpansion/AshenCantor/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/cinder-foundry-concepts.png",
+    "prompt": "Use ONLY character number 4 from LEFT on the concept board as identity reference: Ashen Cantor. Floating ash-robed figure with a brazier mask, copper rings and an ember staff. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "crucible-colossus",
+    "root": "ArtSource/EnemyExpansion/CrucibleColossus/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/cinder-foundry-concepts.png",
+    "prompt": "Use ONLY character number 5 from LEFT on the concept board as identity reference: Crucible Colossus. Walking cracked crucible with iron legs, molten core and heavy slag-crusted shoulders. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "gale-talon",
+    "root": "ArtSource/EnemyExpansion/GaleTalon/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/stormbreach-citadel-concepts.png",
+    "prompt": "Use ONLY character number 1 from LEFT on the concept board as identity reference: Gale Talon. Small blue-gray wind raptor with swept feather fins, pale claws and a trailing gust tail. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "hailshot-gargoyle",
+    "root": "ArtSource/EnemyExpansion/HailshotGargoyle/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/stormbreach-citadel-concepts.png",
+    "prompt": "Use ONLY character number 2 from LEFT on the concept board as identity reference: Hailshot Gargoyle. Squat winged stone gargoyle with hail-crystal cheeks and a hollow cannon-like mouth. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "tempest-duelist",
+    "root": "ArtSource/EnemyExpansion/TempestDuelist/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/stormbreach-citadel-concepts.png",
+    "prompt": "Use ONLY character number 3 from LEFT on the concept board as identity reference: Tempest Duelist. Lean silver-armored duelist with a torn violet scarf and a short wind-edged saber. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "thunderhead-adept",
+    "root": "ArtSource/EnemyExpansion/ThunderheadAdept/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/stormbreach-citadel-concepts.png",
+    "prompt": "Use ONLY character number 4 from LEFT on the concept board as identity reference: Thunderhead Adept. Hooded storm mage with a small cloud mantle and a forked lightning staff. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  },
+  {
+    "slug": "stormcoil-behemoth",
+    "root": "ArtSource/EnemyExpansion/StormcoilBehemoth/animation-v2",
+    "file": "turnaround-reference.png",
+    "reference": "ArtSource/EnemyExpansion/HomePCHandoff-v2/design-v1/stormbreach-citadel-concepts.png",
+    "prompt": "Use ONLY character number 5 from LEFT on the concept board as identity reference: Stormcoil Behemoth. Heavy stone-and-bronze quadruped with a coiled lightning spine and wind-carved horn plates. Preserve exact pixel-art identity, materials and palette. Create eight directions of the SAME character, 4 columns x2 rows. Row1 NORTH full back no face; NE back-right; EAST strict right profile; SE front-right. Row2 SOUTH full front; SW front-left; WEST strict LEFT profile nose/weapon LEFT; NW back-left no face. Preserve anatomical weapon hands, limb counts, body size, equipment and scale. No text, labels, ground, shadows, glow haze, FX or other characters. Generous empty margins and transparent background."
+  }
+]

@@ -1,0 +1,80 @@
+{
+  "id": "glacial-reliquary-glacierback-ram",
+  "dungeon": "Glacial Reliquary",
+  "dungeonKey": "glacial-reliquary",
+  "name": "Glacierback Ram",
+  "provisionalTier": "Elite",
+  "combatRole": "Hybrid",
+  "proposedBaseHP": 200,
+  "rawPrimaryDamage": 28,
+  "appearance": "Large shaggy ram with a glacier ridge on its back, dark hooves and curved transparent ice horns.",
+  "attack": "Telegraphed straight charge or eject one heavy ice chunk at range.",
+  "projectileConcept": "Glacier chunk: tumbling jagged ice boulder with powder trail; player/floor impact large ice fragments and snow plume, one small area hit.",
+  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "animation": {
+    "directions": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+    ],
+    "framesPerDirection": {
+      "idle": 8,
+      "move": 16,
+      "primaryAttack": 24,
+      "hurt": 6,
+      "death": 12
+    },
+    "totalCharacterFrames": 528,
+    "primaryAttackTiming": {
+      "anticipationFrames": [
+        0,
+        9
+      ],
+      "activeFrames": [
+        10,
+        12
+      ],
+      "recoveryFrames": [
+        13,
+        23
+      ],
+      "damageOrReleaseFrame": 10
+    },
+    "fastMovementOptionalFramesPerDirection": 16
+  },
+  "combat": {
+    "windupSeconds": 1.2,
+    "recoverySeconds": 1.6,
+    "damagePolicy": "Raw attack damage before hero armor; no additional legacy 1.8 multiplier for these profiles.",
+    "contactDamage": "none; damage comes from an explicit attack event",
+    "freedomImmune": false
+  },
+  "projectile": {
+    "id": "fx-glacial-reliquary-5",
+    "travelFrames": 12,
+    "adventurerImpactFrames": 12,
+    "environmentImpactFrames": 16,
+    "travelDirections": "Draw authored east-facing projectile rotated to velocity where silhouette permits; directional variants for strongly asymmetric projectiles.",
+    "speedLogicalPixelsPerSecond": 270,
+    "maxLifeSeconds": 2.6,
+    "tracking": null,
+    "arc": true,
+    "areaRadius": 65,
+    "collision": "Swept segment test against hero hurt shape and environment; resolve earliest hit exactly once.",
+    "damage": "Direct hit and blast cannot both damage the same player. Apply statuses only if damage hit was accepted.",
+    "expiry": "Dissipate harmlessly; do not explode on arbitrary lifetime expiry.",
+    "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
+  },
+  "sourceProgress": {
+    "selectedSheetsSaved": 11,
+    "selectedSheetsPlanned": 67,
+    "visualReviewComplete": false,
+    "ueImportTested": false,
+    "status": "INCOMPLETE_REVIEW_DRAFT"
+  }
+}

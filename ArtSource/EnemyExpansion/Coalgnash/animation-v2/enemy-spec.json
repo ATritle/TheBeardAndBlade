@@ -1,0 +1,65 @@
+{
+  "id": "cinder-foundry-coalgnash",
+  "dungeon": "Cinder Foundry",
+  "dungeonKey": "cinder-foundry",
+  "name": "Coalgnash",
+  "provisionalTier": "Basic",
+  "combatRole": "Melee",
+  "proposedBaseHP": 68,
+  "rawPrimaryDamage": 15,
+  "appearance": "Low charcoal goblin-like creature with cracked ember skin, coal teeth and oversized soot-black hands.",
+  "attack": "Scuttles into a short two-handed rake.",
+  "projectileConcept": "none",
+  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "animation": {
+    "directions": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+    ],
+    "framesPerDirection": {
+      "idle": 8,
+      "move": 16,
+      "primaryAttack": 24,
+      "hurt": 6,
+      "death": 12
+    },
+    "totalCharacterFrames": 528,
+    "primaryAttackTiming": {
+      "anticipationFrames": [
+        0,
+        9
+      ],
+      "activeFrames": [
+        10,
+        12
+      ],
+      "recoveryFrames": [
+        13,
+        23
+      ],
+      "damageOrReleaseFrame": 10
+    },
+    "fastMovementOptionalFramesPerDirection": 16
+  },
+  "combat": {
+    "windupSeconds": 0.65,
+    "recoverySeconds": 0.9,
+    "damagePolicy": "Raw attack damage before hero armor; no additional legacy 1.8 multiplier for these profiles.",
+    "contactDamage": "none; damage comes from an explicit attack event",
+    "freedomImmune": false
+  },
+  "projectile": null,
+  "sourceProgress": {
+    "selectedSheetsSaved": 34,
+    "selectedSheetsPlanned": 50,
+    "visualReviewComplete": false,
+    "ueImportTested": false,
+    "status": "INCOMPLETE_REVIEW_DRAFT"
+  }
+}

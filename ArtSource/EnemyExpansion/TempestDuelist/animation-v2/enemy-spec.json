@@ -1,0 +1,65 @@
+{
+  "id": "stormbreach-citadel-tempest-duelist",
+  "dungeon": "Stormbreach Citadel",
+  "dungeonKey": "stormbreach-citadel",
+  "name": "Tempest Duelist",
+  "provisionalTier": "Medium",
+  "combatRole": "Melee",
+  "proposedBaseHP": 112,
+  "rawPrimaryDamage": 23,
+  "appearance": "Lean silver-armored duelist with a torn violet scarf and a short wind-edged saber.",
+  "attack": "Circling steps then one telegraphed lunging cut.",
+  "projectileConcept": "none",
+  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "animation": {
+    "directions": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+    ],
+    "framesPerDirection": {
+      "idle": 8,
+      "move": 16,
+      "primaryAttack": 24,
+      "hurt": 6,
+      "death": 12
+    },
+    "totalCharacterFrames": 528,
+    "primaryAttackTiming": {
+      "anticipationFrames": [
+        0,
+        9
+      ],
+      "activeFrames": [
+        10,
+        12
+      ],
+      "recoveryFrames": [
+        13,
+        23
+      ],
+      "damageOrReleaseFrame": 10
+    },
+    "fastMovementOptionalFramesPerDirection": 16
+  },
+  "combat": {
+    "windupSeconds": 0.9,
+    "recoverySeconds": 1.2,
+    "damagePolicy": "Raw attack damage before hero armor; no additional legacy 1.8 multiplier for these profiles.",
+    "contactDamage": "none; damage comes from an explicit attack event",
+    "freedomImmune": false
+  },
+  "projectile": null,
+  "sourceProgress": {
+    "selectedSheetsSaved": 10,
+    "selectedSheetsPlanned": 50,
+    "visualReviewComplete": false,
+    "ueImportTested": false,
+    "status": "INCOMPLETE_REVIEW_DRAFT"
+  }
+}

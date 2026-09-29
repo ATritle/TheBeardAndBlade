@@ -1,0 +1,80 @@
+{
+  "id": "stormbreach-citadel-hailshot-gargoyle",
+  "dungeon": "Stormbreach Citadel",
+  "dungeonKey": "stormbreach-citadel",
+  "name": "Hailshot Gargoyle",
+  "provisionalTier": "Basic",
+  "combatRole": "Shot",
+  "proposedBaseHP": 55,
+  "rawPrimaryDamage": 12,
+  "appearance": "Squat winged stone gargoyle with hail-crystal cheeks and a hollow cannon-like mouth.",
+  "attack": "Spits one large hail pellet.",
+  "projectileConcept": "Hail pellet: rotating white-blue ice ball with wind streaks; player impact hail chips; floor/wall impact stone dust and broken ice.",
+  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "animation": {
+    "directions": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+    ],
+    "framesPerDirection": {
+      "idle": 8,
+      "move": 16,
+      "primaryAttack": 24,
+      "hurt": 6,
+      "death": 12
+    },
+    "totalCharacterFrames": 528,
+    "primaryAttackTiming": {
+      "anticipationFrames": [
+        0,
+        9
+      ],
+      "activeFrames": [
+        10,
+        12
+      ],
+      "recoveryFrames": [
+        13,
+        23
+      ],
+      "damageOrReleaseFrame": 10
+    },
+    "fastMovementOptionalFramesPerDirection": 16
+  },
+  "combat": {
+    "windupSeconds": 0.65,
+    "recoverySeconds": 0.9,
+    "damagePolicy": "Raw attack damage before hero armor; no additional legacy 1.8 multiplier for these profiles.",
+    "contactDamage": "none; damage comes from an explicit attack event",
+    "freedomImmune": false
+  },
+  "projectile": {
+    "id": "fx-stormbreach-citadel-2",
+    "travelFrames": 12,
+    "adventurerImpactFrames": 12,
+    "environmentImpactFrames": 16,
+    "travelDirections": "Draw authored east-facing projectile rotated to velocity where silhouette permits; directional variants for strongly asymmetric projectiles.",
+    "speedLogicalPixelsPerSecond": 330,
+    "maxLifeSeconds": 2.6,
+    "tracking": null,
+    "arc": false,
+    "areaRadius": 0,
+    "collision": "Swept segment test against hero hurt shape and environment; resolve earliest hit exactly once.",
+    "damage": "Direct hit and blast cannot both damage the same player. Apply statuses only if damage hit was accepted.",
+    "expiry": "Dissipate harmlessly; do not explode on arbitrary lifetime expiry.",
+    "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
+  },
+  "sourceProgress": {
+    "selectedSheetsSaved": 19,
+    "selectedSheetsPlanned": 51,
+    "visualReviewComplete": false,
+    "ueImportTested": false,
+    "status": "INCOMPLETE_REVIEW_DRAFT"
+  }
+}

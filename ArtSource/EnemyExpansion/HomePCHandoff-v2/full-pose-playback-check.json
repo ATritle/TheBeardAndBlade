@@ -1,0 +1,291 @@
+{
+  "passed": 25,
+  "missing": 0,
+  "checked": [
+    {
+      "enemy": "TrenchShivver",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "RivetGunner",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "BreachHound",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "CoilSaboteur",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "BunkerBulwark",
+      "states": [
+        "walk",
+        "attack",
+        "ranged",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "SilkfangSkitter",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "BriarSpitter",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "MossmawStalker",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "SporebellWitch",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "ThornweaveSentinel",
+      "states": [
+        "walk",
+        "attack",
+        "ranged",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "RimeclawCub",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "IcicleFlinger",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "PermafrostTemplar",
+      "states": [
+        "walk",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "SnowveilOracle",
+      "states": [
+        "walk",
+        "attack",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "GlacierbackRam",
+      "states": [
+        "walk",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "Coalgnash",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "CinderPitcher",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "BellowsBrute",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "death",
+        "hurt",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "AshenCantor",
+      "states": [
+        "walk",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "CrucibleColossus",
+      "states": [
+        "walk",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "GaleTalon",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "hurt",
+        "death",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "HailshotGargoyle",
+      "states": [
+        "walk",
+        "attack",
+        "idle",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "TempestDuelist",
+      "states": [
+        "walk",
+        "attack-trail",
+        "contact-impact"
+      ]
+    },
+    {
+      "enemy": "ThunderheadAdept",
+      "states": [
+        "walk",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    },
+    {
+      "enemy": "StormcoilBehemoth",
+      "states": [
+        "walk",
+        "projectile",
+        "hero-impact",
+        "ground-impact"
+      ]
+    }
+  ],
+  "note": "Minimal DOM control checks only; not rendered-browser, visual anatomy, or UE5 validation."
+}
