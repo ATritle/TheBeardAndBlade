@@ -63,7 +63,7 @@ struct FRewardPresentation
     bool BagFull=false;
     FVector2D Landing=FVector2D::ZeroVector;
 };
-struct FDungeonBlood { FVector2D Position; float Age=0,Size=80; int32 Variant=0; bool bRemains=false; };
+struct FDungeonBlood { FVector2D Position; float Age=0,Size=80; int32 Variant=0,RustDirection=-1,ExpansionSpecies=-1,ExpansionDirection=0; bool bRemains=false; };
 enum class EAtlasRoom : uint8 { Entrance, Combat, Trader, Reward, Boss };
 // Run-local snapshots; rooms can only be left after combat, so enemies need no respawn snapshot.
 struct FAtlasRoom
@@ -89,6 +89,7 @@ struct FDungeonImpact
 };
 struct FDungeonShot
 {
+    int32 ExpansionSpecies=-1;
     TWeakObjectPtr<class ADungeonEnemy> SourceEnemy;
     FVector2D Position,Velocity;
     float Life=4,Radius=9,Damage=10,HitHeight=0;
@@ -101,6 +102,8 @@ struct FDungeonShot
 };
 struct FDungeonSplash
 {
+    int32 ExpansionSpecies=-1;
+    bool bExpansionPlayerHit=false;
     FVector2D Position;
     float Radius=50,Life=.65f;
     int32 Art=8;
@@ -243,6 +246,12 @@ public:
     float HealthLag=0;
     void TickNewBoss(float Dt,ADungeonHero* H,ADungeonGameMode* G);
     void TickFlashBoss(float Dt,ADungeonHero* H,ADungeonGameMode* G);
+    void TickRustblade(float Dt,ADungeonHero* H,ADungeonGameMode* G);
+    void TickExpansion(float Dt,ADungeonHero* H,ADungeonGameMode* G);
+    float ExpansionAttackAge=-1,ExpansionHurtAge=-1;
+    bool bExpansionReleased=false,bExpansionRanged=false;
+    float RustAttackAge=-1,RustHurtAge=-1;
+    bool bRustStrikeFired=false;
     void BeginFlashAmbush(ADungeonHero* H,ADungeonGameMode* G);
     FVector2D DrakeMouth() const;
     float BleedTime=0,PoisonTime=0,SlowTime=0,BleedDPS=0,PoisonDPS=0;
@@ -303,6 +312,10 @@ public:
     void RestartFromEnding();
     void VerifyEndings();
     void VerifyWeekend();
+    void VerifyRustblade();
+    void VerifyExpansion();
+    void ReleaseExpansion(ADungeonEnemy* E,ADungeonHero* H);
+    void UpdateExpansionShot(FDungeonShot& S,float Dt,ADungeonHero* H);
     void RunEndingPreview();
     bool HasEnding() const { return EndState!=0; }
     bool IsVictory() const { return EndState==2; }
@@ -502,6 +515,10 @@ private:
     void DrawInventory(ADungeonHero* H);
     void UpdateInventoryDrag(ADungeonHero* H);
     void DrawInventoryDrag(ADungeonHero* H);
+    void DrawInventoryTurntable();
+    void RotateInventoryPortrait(float DeltaX);
+    bool bPortraitDragging=false;
+    float PortraitYaw=22.5f,PortraitLastX=0;
     int32 DragItem=INDEX_NONE,LastClickedItem=INDEX_NONE;
     int32 DragGear=INDEX_NONE,LastClickedGear=INDEX_NONE;
     bool bDragging=false;
@@ -528,6 +545,9 @@ private:
     void Shadow(FVector2D Center,float Radius,float Opacity=1.f);
     void Hero(ADungeonHero* H,float HS=1.375f);
     void Enemy(ADungeonEnemy* E);
+    void Rustblade(ADungeonEnemy* E);
+    void ExpansionEnemy(ADungeonEnemy* E);
+    void ExpansionReview(int32 Species,float Age);
     float Scale=1;
     FVector2D Offset=FVector2D::ZeroVector;
     UPROPERTY() TMap<FString,TObjectPtr<UTexture2D>> Textures;

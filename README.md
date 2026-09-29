@@ -13,7 +13,9 @@ Features
 
 ## Play
 
-Download `TheBeardAndBlade-Windows-v0.4.0.zip` from [Releases](https://github.com/ATritle/TheBeardAndBlade/releases). Extract the **entire ZIP** and launch `TheBeardAndBlade/TheBeardAndBlade.exe`. Unreal Editor is not required. The automatic GitHub source ZIP is not playable. A separate `TheBeardAndBlade-StreamPixel-v0.4.0.zip` contains the same Pixel Streaming-enabled runtime in the hosting upload layout.
+Download `TheBeardAndBlade-Windows-v0.4.1.zip` from [Releases](https://github.com/ATritle/TheBeardAndBlade/releases). Extract the **entire ZIP** and launch `TheBeardAndBlade/TheBeardAndBlade.exe`. Unreal Editor is not required. The automatic GitHub source ZIP is not playable. A separate `TheBeardAndBlade-StreamPixel-v0.4.1.zip` contains the same Pixel Streaming-enabled runtime in the hosting upload layout.
+
+v0.4.1 adds five animated Forgotten Keep enemies and a 32-view inventory adventurer. Open inventory with I, then hold LMB over the portrait and drag horizontally to rotate. Gameplay adventurer sprites are unchanged.
 
 Windows x64 with a compatible DirectX graphics driver is required. Keep the supporting folders beside the EXE. If prerequisites are missing, run the bundled installer under `Engine/Extras/Redist/en-us` inside the extracted game folder. This is an unsigned playtest, not a browser, macOS or Linux build.
 

@@ -1,3 +1,17 @@
+# v0.4.1 — Forgotten Keep enemies and rotating inventory portrait
+
+- Five approved enemies now populate the Forgotten Keep: Rustblade Squire, Graveglass Slinger, Chainbound Bailiff, Candle Hexer and Sepulcher Lancer.
+- Directional idle, walking, attack, hurt and death animations, corrected crop masks, aligned scale/feet and attack-pose-synchronized damage/projectile release.
+- Enemies are introduced by combat-room depth. Safe entrance, trader/reward branches, persistent backtracking and the existing boss progression are retained.
+- A 32-view illustrated inventory adventurer: hold LMB over the portrait and drag horizontally through 360 degrees. Gameplay adventurer sprites and weapon anchors are unchanged.
+- Inventory portrait rotation coexists with existing gear drag/drop, double-click equip/unequip and hover stats.
+
+Download `TheBeardAndBlade-Windows-v0.4.1.zip`, extract everything, and run `TheBeardAndBlade/TheBeardAndBlade.exe`. UE is not required. The separate `TheBeardAndBlade-StreamPixel-v0.4.1.zip` uses the hosting-ready `Windows/` layout. Neither download is the GitHub source ZIP.
+
+Windows x64 Shipping build, still unsigned. No campaign save system has been added. StreamPixel upload/activation remains a separate step.
+
+## Earlier releases
+
 # v0.4.0 — Emerald Atlas, expanded equipment and coin economy
 
 - Explore all seven dungeon themes through four-way doors and the Emerald Atlas map. Backtrack through persistent rooms, discover a trader branch and reward dead end, and find each hidden boss encounter.

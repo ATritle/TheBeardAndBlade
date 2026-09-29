@@ -1,5 +1,6 @@
 #include "DungeonActors.h"
 #include "DungeonRoster.h"
+#include "RustbladeSquire.h"
 #include "HeroBreathing.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
@@ -66,6 +67,8 @@ void ADungeonEnemy::Tick(float Dt)
     UpdateAilments(Dt); if(Health<=0||IsActorBeingDestroyed()) return;
     MotionClock+=Dt;
     HealthLag=HealthLag<=0?Health:FMath::Max(Health,HealthLag-Dt*MaxHealth*.3f);
+    if(Species==RustbladeSquire::Species) { TickRustblade(Dt,H,G); return; }
+    if(DungeonExpansion::Is(Species)) { TickExpansion(Dt,H,G);return; }
     if(Species==30) { TickFlashBoss(Dt,H,G); return; }
     if(Species==28||Species==29) { TickNewBoss(Dt,H,G); return; }
     const float MoveScale=SlowTime>0?.65f:1.f;
@@ -158,6 +161,8 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
     if(IsGameplayBlocked()) return;
     auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)); if(!H||!IsValid(E)) return;
     if(E->Species==30) { ThrowFlashBang(E); return; }
+    if(E->Species==RustbladeSquire::Species) return; // Strike marker in TickRustblade, never theme/projectile dispatch.
+    if(DungeonExpansion::Is(E->Species))return; // Authored expansion release marker owns all damage.
     if(E->Species==28||E->Species==29) { EmitBossShot(E,E->Species==28); return; }
     if(E->Species>=31) { FireThemeAttack(E); return; }
     const auto& S=DungeonRoster::Get(E->Species);

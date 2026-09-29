@@ -1,5 +1,6 @@
 #include "DungeonActors.h"
 #include "DungeonRoster.h"
+#include "DungeonCombatBalance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Engine/Texture2D.h"
@@ -223,6 +224,38 @@ void ADungeonGameMode::VerifyAtlas()
         Check(AtlasRooms.FilterByPredicate([](const FAtlasRoom& R){return R.Visited;}).Num()==1,TEXT("Only entrance revealed initially"));
     }
     H->Restart();
+    // Integrated Keep: room depth controls both waves regardless of visit order.
+    // Exercise real spawn/defeat paths, not just the encounter table.
+    for(int Seed=0;Seed<8;++Seed){
+        InitializeAtlasFloor(Seed,0);
+        for(int Index:{4,2,1,3}){
+            EnterAtlasRoom(Index,-1);
+            int Lancers=0,Bailiffs=0,Hexers=0;
+            for(int ExpectedWave=1;ExpectedWave<=2;++ExpectedWave){
+                const auto Plan=DungeonRoster::KeepEncounter(AtlasRooms[Index].Depth,ExpectedWave);
+                Check(Wave==ExpectedWave&&PendingSpawns==Plan.Num(),TEXT("Keep wave budget by depth"));
+                for(int Species:Plan){
+                    SpawnOneEnemy();--PendingSpawns;
+                    Check(!Enemies.IsEmpty()&&Enemies.Last()->Species==Species,TEXT("Keep depth composition independent of visit order"));
+                    if(!Enemies.IsEmpty()){
+                        auto* E=Enemies.Last().Get();
+                        Check(FMath::IsNearlyEqual(E->MaxHealth,DungeonCombatBalance::SpawnHealth(DungeonRoster::Get(Species).HP,Room,false)),TEXT("Keep health scaling applied once"));
+                        Lancers+=E->Species==53;Bailiffs+=E->Species==51;Hexers+=E->Species==52;
+                    }
+                }
+                const auto Defeated=Enemies;
+                for(const auto& E:Defeated)EnemyDefeated(E.Get());
+            }
+            Check(Lancers==(Index==4?1:0)&&Bailiffs==(Index==2?1:0)&&Hexers==(Index==3?1:0),TEXT("One specialist in its introduction room"));
+            Check(AtlasRooms[Index].Cleared&&AreDoorsOpen()&&PendingSpawns==0,TEXT("Both Keep waves clear before exit"));
+            SaveAtlasRoom();EnterAtlasRoom(0,-1);EnterAtlasRoom(Index,-1);
+            Check(Enemies.IsEmpty()&&PendingSpawns==0&&AreDoorsOpen(),TEXT("Cleared Keep room never respawns"));
+        }
+        for(int Index:{6,7}){
+            EnterAtlasRoom(Index,-1);
+            Check(Enemies.IsEmpty()&&PendingSpawns==0,TEXT("Keep trader and reward remain peaceful"));
+        }
+    }
     // Every cardinal doorway is exercised using an existing reciprocal link.
     for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter){
     InitializeAtlasFloor(17,Chapter);
@@ -281,7 +314,7 @@ void ADungeonGameMode::VerifyAtlas()
         Check(LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/September/BossPortrait_%d.BossPortrait_%d"),Portrait,Portrait))!=nullptr,TEXT("Boss portrait available for explored map rooms only"));
         TickAtlasTravel(ArrivalDuration);
         EnterAtlasRoom(1,-1);SpawnOneEnemy();--PendingSpawns;
-        Check(!Enemies.IsEmpty()&&Enemies[0]->Species>=DungeonProgression::RosterBase(GetBiome())&&Enemies[0]->Species<DungeonProgression::RosterBase(GetBiome())+6,TEXT("Theme-specific regular enemies"));
+        Check(!Enemies.IsEmpty()&&(Chapter==0?Enemies[0]->Species==49:Enemies[0]->Species>=DungeonProgression::RosterBase(GetBiome())&&Enemies[0]->Species<DungeonProgression::RosterBase(GetBiome())+6),TEXT("Theme-specific regular enemies"));
         for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;CompleteRoom();
         Check(AtlasRooms[1].Cleared&&AreDoorsOpen(),TEXT("Normal clear unlocks floor exits"));
         Breakables[0].BrokenAge=2;Breakables[0].Loot=RollItem(48,3,Room);const auto Drop=Breakables[0].Loot;SaveAtlasRoom();

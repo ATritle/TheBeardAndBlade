@@ -3,6 +3,36 @@
 using namespace DungeonInventoryLayout;
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+
+namespace {
+constexpr int PortraitFrames=32;
+int PortraitFrame(float Yaw) { return FMath::RoundToInt(Yaw*PortraitFrames/360.f)%PortraitFrames; }
+}
+void ADungeonHUD::RotateInventoryPortrait(float DeltaX)
+{
+    // One complete revolution per 480 logical UI pixels; no vertical rotation.
+    PortraitYaw=FMath::Fmod(PortraitYaw+DeltaX*.75f,360.f);
+    if(PortraitYaw<0)PortraitYaw+=360.f;
+}
+void ADungeonHUD::DrawInventoryTurntable()
+{
+    auto* PC=GetOwningPlayerController();float X=0,Y=0;
+    if(bPortraitDragging) {
+        if(!PC||Scale<=0||!PC->GetMousePosition(X,Y)||!PC->IsInputKeyDown(EKeys::LeftMouseButton))bPortraitDragging=false;
+        else {const float LogicalX=(X-Offset.X)/Scale;RotateInventoryPortrait(LogicalX-PortraitLastX);PortraitLastX=LogicalX;}
+    }
+    // Warm every frame together to avoid a first-drag texture streaming blur.
+    for(int I=0;I<PortraitFrames;++I)Texture(FString::Printf(TEXT("InventoryTurn_%02d"),I));
+    int Frame=PortraitFrame(PortraitYaw);
+#if !UE_BUILD_SHIPPING
+    FParse::Value(FCommandLine::Get(),TEXT("InventoryTurntableFrame="),Frame);
+    Frame=FMath::Clamp(Frame,0,PortraitFrames-1);
+#endif
+    const FString Name=FString::Printf(TEXT("InventoryTurn_%02d"),Frame);
+    Sprite(Texture(Name)?Name:TEXT("InventoryAdventurer"),84,155,280,420);
+}
 
 bool ADungeonHero::MoveBagItem(int32 Index,FIntPoint Cell)
 {
@@ -11,7 +41,7 @@ bool ADungeonHero::MoveBagItem(int32 Index,FIntPoint Cell)
 }
 void ADungeonHUD::CancelInventoryGesture()
 {
-    DragItem=LastClickedItem=DragGear=LastClickedGear=INDEX_NONE; bDragging=false; LastClickTime=-1;
+    DragItem=LastClickedItem=DragGear=LastClickedGear=INDEX_NONE; bDragging=false; bPortraitDragging=false; LastClickTime=-1;
 }
 bool ADungeonHero::UnequipToCell(int32 Slot,FIntPoint Cell)
 {
@@ -75,9 +105,17 @@ int32 ADungeonHUD::VerifyInventoryGestures(ADungeonHero* H)
     auto* PC=GetOwningPlayerController();if(!PC||!H||!H->IsInventoryOpen()) return 1;
     const auto Bag=H->Inventory;const auto Gear=H->Equipment;const float HP=H->Health,SP=H->Stamina;
     int Errors=0;
-    auto Check=[&](bool OK){if(!OK)++Errors;};
+    int CheckNumber=0;
+    auto Check=[&](bool OK){++CheckNumber;if(!OK){++Errors;UE_LOG(LogTemp,Warning,TEXT("INVENTORY_GESTURE_CHECK_FAILED %d"),CheckNumber);}};
     auto Mouse=[&](float X,float Y){PC->SetMouseLocation(FMath::RoundToInt(Offset.X+X*Scale),FMath::RoundToInt(Offset.Y+Y*Scale));};
     auto Drag=[&](float X,float Y,float TX,float TY){CancelInventoryGesture();Mouse(X,Y);InventoryClick();Mouse(TX,TY);UpdateInventoryDrag(H);};
+    const float SavedYaw=PortraitYaw;
+    PortraitYaw=0;RotateInventoryPortrait(480);Check(FMath::IsNearlyZero(PortraitYaw));
+    RotateInventoryPortrait(-15);Check(PortraitFrame(PortraitYaw)==31);
+    RotateInventoryPortrait(15);Check(PortraitFrame(PortraitYaw)==0);
+    for(int I=0;I<PortraitFrames;++I)Check(Texture(FString::Printf(TEXT("InventoryTurn_%02d"),I))!=nullptr);
+    Mouse(220,350);InventoryClick();Check(bPortraitDragging&&DragGear==INDEX_NONE&&DragItem==INDEX_NONE);
+    CancelInventoryGesture();Check(!bPortraitDragging);PortraitYaw=SavedYaw;
     H->Inventory.Empty();H->AddToInventory(ADungeonGameMode::RollItem(8,4));H->AddToInventory(ADungeonGameMode::RollItem(24,2));
     const auto Weapon=H->Inventory[0].Item;
     Drag(476,198,716,438);Check(H->Inventory[0].Cell==FIntPoint(4,4));

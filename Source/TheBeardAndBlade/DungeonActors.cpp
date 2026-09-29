@@ -1,4 +1,5 @@
 #include "DungeonActors.h"
+#include "RustbladeSquire.h"
 #include "HeroLocomotion.h"
 #include "HeroLocomotionSockets.h"
 #include "DungeonEnemyAudio.h"
@@ -374,6 +375,13 @@ void ADungeonEnemy::TakeDungeonDamage(float Damage)
     if(Health<=0||SpawnTime>0) return;
     const float Dealt=FMath::Min(Health,FMath::Max(0.f,Damage));
     Health=FMath::Max(0.f,Health-Damage); HurtTime=.2f;
+    if(DungeonExpansion::Is(Species)&&Dealt>0){
+        ExpansionHurtAge=0;ExpansionAttackAge=-1;bExpansionReleased=true;Windup=0;Recovery=.25f;bWalking=false;
+    }
+    if(Species==RustbladeSquire::Species&&Dealt>0) {
+        RustHurtAge=0;RustAttackAge=-1;bRustStrikeFired=true;
+        Windup=0;Recovery=.25f;bWalking=false;
+    }
     if(auto* H=Player(this)) if(H->Health>0) H->Health=FMath::Min(H->MaxHealth,H->Health+Dealt*H->Leech);
     auto* G=Mode(this);
     const FVector2D P=DungeonView::Project(GetActorLocation());
@@ -399,6 +407,10 @@ void ADungeonGameMode::BeginPlay()
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteEffects"),bEffectsMuted,GGameUserSettingsIni);
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeVerify"))) { VerifyRustblade();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionVerify"))) { VerifyExpansion();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))) {bMenu=false;bHasRun=true;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeReview"))) {bMenu=false;bHasRun=true;}
     if(FParse::Param(FCommandLine::Get(),TEXT("AtlasVerify"))) { VerifyAtlas();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("EconomyVerify"))) { VerifyEconomy(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TraderVerify"))) { VerifyTrader(); return; }
@@ -422,6 +434,10 @@ void ADungeonGameMode::Tick(float Dt)
 {
     Super::Tick(Dt);
     RunAtlasReview();
+    #if WITH_EDITOR
+    if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
+    if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
+    #endif
     RunEndingPreview();
     if(!HasEnding()&&IsDead()) FinishRun(false);
     if(HasEnding()) { UpdateEnding(Dt);UpdateAudio();return; }
@@ -586,6 +602,9 @@ void ADungeonGameMode::Tick(float Dt)
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonChestPreview"))) Name=TEXT("ChestReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonBossPreview"))) Name=FString::Printf(TEXT("BossReview%d"),GetBossSpecies());
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonEquipmentReview"))) Name=FParse::Param(FCommandLine::Get(),TEXT("ReviewLeft"))?TEXT("EquipmentLeftReview"):TEXT("EquipmentReview");
+            if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeReview"))) { float Age=0;FParse::Value(FCommandLine::Get(),TEXT("RustbladeAge="),Age);Name=FString::Printf(TEXT("EnemyExpansion/RustbladeSquire/runtime-v2/UE-review-%03d"),FMath::RoundToInt(Age*100)); }
+            if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeScaleReview")))Name=TEXT("EnemyExpansion/RustbladeSquire/runtime-v2/UE-scale-comparison");
+            if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))){int32 Species=50;FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Species);Name=FString::Printf(TEXT("EnemyExpansion/%s/runtime-v1/UE-review"),DungeonExpansion::Names[FMath::Clamp(Species-50,0,3)]);}
             FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/TEXT("ArtSource")/(Name+TEXT(".png")),true,false);
         }
         if(Time>5.2f&&FParse::Param(FCommandLine::Get(),TEXT("TraderUISmoke"))) {
@@ -644,6 +663,9 @@ void ADungeonGameMode::SpawnWave()
     bChest=bLootClaimed=bLootRolled=false; Reward=FRewardPresentation();LootTimer=0;
     if(Wave==1) { RosterCursor=FMath::RandRange(0,5);SpawnBreakables(); }
     PendingSpawns=IsBossRoom()?1:FMath::Min(9,3+Wave+(Room-1)%DungeonProgression::RoomsPerChapter); SpawnTimer=2.f;
+    if(bAtlasActive&&AtlasChapter==0&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
+        RosterCursor=0;PendingSpawns=DungeonRoster::KeepEncounter(AtlasRooms[AtlasCurrent].Depth,Wave).Num();
+    }
     UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d wave=%d queued=%d"),Room,Wave,PendingSpawns);
 }
 void ADungeonGameMode::CompleteRoom()
@@ -675,6 +697,18 @@ void ADungeonGameMode::SpawnOneEnemy()
     if(auto* E=GetWorld()->SpawnActor<ADungeonEnemy>(DungeonView::Unproject(Pos),FRotator::ZeroRotator,Params))
     {
         E->bBoss=IsBossRoom(); E->Species=E->bBoss?GetBossSpecies():DungeonProgression::RosterBase(GetBiome())+(RosterCursor++%6);
+        if(!E->bBoss&&bAtlasActive&&AtlasChapter==0&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
+            const auto Encounter=DungeonRoster::KeepEncounter(AtlasRooms[AtlasCurrent].Depth,Wave);
+            E->Species=Encounter[(RosterCursor-1)%Encounter.Num()];
+        }
+        // Explicit isolation tests still override the integrated Keep encounters.
+        #if WITH_EDITOR
+        if(!E->bBoss&&GetBiome()==0&&FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest")))E->Species=RustbladeSquire::Species;
+        if(!E->bBoss&&GetBiome()==0&&FParse::Param(FCommandLine::Get(),TEXT("ExpansionTest"))){
+            int32 Selected=0;FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Selected);
+            E->Species=DungeonExpansion::Is(Selected)?Selected:50+((RosterCursor-1)%4);
+        }
+        #endif
         if(E->bBoss&&E->Species>=28) E->Facing=4;
         const auto& S=DungeonRoster::Get(E->Species);
         E->MaxHealth=E->Health=DungeonCombatBalance::SpawnHealth(S.HP,Room,E->bBoss);
@@ -724,6 +758,8 @@ void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
         if(Blood.Num()>=96) Blood.RemoveAt(0);
         FDungeonBlood B; B.Position=DungeonView::Project(E->GetActorLocation()); B.Size=E->bBoss?125:80;
         B.bRemains=true; B.Variant=(E->Species==6||E->Species==15||E->Species==22||E->Species==25)?2:(E->Species<=1||E->Species==5)?3:E->Species%2;
+        if(E->Species==RustbladeSquire::Species)B.RustDirection=E->Facing;
+        if(DungeonExpansion::Is(E->Species)){B.ExpansionSpecies=E->Species;B.ExpansionDirection=E->Facing;}
         Blood.Add(B);
     }
     if(!IsFreedomActive()) FreedomKills=FMath::Min(15,FreedomKills+1);
@@ -833,6 +869,8 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
     const bool NewArt=Name.StartsWith(TEXT("Flash"))||Name.StartsWith(TEXT("Mack_"))||Name.StartsWith(TEXT("Twister_"))||Name.StartsWith(TEXT("BossPortrait_"))||Name.StartsWith(TEXT("BossName_"))||Name.StartsWith(TEXT("BossBorder_"))||Name.StartsWith(TEXT("Status_"))||Name.StartsWith(TEXT("RewardChest_"))||Name.StartsWith(TEXT("RarityGlow_"))||Name.StartsWith(TEXT("LootEffect_"))||Name.StartsWith(TEXT("BurgerSplat_"))||Name.StartsWith(TEXT("FoodDebris_"))||Name.StartsWith(TEXT("MackLanding_"));
     FString Path=FString::Printf(TEXT("/Game/Art/%s/%s.%s"),Name.StartsWith(TEXT("Ending"))?TEXT("Endings"):Name.StartsWith(TEXT("Intro"))?TEXT("Intros"):Name.StartsWith(TEXT("Theme"))?TEXT("Progression"):NewArt?TEXT("September"):TEXT("V2"),*Name,*Name);
     const int GearId=Name.StartsWith(TEXT("Loot_"))?FCString::Atoi(*Name.Mid(5)):-1;
+    if(Name.StartsWith(TEXT("Rustblade_")))Path=FString::Printf(TEXT("/Game/Art/EnemyExpansion/RustbladeSquire/%s.%s"),*Name,*Name);
+    if(!DungeonExpansion::Path(Name).IsEmpty())Path=DungeonExpansion::Path(Name);
     if(GearId>=60&&GearId<DungeonLootCatalog::Count)Path=FString::Printf(TEXT("/Game/Art/V2/GearSheet_%d.GearSheet_%d"),(GearId-60)/3,(GearId-60)/3);
     auto* T=LoadObject<UTexture2D>(nullptr,*Path);
 #if WITH_EDITOR
@@ -973,6 +1011,8 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
 }
 void ADungeonHUD::Enemy(ADungeonEnemy* E)
 {
+    if(E->Species==RustbladeSquire::Species) { Rustblade(E);return; }
+    if(DungeonExpansion::Is(E->Species)){ExpansionEnemy(E);return;}
     FVector2D P=DungeonView::Project(E->GetActorLocation());
     const auto& S=DungeonRoster::Get(E->Species);
     const float Size=DungeonRoster::RenderSize(E->Species);
@@ -1210,6 +1250,9 @@ void ADungeonHUD::InventoryClick()
         const auto Size=H->Equipment[GearSlot].Size();const auto Local=P-Gear(GearSlot);
         DragGrab=FVector2D(FMath::Min(Local.X,Size.X*60.-1),FMath::Min(Local.Y,Size.Y*60.-1));return;
     }
+    if(GearSlot==INDEX_NONE&&In(122,155,196,420)) {
+        CancelInventoryGesture();bPortraitDragging=true;PortraitLastX=P.X;return;
+    }
     if(In(BagX,BagY,360,360)) {
         const FIntPoint C=BagCell(P);H->SelectedItem=INDEX_NONE;
         for(int I=0;I<H->Inventory.Num();++I) {
@@ -1404,7 +1447,7 @@ void ADungeonHUD::DrawInventory(ADungeonHero* H)
     Box(0,0,1280,800,FLinearColor(0,0,0,.85f));
     Sprite(TEXT("InventoryFrame"),10,40,1260,720);
     Sprite(TEXT("InventoryCard"),24,102,400,594);
-    Sprite(TEXT("InventoryAdventurer"),84,155,280,420);
+    DrawInventoryTurntable();
     Sprite(TEXT("InventorySatchel"),593,91,86,80);
     Sprite(TEXT("CurrencyCoin"),456,626,38,38);
     CardText(FString::Printf(TEXT("%lld"),H->Coins),506,635,Gold,23,310);
@@ -1438,7 +1481,7 @@ void ADungeonHUD::DrawInventory(ADungeonHero* H)
         if(In(Mouse,X,Y,W,HH))Hover=&B.Item;
     }
     // Central portrait hit area excludes the equipment slots on either side.
-    const bool HoverAdventurer=!bDragging&&!Hover&&In(Mouse,122,155,196,420);
+    const bool HoverAdventurer=!bDragging&&!bPortraitDragging&&!Hover&&In(Mouse,122,155,196,420);
     if(HoverAdventurer)DrawAdventurerStats(H);
     else if(Hover||H->Inventory.IsValidIndex(H->SelectedItem)) DrawItemCard(Hover?*Hover:H->Inventory[H->SelectedItem].Item,H);
     else Sprite(TEXT("InventoryCard"),842,104,400,628);
@@ -1462,6 +1505,11 @@ void ADungeonHUD::DrawHUD()
         LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Art/V2/M_KeySprite.M_KeySprite"));
         for(int I=0;I<16;++I) Texture(FString::Printf(TEXT("TeaFX_%d"),I));
         for(int I=0;I<8;++I) Texture(FString::Printf(TEXT("Finance_%d"),I));
+        if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest"))||FParse::Param(FCommandLine::Get(),TEXT("RustbladeReview"))) {
+            const TCHAR* States[]={TEXT("idle"),TEXT("walk"),TEXT("attack"),TEXT("hurt"),TEXT("death")};
+            const int Counts[]={4,8,RustbladeSquire::AttackFrames,4,8};
+            for(int D=0;D<8;++D)for(int S=0;S<5;++S)for(int F=0;F<Counts[S];++F)Texture(RustbladeSquire::Art(D,States[S],F));
+        }
         for(int S=31;S<=48;++S)for(int F=0;F<8;++F)Texture(FString::Printf(TEXT("ThemeEnemy_%d_%d"),S,F));
         for(int F=0;F<16;++F)Texture(FString::Printf(TEXT("FlashGuy_%d"),F));
         for(int S=0;S<28;++S) for(int F=0;F<8;++F) Texture(FString::Printf(TEXT("Creature_%d_%d"),S,F));
@@ -1489,6 +1537,38 @@ void ADungeonHUD::DrawHUD()
     Sprite(G->IsAtlasFloor()?(G->GetBiome()==0?FString(TEXT("AtlasChamber")):FString::Printf(TEXT("AtlasChamber%d"),G->GetBiome())):G->GetBiome()==0?FString(TEXT("Arena")):FString::Printf(TEXT("Arena%d"),G->GetBiome()),0,0,1280,800);
     if(G->IsBossIntroActive()){DrawBossIntro(G);return;}
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))){
+        int32 Species=50;float Age=GetWorld()->GetTimeSeconds();FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Species);FParse::Value(FCommandLine::Get(),TEXT("ExpansionAge="),Age);
+        ExpansionReview(Species,Age);return;
+    }
+    if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeReview"))) {
+        if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeScaleReview"))) {
+            Label(TEXT("ADVENTURER / RUSTBLADE - NORMAL GAMEPLAY SCALE"),24,16,Gold,.9f);
+            const auto Saved=H->GetActorLocation();
+            for(int D=0;D<8;++D) {
+                const float X=160+(D%4)*320,Y=325+(D/4)*340;
+                H->SetActorLocation(DungeonView::Unproject(FVector2D(X-65,Y)));
+                H->SetWalkReviewPose(D,0);Hero(H);
+                const float Size=RustbladeSquire::RenderSize;
+                Shadow(FVector2D(X+65,Y),24);
+                Sprite(RustbladeSquire::Art(D,TEXT("walk"),0),X+65-Size*.5f,Y-Size*RustbladeSquire::RootY,Size,Size);
+                Label(RustbladeSquire::Directions[D],X-8,Y+18,Pale,.8f);
+            }
+            H->SetActorLocation(Saved);return;
+        }
+        Label(TEXT("RUSTBLADE SQUIRE / IDLE - WALK - ATTACK - HURT - DEATH"),24,12,Gold,.8f);
+        float Age=GetWorld()->GetTimeSeconds();FParse::Value(FCommandLine::Get(),TEXT("RustbladeAge="),Age);
+        const TCHAR* States[]={TEXT("idle"),TEXT("walk"),TEXT("attack"),TEXT("hurt"),TEXT("death")};
+        static const int Idle[]={0,1,2,3,2,1};
+        const int Frames[]={Idle[int(Age*4)%6],RustbladeSquire::WalkFrame(Age*61),RustbladeSquire::AttackFrame(FMath::Fmod(Age,RustbladeSquire::AttackDuration+.32f)),RustbladeSquire::HurtFrame(FMath::Fmod(Age,.7f)),RustbladeSquire::DeathFrame(FMath::Fmod(Age,2.f))};
+        for(int D=0;D<8;++D)for(int S=0;S<5;++S) {
+            const float X=80+D*160,Y=183+S*148,Size=RustbladeSquire::RenderSize;
+            Shadow(FVector2D(X,Y),22);
+            Sprite(RustbladeSquire::Art(D,States[S],Frames[S]),X-Size*.5f,Y-Size*RustbladeSquire::RootY,Size,Size);
+            Label(FString::Printf(TEXT("%s %s %d"),RustbladeSquire::Directions[D],States[S],Frames[S]),X-60,Y+4,Pale,.6f);
+        }
+        return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("LocomotionPreview")))
     {
         Box(0,0,1280,800,FLinearColor(.035f,.045f,.05f,1));
@@ -1632,7 +1712,7 @@ void ADungeonHUD::DrawHUD()
             }
         }
     }
-    for(auto& E:G->GetEnemies()) if(IsValid(E)&&E->Windup>0&&(E->Species<28||E->Species>=31))
+    for(auto& E:G->GetEnemies()) if(IsValid(E)&&E->Windup>0&&E->Species!=RustbladeSquire::Species&&!DungeonExpansion::Is(E->Species)&&(E->Species<28||E->Species>=31))
     {
         const auto& Spec=DungeonRoster::Get(E->Species);
         const float Radius=E->bBoss?E->AttackRadius:Spec.AttackStyle==4?Spec.Range:Spec.AttackStyle==0?Spec.Range:35;
@@ -1648,6 +1728,11 @@ void ADungeonHUD::DrawHUD()
     DrawReward(G,H);
     for(const auto& FX:G->GetSplashes())
     {
+        if(DungeonExpansion::Is(FX.ExpansionSpecies)){
+            const int Count=FX.bExpansionPlayerHit?12:FX.ExpansionSpecies==52?14:16;
+            const int Frame=FMath::Clamp(int((.84f-FX.Life)/.84f*Count),0,Count-1);
+            Sprite(DungeonExpansion::FX(FX.ExpansionSpecies,FX.bExpansionPlayerHit?TEXT("hero-impact"):TEXT("ground-impact"),Frame),FX.Position.X-48,FX.Position.Y-48,96,96,FLinearColor(1,1,1,FMath::Clamp(FX.Life/.2f,0.f,1.f)));continue;
+        }
         if(FX.Art>=40)
         {
             const float Size=FX.Radius*2*(.6f+.4f*FMath::Clamp((.65f-FX.Life)/.16f,0.f,1.f));
@@ -1689,6 +1774,12 @@ void ADungeonHUD::DrawHUD()
     for(const auto& Shot:G->GetShots())
     {
         FVector2D P=Shot.Position;
+        if(DungeonExpansion::Is(Shot.ExpansionSpecies)){
+            const int S=Shot.ExpansionSpecies;const float Size=S==50?35.f:68.f;
+            float Angle=FMath::RadiansToDegrees(FMath::Atan2(Shot.Velocity.Y,Shot.Velocity.X));
+            if(S==50){Shadow(P,8);P.Y-=FMath::Sin(FMath::Clamp(Shot.Age/1.1f,0.f,1.f)*PI)*30;Angle=0;}
+            Sprite(DungeonExpansion::FX(S,TEXT("projectile"),int(Shot.Age*16)%12),P.X-Size*.5f,P.Y-Size*.5f,Size,Size,FLinearColor::White,Angle);continue;
+        }
         if(Shot.Style==14||Shot.Style==15)
         {
             float Angle=FMath::RadiansToDegrees(FMath::Atan2(Shot.Velocity.Y,Shot.Velocity.X));

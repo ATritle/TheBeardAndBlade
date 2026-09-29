@@ -1,5 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "RustbladeSquire.h"
+#include "DungeonExpansion.h"
 struct FDungeonSpecies
 {
     const TCHAR* Name;
@@ -9,6 +11,18 @@ struct FDungeonSpecies
 };
 namespace DungeonRoster
 {
+// Atlas depth, not visit count or the clamped loot/health room number.
+// Replace slots in the original 4/5/6/6 budgets; retain light Keep wildlife.
+inline TArray<int32> KeepEncounter(int32 Depth,int32 Wave=1)
+{
+    // Only one heavy/caster introduction per room, even with two waves.
+    if(Wave>1&&Depth==2)return {49,49,50,4,2};
+    if(Wave>1&&Depth>=3)return {49,49,50,4,2,49};
+    if(Depth<=1)return {49,49,50,4};
+    if(Depth==2)return {49,51,49,50,4};
+    if(Depth==3)return {49,52,49,2,49,4};
+    return {49,53,49,50,4,49};
+}
 // Attack styles: slash, aimed bolt, charge, fan, slam, venom, radial volley.
 inline const FDungeonSpecies Species[]={
  {TEXT("Crypt Guard"),61,44,13,48,.55f,.9f,0,false},
@@ -59,11 +73,18 @@ inline const FDungeonSpecies Species[]={
  {TEXT("Storm Knight"),64,115,24,100,.95f,1.6f,0,false},
  {TEXT("Static Spider"),75,80,14,280,1.1f,2.f,3,false},
  {TEXT("Rubble Golem"),40,170,30,140,1.5f,2.2f,4,false},
- {TEXT("Cyclone Imp"),74,63,12,260,1.3f,2.3f,6,true}
+ {TEXT("Cyclone Imp"),74,63,12,260,1.3f,2.3f,6,true},
+ {TEXT("Rustblade Squire"),61,65,14,80,.51f,.32f,0,false},
+ {TEXT("Graveglass Slinger"),52,48,11,300,.65f,.9f,1,false},
+ {TEXT("Chainbound Bailiff"),46,110,20,90,.9f,1.2f,0,false},
+ {TEXT("Candle Hexer"),45,76,15,300,.9f,1.2f,1,true},
+ {TEXT("Sepulcher Lancer"),43,175,26,310,1.2f,1.6f,1,false}
 };
-inline const FDungeonSpecies& Get(int32 I) { return Species[FMath::Clamp(I,0,48)]; }
+inline const FDungeonSpecies& Get(int32 I) { return Species[FMath::Clamp(I,0,int32(UE_ARRAY_COUNT(Species))-1)]; }
 inline float RenderSize(int32 I)
 {
+    if(I==RustbladeSquire::Species)return RustbladeSquire::RenderSize;
+    if(DungeonExpansion::Is(I))return 180.f; // Receive-hit volume, not padded 512px art canvas.
     const float Sizes[]={178,168,112,132,110,190,210,195,220,160,240,178,205,145,210,220,185,210,190,235,215,180,235,260,225,350,330,380,320,330,205,240,145,165,180,200,150,190,215,180,155,195,190,170,240,230,205,285,170};
     return Sizes[FMath::Clamp(I,0,48)];
 }

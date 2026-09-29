@@ -1,4 +1,6 @@
 #include "DungeonActors.h"
+#include "RustbladeSquire.h"
+#include "DungeonExpansion.h"
 #include "DungeonCombatBalance.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -44,6 +46,20 @@ void ADungeonHUD::DrawCombatFX(ADungeonGameMode* G,bool Foreground)
 {
     for(const auto& B:G->Blood)
     {
+        if(DungeonExpansion::Is(B.ExpansionSpecies)){
+            if(!Foreground&&B.Age<5){
+                const float S=DungeonExpansion::RenderSize,Alpha=FMath::Clamp((5-B.Age)/1.4f,0.f,1.f);
+                Sprite(DungeonExpansion::Art(B.ExpansionSpecies,B.ExpansionDirection,TEXT("death"),FMath::Clamp(int(B.Age/.14f),0,7)),B.Position.X-S*.5f,B.Position.Y-S*DungeonExpansion::RootY,S,S,FLinearColor(1,1,1,Alpha));
+            }continue;
+        }
+        if(B.RustDirection>=0) {
+            if(!Foreground&&B.Age<5.f) {
+                const float Size=RustbladeSquire::RenderSize;
+                const float Alpha=FMath::Clamp((5.f-B.Age)/1.4f,0.f,1.f);
+                Sprite(RustbladeSquire::Art(B.RustDirection,TEXT("death"),RustbladeSquire::DeathFrame(B.Age)),B.Position.X-Size*.5f,B.Position.Y-Size*RustbladeSquire::RootY,Size,Size,FLinearColor(1,1,1,Alpha));
+            }
+            continue;
+        }
         if(!Foreground)
         {
             const float Alpha=FMath::Min(1.f,B.Age/.3f)*FMath::Clamp((14.f-B.Age)/4.f,0.f,1.f);

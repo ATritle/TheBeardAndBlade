@@ -99,6 +99,7 @@ void ADungeonGameMode::UpdateProjectiles(float Dt)
     const auto HeroP=DungeonView::Project(H->GetActorLocation());
     for(auto& S:Shots)
     {
+        if(DungeonExpansion::Is(S.ExpansionSpecies)) {UpdateExpansionShot(S,Dt,H);continue;}
         const bool LinearEnemy=!S.bFriendly&&S.Style!=13&&S.Style!=14&&!S.Velocity.IsNearlyZero();
         if(LinearEnemy&&!S.bMotionTuned)
         {

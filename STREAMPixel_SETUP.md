@@ -1,5 +1,16 @@
 # StreamPixel setup
 
+## Current release — v0.4.1
+
+Upload `Builds/TheBeardAndBlade-StreamPixel-v0.4.1.zip` for the approved Forgotten Keep
+enemy expansion and 360-degree inventory portrait. Select `Windows/TheBeardAndBlade.exe`.
+This is the complete Pixel Streaming-enabled Shipping runtime, not a source-project ZIP.
+Build with `Tools/package_windows.ps1 -Destination "$PWD/Builds/v0.4.1"`, then
+`python Tools/zip_release.py --version v0.4.1 --streaming`.
+Upload and browser validation are still required; packaging does not deploy to StreamPixel.
+
+The sections below document previous builds.
+
 ## Latest test build — September 28, 2026
 
 Upload `Builds/TheBeardAndBlade-StreamPixel-test-2026-09-28.zip` for the latest
