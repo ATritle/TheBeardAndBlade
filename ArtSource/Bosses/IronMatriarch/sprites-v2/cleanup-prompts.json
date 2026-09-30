@@ -1,0 +1,119 @@
+[
+  {
+    "id": "idle-front",
+    "file": "idle-front.png",
+    "frames": 8,
+    "cols": 4,
+    "rows": 2,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 8 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 2 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "flying-slam-front",
+    "file": "flying-slam-front.png",
+    "frames": 16,
+    "cols": 4,
+    "rows": 4,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 16 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 4 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "meteor-summon-front",
+    "file": "meteor-summon-front.png",
+    "frames": 12,
+    "cols": 4,
+    "rows": 3,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 12 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 3 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "idle-left",
+    "file": "idle-left-corrected.png",
+    "frames": 8,
+    "cols": 4,
+    "rows": 2,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 8 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 2 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "flying-slam-left",
+    "file": "flying-slam-left.png",
+    "frames": 16,
+    "cols": 4,
+    "rows": 4,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 16 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 4 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "flamethrower-left",
+    "file": "flamethrower-left.png",
+    "frames": 12,
+    "cols": 4,
+    "rows": 3,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 12 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 3 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "meteor-summon-left",
+    "file": "meteor-summon-left.png",
+    "frames": 12,
+    "cols": 4,
+    "rows": 3,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 12 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 3 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "idle-right",
+    "file": "idle-right.png",
+    "frames": 8,
+    "cols": 4,
+    "rows": 2,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 8 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 2 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "flying-slam-right",
+    "file": "flying-slam-right.png",
+    "frames": 16,
+    "cols": 4,
+    "rows": 4,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 16 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 4 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "flamethrower-right",
+    "file": "flamethrower-right.png",
+    "frames": 12,
+    "cols": 4,
+    "rows": 3,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 12 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 3 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "meteor-summon-right",
+    "file": "meteor-summon-right.png",
+    "frames": 12,
+    "cols": 4,
+    "rows": 3,
+    "type": "character",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 12 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 3 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "slam-shockwave",
+    "file": "slam-shockwave.png",
+    "frames": 8,
+    "cols": 4,
+    "rows": 2,
+    "type": "effect",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 8 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 2 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  },
+  {
+    "id": "meteor-impact",
+    "file": "meteor-impact.png",
+    "frames": 8,
+    "cols": 4,
+    "rows": 2,
+    "type": "effect",
+    "prompt": "This is a precise sprite-sheet spacing/edge cleanup edit, NOT a new design. Preserve the source sheet's 8 poses, frame order, action, facing, five-headed mechanical dragon anatomy (where present), colors, details and pixel art. Output EXACTLY 4 columns by 2 rows, equal rectangular cells. Re-layout every complete pose in its correct cell with EXTREMELY GENEROUS TRANSPARENT PADDING: the largest pose must occupy at most 65 percent of the cell width and 65 percent of the cell height. Leave at least 17 percent EMPTY transparent margin on every side of EACH cell, including the outer sheet edges. Clearly separated isolated miniature sprites, not a densely filled illustration. Use ONE uniform reduction factor for every pose on this sheet so relative scale stays consistent; do not stretch poses. Preserve relative pose movement, especially flight height and crouch. Repair any clipped wing tips, tail tips, flames or debris by reconstructing their natural continuation. Nothing from an adjacent pose can cross a cell seam. Do not add borders/grid lines/numbers/text or opaque background. TRUE transparent alpha. Preserve all intentional detached effect particles within their own frame; eliminate accidental fragments from neighbors. Keep exact requested number of poses. For character sheets preserve all five colored heads, wings and ONE tail. This edit's purpose is roomy safe frame boundaries and complete silhouettes."
+  }
+]

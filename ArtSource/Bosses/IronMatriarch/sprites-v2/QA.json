@@ -1,0 +1,316 @@
+{
+  "status": "Source draft, not final animation approval",
+  "sheetCount": 21,
+  "missing": [],
+  "ueTested": false,
+  "renderedPreviewTested": false,
+  "reports": [
+    {
+      "id": "idle-front",
+      "file": "idle-front.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "transparentPixels": 768700,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flying-slam-front",
+      "file": "flying-slam-front.png",
+      "size": [
+        1312,
+        1199
+      ],
+      "transparentPixels": 1281012,
+      "hasTransparency": true,
+      "layoutFrames": 16,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flamethrower-front",
+      "file": "flamethrower-front.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "transparentPixels": 440853,
+      "hasTransparency": true,
+      "layoutFrames": 12,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "meteor-summon-front",
+      "file": "meteor-summon-front.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "transparentPixels": 906408,
+      "hasTransparency": true,
+      "layoutFrames": 12,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "idle-left",
+      "file": "idle-left.png",
+      "size": [
+        1659,
+        948
+      ],
+      "transparentPixels": 827303,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flying-slam-left",
+      "file": "flying-slam-left.png",
+      "size": [
+        1312,
+        1199
+      ],
+      "transparentPixels": 808491,
+      "hasTransparency": true,
+      "layoutFrames": 16,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [
+        "column 1",
+        "column 2",
+        "row 1",
+        "row 2",
+        "row 3"
+      ],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flamethrower-left",
+      "file": "flamethrower-left.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "transparentPixels": 805123,
+      "hasTransparency": true,
+      "layoutFrames": 12,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "meteor-summon-left",
+      "file": "meteor-summon-left.png",
+      "size": [
+        1450,
+        1085
+      ],
+      "transparentPixels": 717534,
+      "hasTransparency": true,
+      "layoutFrames": 12,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [
+        "column 1"
+      ],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "idle-right",
+      "file": "idle-right.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 908614,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flying-slam-right",
+      "file": "flying-slam-right.png",
+      "size": [
+        1312,
+        1199
+      ],
+      "transparentPixels": 783706,
+      "hasTransparency": true,
+      "layoutFrames": 16,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [
+        "column 1",
+        "column 2"
+      ],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flamethrower-right",
+      "file": "flamethrower-right.png",
+      "size": [
+        1437,
+        1094
+      ],
+      "transparentPixels": 748291,
+      "hasTransparency": true,
+      "layoutFrames": 12,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "meteor-summon-right",
+      "file": "meteor-summon-right.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "transparentPixels": 730806,
+      "hasTransparency": true,
+      "layoutFrames": 12,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [
+        "column 3"
+      ],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flame-red",
+      "file": "flame-red.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1034385,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flame-blue",
+      "file": "flame-blue.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1039073,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flame-green",
+      "file": "flame-green.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1008637,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flame-white",
+      "file": "flame-white.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1013460,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "flame-violet",
+      "file": "flame-violet.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1117146,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "slam-shockwave",
+      "file": "slam-shockwave.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1111360,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "meteor-warning",
+      "file": "meteor-warning.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1072125,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "meteor-fall",
+      "file": "meteor-fall.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1183312,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    },
+    {
+      "id": "meteor-impact",
+      "file": "meteor-impact.png",
+      "size": [
+        1774,
+        887
+      ],
+      "transparentPixels": 1109789,
+      "hasTransparency": true,
+      "layoutFrames": 8,
+      "edgeContent": false,
+      "gridSeamsWithVisibleContent": [],
+      "note": "Seam/edge flags require visual crop review, not automatic proof of clipping."
+    }
+  ]
+}

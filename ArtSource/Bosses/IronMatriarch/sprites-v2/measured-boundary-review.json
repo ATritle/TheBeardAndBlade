@@ -1,0 +1,107 @@
+[
+  {
+    "id": "idle-front",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flying-slam-front",
+    "measuredFrames": 16,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flamethrower-front",
+    "measuredFrames": 12,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "meteor-summon-front",
+    "measuredFrames": 12,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "idle-left",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flying-slam-left",
+    "measuredFrames": 16,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flamethrower-left",
+    "measuredFrames": 12,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "meteor-summon-left",
+    "measuredFrames": 12,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "idle-right",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flying-slam-right",
+    "measuredFrames": 16,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flamethrower-right",
+    "measuredFrames": 12,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "meteor-summon-right",
+    "measuredFrames": 12,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flame-red",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flame-blue",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flame-green",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flame-white",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "flame-violet",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "slam-shockwave",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "meteor-warning",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "meteor-fall",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  },
+  {
+    "id": "meteor-impact",
+    "measuredFrames": 8,
+    "boundaryWarnings": []
+  }
+]
