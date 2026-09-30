@@ -1,0 +1,16 @@
+[
+  {
+    "file": "character.png",
+    "refs": [
+      "C:/Users/atritle/Documents/Codex/2026-09-22/i-ha/outputs/IronMatriarch/sprites-v2/design-reference.png"
+    ],
+    "prompt": "Create a cinematic boss-introduction cutout using this EXACT Iron Matriarch character design as reference. High-quality detailed pixel art, crisp pixel clusters, metallic gray armored five-headed mechanical dragon queen, central red head with gold crown, viewer left heads icy white and blue, viewer right green and violet. Preserve exactly FIVE heads, two mechanical red-membrane wings, two claw arms, two legs, one spiked segmented tail, red reactor core and gold trim. Dramatic commanding roar, mostly front facing with slight three-quarter depth. Entire character including every wing tip, crown, feet and tail fully within image, with 10% transparent margin. Single isolated character, no words, no title, no scenery, no ground slab, no border, no duplicate poses. Match reference identity rigorously. Pixel-art boss intro portrait suitable for overlay on existing dungeon. Transparent alpha background."
+  },
+  {
+    "file": "title.png",
+    "refs": [
+      "C:/Users/atritle/Documents/Codex/2026-09-22/i-ha/outputs/BigMack/intro-v1/big-mack-title.png"
+    ],
+    "prompt": "Create a standalone wide pixel-art fantasy boss title nameplate, matching the reference's crafted decorative banner quality and chunky readable lettering, but entirely mechanical dragon queen themed, NO burgers or food. Exact text: IRON MATRIARCH. One horizontal line, extremely legible ornate uppercase serif lettering, silver-steel letter faces with gold bevel trim and subtle red reactor glow, dark gunmetal backing, rivets, small angular dragon-wing ornaments, a small gold crown with red jewel above center. Tiny white, blue, red, green and violet gem accents. Transparent alpha outside the tight ornamental nameplate. No character, no dungeon background, no other words. Generous transparent margin, no clipped flourishes. Crisp detailed pixel-art edges."
+  }
+]
