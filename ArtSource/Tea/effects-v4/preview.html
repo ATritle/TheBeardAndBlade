@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TEA · impact workshop</title><style>
+*{box-sizing:border-box}body{margin:0;background:#10171b;color:#f0e5cf;font:16px system-ui;padding:28px}main{max-width:1100px;margin:auto}h1{font:36px Georgia;margin:8px 0}p{color:#b7c2c7;line-height:1.5}.tag{color:#e1b365;letter-spacing:3px;font-size:12px}canvas{width:100%;background:#172126;border:1px solid #4e5146;image-rendering:pixelated;display:block}.controls{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:18px 0}button,select{padding:10px;background:#cfaa66;border:0;color:#172126;font:inherit}a{color:#e1b365}input{accent-color:#dbad61}#atlas{max-width:100%;background:repeating-conic-gradient(#26343a 0% 25%,#1c282d 0% 50%) 0/24px 24px}summary{padding:16px;cursor:pointer}#status{font-variant-numeric:tabular-nums}</style>
+<main><div class="tag">THE BEARD AND BLADE / ART REVIEW</div><h1>TEA · throw and impact</h1><p>New wide-area artwork: branching tea jets, far-flung droplets and ceramic shards, then immediate removal. Choose ground or enemy impact below. No lingering puddle, sizzle, steam, or fade.</p>
+<canvas id="stage" width="1100" height="580" aria-label="Animated TEA projectile and impact review"></canvas>
+<div class="controls"><button id="play">Pause</button><button id="restart">Replay</button><select id="mode"><option value="combo">Throw → ground impact</option><option value="enemy-combo">Throw → enemy impact</option><option value="cup-flight">Cup flight poses</option><option value="tea-explosion">Ground explosion</option><option value="enemy-impact">Enemy impact</option></select><label>Speed <input id="speed" type="range" min="0.25" max="1.5" step="0.25" value="1"></label><label><input id="loop" type="checkbox" checked> Loop</label></div>
+<label>Scrub <input id="scrub" type="range" min="0" max="2500" value="0" style="width:75%"></label><p id="status">Loading artwork…</p>
+<details><summary>Source sprite sheet</summary><img id="atlas" alt="Selected source sprite sheet"><p><a href="manifest.json">Frame rectangles</a> · <a href="UE5_HANDOFF.md">UE5 handoff</a></p></details>
+<p>Visual concept only. Existing game damage and cooldowns are unchanged. Final pivots, timing and character cast poses require UE5 integration.</p></main>
+<script src="manifest.js"></script><script>
+const $=id=>document.getElementById(id),ctx=$('stage').getContext('2d');ctx.imageSmoothingEnabled=false;
+// New ground atlas uses a smaller cup within a wider frame: normalize cup body, preserve broad spray geometry.
+const reviewSizes={'cup-flight':108,'tea-explosion':302,'enemy-impact':310};
+const imgs={};let time=0,last=0,playing=true,ready=false;const duration=2.5;
+Promise.all(pack.sheets.map(s=>new Promise((resolve,reject)=>{const im=new Image();imgs[s.id]=im;im.onload=resolve;im.onerror=reject;im.src=s.file;}))).then(()=>{ready=true;atlas();}).catch(()=>$('status').textContent='An image failed to load. Keep all pack files beside this preview.');
+function atlas(){$('atlas').src=imgs[$('mode').value==='combo'?'tea-explosion':$('mode').value==='enemy-combo'?'enemy-impact':$('mode').value].src;}
+function sprite(id,f,x,y,size,alpha=1){const s=pack.sheets.find(s=>s.id===id),r=s.rects[Math.max(0,Math.min(s.frames-1,f))];const scale=size/Math.max(...s.cellSize);ctx.globalAlpha=alpha;ctx.drawImage(imgs[id],...r,x-r[2]*scale/2,y-r[3]*scale/2,r[2]*scale,r[3]*scale);ctx.globalAlpha=1;}
+// Play only shatter/splash frames, then remove immediately; no aftermath or fade.
+function groundPhase(age){if(age<0||age>=.6)return null;return {sheet:'tea-explosion',frame:Math.min(5,Math.floor(age*10+1e-8)),alpha:1};}
+function ground(age,x,y,zoom=1){const p=groundPhase(age);if(p)sprite(p.sheet,p.frame,x,y,reviewSizes[p.sheet]*zoom,p.alpha);}
+function floor(){ctx.fillStyle='#172126';ctx.fillRect(0,0,1100,580);ctx.strokeStyle='#28373c';ctx.lineWidth=2;for(let y=40;y<580;y+=65){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(1100,y);ctx.stroke();for(let x=(y%2)*50;x<1100;x+=110){ctx.strokeRect(x,y,110,65);}}}
+function target(){ctx.fillStyle='#100f0a88';ctx.beginPath();ctx.ellipse(805,443,54,14,0,0,7);ctx.fill();ctx.fillStyle='#806447';ctx.fillRect(793,289,23,156);ctx.fillRect(745,337,119,18);ctx.beginPath();ctx.arc(805,296,27,0,7);ctx.fill();ctx.strokeStyle='#c3a06b';ctx.lineWidth=3;ctx.strokeRect(777,329,57,58);ctx.fillStyle='#b7c2c7';ctx.font='15px system-ui';ctx.fillText('Impact test target',741,493);}
+function draw(){floor();if(!ready)return;const mode=$('mode').value;
+if(mode==='combo'||mode==='enemy-combo'){if(mode==='enemy-combo')target();const flight=.75,arrival=.35+flight;
+if(time>=.35&&time<arrival){const q=(time-.35)/flight;sprite('cup-flight',Math.floor(q*8)%8,180+q*620,360-Math.sin(q*Math.PI)*160,reviewSizes['cup-flight']);}
+if(mode==='combo')ground(time-arrival,795,416);
+if(mode==='enemy-combo'&&time>=arrival&&time<arrival+.4)sprite('enemy-impact',Math.floor((time-arrival)*10),805,343,reviewSizes['enemy-impact']);
+ctx.fillStyle='#e2b46b';ctx.font='17px system-ui';ctx.fillText(time<.35?'Windup':time<arrival?'Tumbling cup':time<arrival+(mode==='combo'?.6:.4)?'Impact':'Cleared',35,42);
+}else if(mode==='tea-explosion'){ground(time,550,290,1.5);}else{const s=pack.sheets.find(s=>s.id===mode);const count=pack.playbackFrames[mode];if(time<count/10)sprite(mode,Math.min(count-1,Math.floor(time*10)),550,290,reviewSizes[mode]*1.5);}
+$('status').textContent=`${time.toFixed(2)} s / ${duration.toFixed(1)} s · ${(mode==='combo'||mode==='enemy-combo')?'Throw + brief impact':$('mode').selectedOptions[0].text}`;$('scrub').value=Math.round(time*1000);}
+function tick(now){if(last&&playing&&ready){time+=(now-last)/1000*Number($('speed').value);if(time>=duration){if($('loop').checked)time%=duration;else{time=duration;playing=false;$('play').textContent='Play';}}}last=now;draw();requestAnimationFrame(tick);}requestAnimationFrame(tick);
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause':'Play';};$('restart').onclick=()=>{time=0;playing=true;$('play').textContent='Pause';};$('scrub').oninput=()=>{time=Number($('scrub').value)/1000;playing=false;$('play').textContent='Play';draw();};$('mode').onchange=()=>{time=0;atlas();draw();};
+</script></html>

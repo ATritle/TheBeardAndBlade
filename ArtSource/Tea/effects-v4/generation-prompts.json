@@ -1,0 +1,16 @@
+[
+  {
+    "file": "tea-explosion.png",
+    "n": 6,
+    "rows": 2,
+    "cols": 3,
+    "prompt": "Create a REDRAW of the ground impact attack in this pixel-art tea reference. EXACTLY SIX frames arranged 3 columns x 2 rows equal rectangular cells, chronological. NO puddle aftermath, NO steam, NO fading. Frame1 small ivory gold rimmed CUP cracking on contact; frame2 small cup shatters, narrow jets shoot sideways; frame3 MULTIPLE LONG THIN amber tea jets spread far left right forward and back; frame4 peak splash spans at least FIVE TIMES the original cup width, wide low radial blast, many separated droplets and small ceramic shards at outer perimeter; frame5 advancing detached liquid ribbons and wide scattered droplets; frame6 last outward-flying droplets/shards over a broad empty center. Not a giant central blob, NOT an enlarged cup, not fire, no shockwave circles. Cup body in frame1 only12% of cell width, largest spray60% of cell width; ALL frames have same camera/scale, same floor anchor. Most expansion must be lateral across ground, isometric three-quarter view. Same ivory ceramic, gold rim, amber liquid and crisp pixel style as reference. Transparent background and generous clear cell gutters, no neighbors touching. No text/grid/scenery."
+  },
+  {
+    "file": "enemy-impact.png",
+    "n": 4,
+    "rows": 1,
+    "cols": 4,
+    "prompt": "Redraw this pixel-art tea enemy-hit effect as EXACTLY FOUR distinct consecutive impact frames in a 4 columns x 1 row sheet. No steam, puddle or fade frames. Tiny sharp contact spark in frame1, explosive branching tea splash frame2, wide radial spray peak frame3, far-flung droplets and ceramic flecks with clearing center frame4. The effect must cover a MUCH WIDER AREA with many long thin amber tea jets, disconnected droplets and tiny white ceramic shards extending far from the contact point. Keep the central contact spark SMALL; do not merely enlarge a central blob or the fragments. Peak radius5x first-frame radius, expanding silhouette. Same pixel art style and tea colors as reference. No enemy body, no background scenery, no fire, no warning circles. Strict equal cells, largest effect central65% of cell, true transparent margins. No text or grid."
+  }
+]
