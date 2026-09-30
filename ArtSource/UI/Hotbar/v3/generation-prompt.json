@@ -1,0 +1,6 @@
+{
+  "tool": "Built-in image_gen",
+  "prompt": "Edit the provided HUD preview with ONLY these two precise changes. (1) Change the green illuminated STAMINA ARC above and to the upper LEFT of the red health orb to rich luminous BLUE, with light blue highlights and dark blue depleted backing. Also change the small green disk behind its lightning symbol to dark blue, preserving the gold lightning bolt. (2) Remove the entire small line '5s HOLD / 3s COOLDOWN' beneath the far-right BLOCK label, replacing it seamlessly with the existing dungeon floor background. Keep the text 'BLOCK', 'RMB' and its mouse icon. Preserve the green block ring at FAR RIGHT and all emerald decorative gems; these must NOT turn blue. Preserve everything else exactly: bald glasses-wearing red-bearded adventurer attack icon, six slots in order 1/2/3/4/LMB/MMB, eagle, tea, all other labels, red health orb, gold and dark iron frames, composition, pixel art finish, dungeon background, aspect ratio. No extra widgets or text.",
+  "source": "Previous local concept: outputs/HUD/hotbar-v2/hotbar-concept-v2.png (historical edit reference, not required for implementation)",
+  "status": "Visual concept; UE5 implementation pending"
+}
