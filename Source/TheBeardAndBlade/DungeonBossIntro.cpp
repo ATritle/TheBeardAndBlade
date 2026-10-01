@@ -10,6 +10,7 @@ namespace
     // Species order differs from campaign order; keep art routing in one place.
     const TCHAR* IntroPrefix(int32 Species)
     {
+        if(Species==IronMatriarch::Species)return TEXT("IntroIron");
         static const TCHAR* Names[]={TEXT("IntroFinance"),TEXT("IntroWebroot"),TEXT("IntroRime"),TEXT("IntroCinder"),TEXT("IntroMack"),TEXT("IntroTwister"),TEXT("IntroFlash")};
         return Names[FMath::Clamp(Species-24,0,6)];
     }
@@ -41,14 +42,17 @@ void ADungeonHero::SkipIntro()
 void ADungeonGameMode::StartBossIntro()
 {
     CancelBossIntro();
-    if(!IsBossRoom()||GetBossSpecies()<24||GetBossSpecies()>30)return;
+    if(!IsBossRoom()||(GetBossSpecies()!=IronMatriarch::Species&&(GetBossSpecies()<24||GetBossSpecies()>30)))return;
     // Complete texture initialization before starting the synchronized audio/timeline.
     if(auto* PC=UGameplayStatics::GetPlayerController(this,0))
         if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD()))HUD->PreloadBossIntro(GetBossSpecies());
     BossIntroTime=0;
     // Entrances always animate; legacy saved motion preferences are ignored.
-    if(auto* Cue=LoadObject<USoundBase>(nullptr,TEXT("/Game/Audio/BossIntroCue.BossIntroCue")))
-        IntroAudio=UGameplayStatics::SpawnSound2D(this,Cue,(bMusicMuted||bEffectsMuted)?0:.42f,1,0,nullptr,false,true);
+    const TCHAR* CuePath=GetBossSpecies()==IronMatriarch::Species?TEXT("/Game/Audio/IronIntro.IronIntro"):TEXT("/Game/Audio/BossIntroCue.BossIntroCue");
+    const bool Muted=bEffectsMuted||(GetBossSpecies()!=IronMatriarch::Species&&bMusicMuted);
+    // IronIntro already contains its 2.10s lead-in; start at zero exactly once.
+    if(auto* Cue=LoadObject<USoundBase>(nullptr,CuePath))
+        IntroAudio=UGameplayStatics::SpawnSound2D(this,Cue,Muted?0:.42f*MasterVolume,1,0,nullptr,false,true);
     if(MusicComponent)MusicComponent->SetVolumeMultiplier(0);
 }
 void ADungeonGameMode::CancelBossIntro()
@@ -66,7 +70,7 @@ void ADungeonGameMode::FinishBossIntro()
 void ADungeonGameMode::UpdateBossIntro(float Dt)
 {
     if(IsDead()){CancelBossIntro();DialogueLines.Empty();return;}
-    if(IntroAudio){IntroAudio->SetPaused(bMenu);IntroAudio->SetVolumeMultiplier((bMusicMuted||bEffectsMuted)?0:.42f);}
+    if(IntroAudio){IntroAudio->SetPaused(bMenu);IntroAudio->SetVolumeMultiplier((bEffectsMuted||(GetBossSpecies()!=IronMatriarch::Species&&bMusicMuted))?0:.42f*MasterVolume);}
     if(bMenu)return;
     if(MusicComponent)MusicComponent->SetVolumeMultiplier(0);
     BossIntroTime+=FMath::Max(0.f,Dt);DialogueWait=FMath::Max(0.f,DialogueWait-Dt);
@@ -77,6 +81,10 @@ void ADungeonHUD::PreloadBossIntro(int32 Species)
 {
     const FString Prefix=IntroPrefix(Species);
     Texture(Prefix+TEXT("Character"));Texture(Prefix+TEXT("Title"));
+    if(Species==IronMatriarch::Species){
+        for(const TCHAR* View:{TEXT("front"),TEXT("left"),TEXT("right")})for(const TCHAR* State:{TEXT("idle"),TEXT("flying_slam"),TEXT("flamethrower"),TEXT("meteor_summon")})Texture(FString::Printf(TEXT("Iron_%s_%s"),State,View));
+        for(const TCHAR* Effect:{TEXT("flame_white"),TEXT("flame_blue"),TEXT("flame_red"),TEXT("flame_green"),TEXT("flame_violet"),TEXT("slam_shockwave"),TEXT("meteor_warning"),TEXT("meteor_fall"),TEXT("meteor_impact")})Texture(FString(TEXT("Iron_"))+Effect);
+    }
 }
 
 void ADungeonHUD::DrawBossIntro(ADungeonGameMode* G)
@@ -143,7 +151,7 @@ void ADungeonGameMode::VerifyBossIntro()
 {
 #if !UE_BUILD_SHIPPING
     int Errors=0;auto Check=[&](bool OK,const TCHAR* S){if(!OK){++Errors;UE_LOG(LogTemp,Error,TEXT("INTRO_VERIFY %s"),S);}};
-    for(int R:{4,8,12,16,20,24,28})for(float Dt:{.016f,.3f,2.f})
+    for(int R:{4,8,12,16,20,24,28,32})for(float Dt:{.016f,.3f,2.f})
     {
         StartPlaytestRoom(R);Tick(2.1f);Check(IsBossIntroActive()&&IsGameplayBlocked(),TEXT("Intro blocks combat"));
         const float Before=BossIntroTime;ToggleMenu();Tick(1);Check(BossIntroTime==Before,TEXT("Pause freezes timeline"));ToggleMenu();

@@ -60,6 +60,16 @@ for job in jobs:
     frames[-1]['clipRows']=[[yy-y,a-x,z-a+1] for yy,(a,z) in sorted(spans.items())]
     frames[-1]['edgeRisk']=False
  entries.append({k:job[k] for k in ['file','state','direction','frames']}|{'sourcePoseCount':job['frames'],'frames':frames,'componentCount':componentCount,'width':w,'height':h,'alphaExtrema':alpha.getextrema(),'emptyCells':sum(not f['bounds'] for f in frames),'edgeRiskCells':[i+1 for i,f in enumerate(frames) if f['edgeRisk']]})
+# Explicit reviewed FX regions: sparse late sparks confuse alpha-valley detection.
+for entry in entries:
+ if entry['file']=='ground-impact.png':
+  image=Image.open(root/entry['file']).convert('RGBA');mask=image.getchannel('A').point(lambda v:255 if v>64 else 0)
+  xs=[0,383,772,1149,1536];ys=[0,290,572,802,1024];frames=[]
+  for row in range(4):
+   for col in range(4):
+    x,y=xs[col],ys[row];w,h=xs[col+1]-x,ys[row+1]-y
+    frames.append({'cell':[x,y,w,h],'bounds':mask.crop((x,y,x+w,y+h)).getbbox(),'edgeRisk':False,'reviewedFXRegion':True})
+  entry['frames']=frames;entry['emptyCells']=sum(not f['bounds'] for f in frames);entry['edgeRiskCells']=[]
 sheets=entries
 combined=[]
 for direction in ['N','NE','E','SE','S','SW','W','NW']:

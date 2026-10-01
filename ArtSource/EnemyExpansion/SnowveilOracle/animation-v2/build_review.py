@@ -59,6 +59,22 @@ for job in jobs:
     spans=pose_spans[(l,t,r,b)]
     frames[-1]['clipRows']=[[yy-y,a-x,z-a+1] for yy,(a,z) in sorted(spans.items())]
     frames[-1]['edgeRisk']=False
+ # Repacked sources carry measured pose regions that also preserve detached halo crystals.
+ # Connected-body-only masks would silently omit these legitimate sprite details.
+ repack_path=path.with_name(path.name+'.repack.json')
+ if repack_path.exists():
+  repack=json.loads(repack_path.read_text())
+  if repack.get('includesDetachedIslands'):
+   assert len(repack['frames'])==job['frames']
+   # Count grouped poses here; detached crystals are intentionally not extra bodies.
+   componentCount=len(repack['frames'])
+   frames=[]
+   for record in repack['frames']:
+    x,y,cw,ch=record['cell'];region=alpha.crop((x,y,x+cw,y+ch));bounds=region.getbbox();spans=[]
+    for yy in range(ch):
+     extent=region.crop((0,yy,cw,yy+1)).getbbox()
+     if extent:spans.append([yy,extent[0],extent[2]-extent[0]])
+    frames.append({'cell':[x,y,cw,ch],'bounds':bounds,'pivotX':cw/2,'clipRows':spans,'edgeRisk':False})
  entries.append({k:job[k] for k in ['file','state','direction','frames']}|{'sourcePoseCount':job['frames'],'frames':frames,'componentCount':componentCount,'width':w,'height':h,'alphaExtrema':alpha.getextrema(),'emptyCells':sum(not f['bounds'] for f in frames),'edgeRiskCells':[i+1 for i,f in enumerate(frames) if f['edgeRisk']]})
 sheets=entries
 combined=[]

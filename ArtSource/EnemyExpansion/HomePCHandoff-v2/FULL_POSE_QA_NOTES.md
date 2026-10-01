@@ -1,5 +1,7 @@
 # Full pose batch — working QA notes
 
+**2026-09-30 resolution:** these are historical generation notes. Current selected repairs, runtime calibration and test evidence are summarized in `COMPLETION-AND-TEST.md` and the completed-handoff section of `GENERATION_PROGRESS-v4.md`. In particular, the rejected Sporebell SW grip-v2 is not used, Breach E idle is the margin-v4 repair, and the current Silkfang SW death sheet is the separated/ordered repair. All current source crop audits pass; all atlases are imported and the UE validation suite passes. User gameplay approval remains pending.
+
 All 25 turnaround references have been visually inspected. These boards are design references only, not final animation sheets. Greaseworks is excluded.
 
 Known issues to resolve during source generation:

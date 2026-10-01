@@ -1,12 +1,14 @@
 #include "DungeonActors.h"
 #include "DungeonRoster.h"
+#include "DungeonExpansion.h"
+#include "DungeonTeaVisuals.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 
 void ADungeonHero::PowerMove()
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    if(!G||G->IsGameplayBlocked()||IsInventoryOpen()||Health<=0||StunTime>0||IsRolling()||IsAttacking()||IsCasting()||PowerCooldown>0) return;
+    if(!G||!CanUseTea()) return;
     const FVector2D P=DungeonView::Project(GetActorLocation());
     PowerTarget=P+Aim*300;
     if(auto* PC=Cast<APlayerController>(GetController()))
@@ -45,7 +47,7 @@ void ADungeonGameMode::ResolveProjectile(const FDungeonShot& S,FVector2D At)
         if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
         {
             auto D=DungeonView::Project(H->GetActorLocation())-FVector2D(0,S.HitHeight)-At;D.Y/=.65f;
-            if(D.Size()<=FMath::Max(S.Radius+20,S.BlastRadius)) H->ReceiveHit(S.Damage);
+            if(S.bPlayerBodyHit||D.Size()<=FMath::Max(S.Radius+20,S.BlastRadius)) H->ReceiveHit(S.Damage,false,S.bPlayerBodyHit?S.Origin:At,S.bBossAttack);
         }
         return;
     }
@@ -54,7 +56,7 @@ void ADungeonGameMode::ResolveProjectile(const FDungeonShot& S,FVector2D At)
         FDungeonSplash FX;FX.Position=At;FX.Art=20;FX.Radius=175;Splashes.Add(FX);
         PlaySound(TEXT("FlashBang"),.65f);
         if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
-            if(H->ApplyFlashBang(At,S.BlastRadius)&&S.SourceEnemy.IsValid())S.SourceEnemy->BeginFlashAmbush(H,this);
+            if(H->ApplyFlashBang(At,S.BlastRadius,S.bBossAttack)&&S.SourceEnemy.IsValid())S.SourceEnemy->BeginFlashAmbush(H,this);
         return;
     }
     if(S.Style==10||S.Style==11)
@@ -62,9 +64,9 @@ void ADungeonGameMode::ResolveProjectile(const FDungeonShot& S,FVector2D At)
         AddBossFX(At,S.Style==10?16:18);
         if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
         {
-            if(FVector2D::Distance(DungeonView::Project(H->GetActorLocation())-FVector2D(0,S.HitHeight),At)<S.Radius+20)
+            if(S.bPlayerBodyHit||FVector2D::Distance(DungeonView::Project(H->GetActorLocation())-FVector2D(0,S.HitHeight),At)<S.Radius+20)
             {
-                const float Before=H->Health; H->ReceiveHit(S.Damage,S.Style==11);
+                const float Before=H->Health; H->ReceiveHit(S.Damage,S.Style==11,S.Velocity.IsNearlyZero()?S.Origin:DungeonView::Project(H->GetActorLocation())-S.Velocity.GetSafeNormal()*60,S.bBossAttack);
                 if(S.Style==10&&H->Health<Before) H->ApplyBurgerStatus();
             }
         }
@@ -72,6 +74,7 @@ void ADungeonGameMode::ResolveProjectile(const FDungeonShot& S,FVector2D At)
     }
     FDungeonSplash FX; FX.Position=At; FX.bFriendly=S.bFriendly; FX.Radius=FMath::Max(28.f,S.BlastRadius);
     FX.Art=S.bFriendly?8:S.Art==1||S.Art==2?9:S.Art==4?10:S.Art==5?11:S.Art==6?12:S.Art==7?13:15;
+    if(S.bFriendly){FX.TeaKind=1;FX.Life=TeaV4::GroundDuration;}
     Splashes.Add(FX);
     PlaySound(S.bFriendly?TEXT("TeaSplash"):S.Art==1||S.Art==2?TEXT("Paper"):S.Art==3?TEXT("Hit"):S.Art==6?TEXT("TeaSplash"):TEXT("Explosion"),S.bFriendly?1.f:.65f);
     if(S.bFriendly)
@@ -81,20 +84,35 @@ void ADungeonGameMode::ResolveProjectile(const FDungeonShot& S,FVector2D At)
         for(auto& E:Targets) if(IsValid(E)&&E->Health>0&&E->SpawnTime<=0)
         {
             auto D=DungeonView::Project(E->GetActorLocation())-At; D.Y/=.65;
-            if(D.Size()<=S.BlastRadius+(E->bBoss?24:12)) E->TakeDungeonDamage(S.Damage);
+            if(D.Size()<=S.BlastRadius+(E->bBoss?24:12)){
+                const float Before=E->Health;
+                const auto Contact=DungeonView::Project(E->GetActorLocation());
+                const float Height=FMath::Clamp(DungeonRoster::RenderSize(E->Species)*.35f,35.f,110.f);
+                E->TakeDungeonDamage(S.Damage);
+                if(E->Health<Before){
+                    FDungeonSplash Hit;Hit.TeaKind=2;Hit.TeaEnemy=E;Hit.TeaHeight=Height;
+                    Hit.Position=Contact-FVector2D(0,Height);Hit.Life=TeaV4::EnemyDuration;Splashes.Add(Hit);
+                }
+            }
         }
     }
     else if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
     {
         auto D=DungeonView::Project(H->GetActorLocation())-(S.Style==12?FVector2D(0,65):FVector2D::ZeroVector)-At; D.Y/=.65;
-        if(D.Size()<=FMath::Max(S.Radius+20,S.BlastRadius)) H->ReceiveHit(S.Damage);
+        if(S.bPlayerBodyHit||D.Size()<=FMath::Max(S.Radius+20,S.BlastRadius)) {
+            if(S.bMelee)H->ReceiveMeleeHit(S.Damage,S.MeleeOrigin,S.bBossAttack);else H->ReceiveHit(S.Damage,false,S.bPlayerBodyHit?S.Origin:At,S.bBossAttack);
+        }
     }
 }
 
 void ADungeonGameMode::UpdateProjectiles(float Dt)
 {
-    for(auto& S:Splashes) S.Life-=Dt;
-    Splashes.RemoveAll([](const FDungeonSplash& S){return S.Life<=0;});
+    for(auto& S:Splashes){
+        S.Life-=Dt;
+        if(S.TeaKind==2&&S.TeaEnemy.IsValid()&&S.TeaEnemy->Health>0)
+            S.Position=DungeonView::Project(S.TeaEnemy->GetActorLocation())-FVector2D(0,S.TeaHeight);
+    }
+    Splashes.RemoveAll([](const FDungeonSplash& S){return S.TeaKind?!TeaV4::Alive(S.Life):S.Life<=0;});
     auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)); if(!H) return;
     const auto HeroP=DungeonView::Project(H->GetActorLocation());
     for(auto& S:Shots)
@@ -128,11 +146,11 @@ void ADungeonGameMode::UpdateProjectiles(float Dt)
         bool Hit=false;
         if(!S.bFriendly&&S.Style!=13&&S.Style!=14)
         {
-            const auto Segment=S.Position-Before;
-            const auto HitCenter=HeroP-FVector2D(0,S.Style==12?65:S.HitHeight);
-            const float T=Segment.IsNearlyZero()?0:FMath::Clamp(FVector2D::DotProduct(HitCenter-Before,Segment)/Segment.SizeSquared(),0.,1.);
-            Hit=FVector2D::Distance(Before+Segment*T,HitCenter)<S.Radius+17;
-            if(Hit) S.Position=Before+Segment*T;
+            const FVector2D VisualOffset=S.Style<10?FVector2D(0,22):FVector2D::ZeroVector;
+            const float T=DungeonExpansion::PlayerBodyHit(Before-VisualOffset,S.Position-VisualOffset,HeroP,S.Radius);
+            Hit=T<=1;
+            S.bPlayerBodyHit=Hit;
+            if(Hit) S.Position=FMath::Lerp(Before,S.Position,T);
         }
         const bool Wall=S.Position.X<65||S.Position.X>1215||S.Position.Y<145||S.Position.Y>755;
         if(Hit||S.Life<=0||Wall)

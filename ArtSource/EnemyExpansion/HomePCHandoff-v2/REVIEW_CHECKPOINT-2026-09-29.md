@@ -16,6 +16,6 @@ All 25 active enemies have eight directional walking sheets. Greaseworks is held
 - Coil Saboteur: inspect two-handed grip continuity and weapon-edge crop margins in attacks.
 - Breach Hound: selected east idle has edge-touching poses; preserve ears, tail, and paws when extracting.
 
-Raw image viewers may show hidden RGB under fully transparent pixels. Inspect alpha before assuming colored edge artifacts are visible in-game. Do not erase intentional detached particles during cropping. Image cleanup scripts have not been authorized; no raster cleanup was performed by scripts.
+Raw image viewers may show hidden RGB under fully transparent pixels. Inspect alpha before assuming colored edge artifacts are visible in-game. Do not erase intentional detached particles during cropping. The user subsequently authorized local image processing for haze and crop repairs. See GENERATION_PROGRESS-v4.md for the later repair checkpoint; this earlier snapshot is not current availability.
 
 Only selected files in generation-prompts/full-pose-jobs should feed previews and handoff. Never import every PNG in a folder; rejected candidates remain for history.

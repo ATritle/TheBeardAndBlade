@@ -10,7 +10,7 @@
   "appearance": "Imp-like ice scavenger in torn blue cloth holding a bundle of oversized icicles.",
   "attack": "Throws one spinning icicle with a small arc.",
   "projectileConcept": "Icicle: end-over-end cyan shard and snow flecks; player impact crystal shards; floor/wall impact brittle ice fracture.",
-  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "assetStatus": "SPRITES_COMPLETE_UE_TEST_READY",
   "animation": {
     "directions": [
       "N",
@@ -71,10 +71,23 @@
     "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
   },
   "sourceProgress": {
-    "selectedSheetsSaved": 43,
+    "selectedSheetsSaved": 51,
     "selectedSheetsPlanned": 51,
     "visualReviewComplete": false,
-    "ueImportTested": false,
-    "status": "INCOMPLETE_REVIEW_DRAFT"
+    "ueImportTested": true,
+    "status": "SPRITES_COMPLETE_UE_TEST_READY"
+  },
+  "runtimeReview": {
+    "species": 66,
+    "atlasCount": 43,
+    "poseCount": 568,
+    "sourceCropAuditPassed": true,
+    "atlasBoundsAuditPassed": true,
+    "automatedUETestPassed": true,
+    "visualReviewScope": "Directional source repair review, cross-state scale boards, eight-direction attack contact boards; automated combat captures for the five elites.",
+    "userGameplayApproval": false,
+    "exhaustiveManualGameplay": false,
+    "timingAuthority": "Source/TheBeardAndBlade/DungeonExpansionV2.h::ReleaseFrame",
+    "report": "ArtSource/EnemyExpansion/HomePCHandoff-v2/COMPLETION-AND-TEST.md"
   }
 }

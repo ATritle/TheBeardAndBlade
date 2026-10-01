@@ -1,6 +1,6 @@
 {
   "sourceCheckOnly": true,
-  "sheets": 43,
+  "sheets": 51,
   "checks": [
     {
       "file": "walk-N.png",
@@ -22,8 +22,25 @@
     {
       "file": "attack-a-N.png",
       "size": [
-        1448,
-        1086
+        1648,
+        1302
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-N.png",
+      "size": [
+        1708,
+        1221
       ],
       "alpha": [
         0,
@@ -71,6 +88,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-NE.png",
+      "size": [
+        1664,
+        1194
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-E.png",
       "size": [
         1254,
@@ -92,6 +126,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-E.png",
+      "size": [
+        1704,
+        1164
       ],
       "alpha": [
         0,
@@ -139,6 +190,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SE.png",
+      "size": [
+        1560,
+        1212
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-S.png",
       "size": [
         1254,
@@ -160,6 +228,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-S.png",
+      "size": [
+        1608,
+        1230
       ],
       "alpha": [
         0,
@@ -207,6 +292,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SW.png",
+      "size": [
+        1732,
+        1119
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-W.png",
       "size": [
         1254,
@@ -241,6 +343,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-W.png",
+      "size": [
+        1556,
+        1179
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-NW.png",
       "size": [
         1254,
@@ -260,8 +379,25 @@
     {
       "file": "attack-a-NW.png",
       "size": [
-        1448,
-        1086
+        1560,
+        1236
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NW.png",
+      "size": [
+        1684,
+        1197
       ],
       "alpha": [
         0,
@@ -735,5 +871,5 @@
     }
   ],
   "walkCells": 128,
-  "attackCells": 96
+  "attackCells": 192
 }

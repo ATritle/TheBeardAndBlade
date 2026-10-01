@@ -1,3 +1,20 @@
+# v0.4.2 — Iron Aerie, expanded enemies and combat HUD
+
+- Expanded dungeon floors with tougher late-room enemies and persistent exploration.
+- Completed directional enemy animation packs, corrected anchors, revised elite scale and projectile presentation.
+- New Iron Aerie floor and Iron Matriarch boss, with cinematic intro and recorded dragon audio.
+- Iron Matriarch's flames escalate with exposure; meteors splash and slams deal heavy damage. Bosses remain immune to FREEDOM.
+- Compact illustrated HUD, animated meters, mouse-button icons and graphical FREEDOM charge.
+- Directional RMB blocking with a reusable five-second reserve and player block animation. Boss attacks retain 75% damage through block.
+- Dedicated TEA flight, ground and enemy impact assets: hand-sized cup, compact splashes, 10 FPS playback, immediate endings, unchanged damage radius and cooldown.
+- Removed obsolete floor-loot prompts. Updated current documentation, archived historical notes and retired one-off CMD launchers.
+
+Download the Windows ZIP, extract everything, and run TheBeardAndBlade/TheBeardAndBlade.exe. The separate StreamPixel ZIP uses Windows/TheBeardAndBlade.exe. Both contain the same Pixel Streaming-enabled Windows x64 Shipping runtime. SHA-256 files are included.
+
+Unsigned playtest; no campaign save. StreamPixel upload and hosted validation are separate steps.
+
+## Earlier releases
+
 # v0.4.1 — Forgotten Keep enemies and rotating inventory portrait
 
 - Five approved enemies now populate the Forgotten Keep: Rustblade Squire, Graveglass Slinger, Chainbound Bailiff, Candle Hexer and Sepulcher Lancer.

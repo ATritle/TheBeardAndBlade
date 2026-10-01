@@ -11,6 +11,8 @@
 #include "HeroBreathing.h"
 #include "DungeonDescent.h"
 #include "DungeonRoster.h"
+#include "DungeonTeaVisuals.h"
+#include "TeaV4Metrics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneComponent.h"
@@ -91,6 +93,7 @@ void ADungeonHero::BeginPlay()
 void ADungeonHero::Restart()
 {
     CancelCombatActions();
+    Block=FDungeonBlock();GuardBlend=0;
     Equipment.Empty();Equipment.SetNum(DungeonLootCatalog::EquipmentSlots);
     for(int S=0;S<Equipment.Num();++S)Equipment[S].Slot=S;
     Equipment[0]=ADungeonGameMode::MakeItem(0,0); Equipment[0].Attack=0; Equipment[0].Name=TEXT("Old Iron Sword");
@@ -111,8 +114,25 @@ void ADungeonHero::Tick(float Dt)
 {
     Super::Tick(Dt);
     ScreenVelocity=FVector2D::ZeroVector;
-    if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) return;
-    if(bInventoryOpen) { bWalking=false; return; }
+    if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) {StopBlock();return;}
+    if(bInventoryOpen) { StopBlock();bWalking=false; return; }
+    if(Health<=0||StunTime>0)StopBlock();
+    Block.Tick(Dt);
+    GuardBlend=FMath::FInterpConstantTo(GuardBlend,IsBlocking()?1.f:0.f,Dt,IsBlocking()?7.f:9.f);
+    #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("EliteReplay"))||FParse::Param(FCommandLine::Get(),TEXT("RosterReplay")))if(auto* G=Mode(this)){
+        InputX=InputY=0;
+        for(auto& E:G->GetEnemies())if(IsValid(E)){
+            const auto EnemyP=DungeonView::Project(E->GetActorLocation()),HeroP=DungeonView::Project(GetActorLocation());
+            const float T=FMath::Fmod(FMath::Max(0.f,GetWorld()->GetTimeSeconds()-.5f),14.f);
+            const FVector2D Goal=T<4?EnemyP+FVector2D(FMath::Cos(T*1.1f),FMath::Sin(T*1.1f))*225.f:EnemyP+FVector2D(0,68);
+            const auto Move=(Goal-HeroP).GetSafeNormal();
+            if((Goal-HeroP).Size()>8){InputX=Move.X;InputY=Move.Y;}
+            if(T<4)for(const auto& Shot:G->GetShots())if((Shot.Position-HeroP).Size()<90)Dodge();
+            break;
+        }
+    }
+    #endif
     const bool Resting=Health>0&&StunTime<=0&&!IsAttacking()&&!IsCasting()&&!IsRolling()&&FMath::Abs(InputX)+FMath::Abs(InputY)<.01f;
     IdleBreathBlend=FMath::FInterpTo(IdleBreathBlend,Resting?1.f:0.f,Dt,Resting?4.f:12.f);
     const float Fatigue=1.f-FMath::Clamp(Stamina/FMath::Max(1.f,MaxStamina),0.f,1.f);
@@ -152,7 +172,7 @@ void ADungeonHero::Tick(float Dt)
     bWalking=FVector2D::Distance(Next,P)>.01f;
     MoveBlend=HeroLocomotion::Blend(MoveBlend,bWalking?1.f:0.f,Dt,bWalking?15.f:12.f);
     RunBlend=HeroLocomotion::Blend(RunBlend,Sprinting&&bWalking?1.f:0.f,Dt,10.f);
-    if(bWalking) { GaitTravel=(Next-P).GetSafeNormal();Facing=DungeonView::Direction(GaitTravel); }
+    if(bWalking) { GaitTravel=(Next-P).GetSafeNormal();if(!IsBlocking())Facing=DungeonView::Direction(GaitTravel); }
     // Playback tracks actual displacement, including boots/slow/attack modifiers.
     // A longer sprint stride keeps the legs from simply cycling twice as fast.
     const float GaitStep=FVector2D::Distance(Next,P)*144.f/HeroLocomotion::Stride(Sprinting?1.f:0.f);
@@ -163,7 +183,7 @@ void ADungeonHero::Tick(float Dt)
     WalkDistance=FMath::Fmod(WalkDistance,144.f);
     SetActorLocation(DungeonView::Unproject(Next));
     if(Dt>SMALL_NUMBER) ScreenVelocity=(Next-P)/Dt;
-    if(auto* PC=Cast<APlayerController>(GetController()))
+    if(auto* PC=Cast<APlayerController>(GetController());PC&&!FParse::Param(FCommandLine::Get(),TEXT("HotbarReview")))
     {
         int32 W=0,H=0; float MX=0,MY=0; PC->GetViewportSize(W,H);
         const float S=FMath::Min(W/1280.f,H/800.f);
@@ -176,11 +196,20 @@ void ADungeonHero::Tick(float Dt)
                 if(Delta.SizeSquared()>144)
                 {
                     Aim=Delta.GetSafeNormal();
-                    if(!bWalking)Facing=DungeonView::Direction(Aim);
+                    if(!bWalking||IsBlocking())Facing=DungeonView::Direction(Aim);
                 }
             }
         }
     }
+    #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("EliteReplay"))||FParse::Param(FCommandLine::Get(),TEXT("RosterReplay")))if(auto* G=Mode(this))
+        for(auto& E:G->GetEnemies())if(IsValid(E)){
+            const auto Delta=DungeonView::Project(E->GetActorLocation())-DungeonView::Project(GetActorLocation());
+            Aim=Delta.GetSafeNormal();
+            if(Delta.Size()<100&&!IsAttacking()&&!IsRolling())Attack();
+            break;
+        }
+    #endif
     if(AttackTime>0)
     {
         AttackTime=FMath::Max(0.f,AttackTime-Dt*AttackSpeed);
@@ -204,8 +233,12 @@ void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
     I->BindAxis("MoveForward",this,&ADungeonHero::MoveForward);
     I->BindAxis("MoveRight",this,&ADungeonHero::MoveRight);
     I->BindAction("Attack",IE_Pressed,this,&ADungeonHero::Attack);
-    I->BindAction("PowerMove",IE_Pressed,this,&ADungeonHero::PowerMove);
-    I->BindAction("Freedom",IE_Pressed,this,&ADungeonHero::Freedom);
+    // Explicit bindings migrate old saved RMB/MMB mappings without duplicate actions.
+    I->BindKey(EKeys::MiddleMouseButton,IE_Pressed,this,&ADungeonHero::PowerMove);
+    I->BindKey(EKeys::RightMouseButton,IE_Pressed,this,&ADungeonHero::BlockPressed);
+    I->BindKey(EKeys::RightMouseButton,IE_Released,this,&ADungeonHero::BlockReleased);
+    if(!FParse::Param(FCommandLine::Get(),TEXT("EliteTest"))&&!FParse::Param(FCommandLine::Get(),TEXT("RosterTest")))
+        I->BindKey(EKeys::One,IE_Pressed,this,&ADungeonHero::Freedom);
     // Reserve M for the atlas even if an older user config still maps it to music.
     I->BindKey(EKeys::F8,IE_Pressed,this,&ADungeonHero::ToggleMusic);
     // SFX mute is a visible menu control, not an accidental N press beside Map.
@@ -217,6 +250,7 @@ void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
     I->BindAction("Sprint",IE_Pressed,this,&ADungeonHero::SprintPressed);
     I->BindAction("Sprint",IE_Released,this,&ADungeonHero::SprintReleased);
 #if WITH_EDITOR
+    if(!FParse::Param(FCommandLine::Get(),TEXT("EliteTest"))&&!FParse::Param(FCommandLine::Get(),TEXT("RosterTest"))){
     I->BindKey(EKeys::F1,IE_Pressed,this,&ADungeonHero::TestFinance);
     I->BindKey(EKeys::F2,IE_Pressed,this,&ADungeonHero::TestMack);
     I->BindKey(EKeys::F3,IE_Pressed,this,&ADungeonHero::TestWebroot);
@@ -227,17 +261,14 @@ void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
     I->BindKey(EKeys::F9,IE_Pressed,this,&ADungeonHero::TestFinance);
     I->BindKey(EKeys::F10,IE_Pressed,this,&ADungeonHero::TestTwister);
     I->BindKey(EKeys::F11,IE_Pressed,this,&ADungeonHero::TestFlashBang);
-    // Main keyboard number row: available on laptops without a numeric keypad.
-    I->BindKey(EKeys::One,IE_Pressed,this,&ADungeonHero::TestGreaseEnemies);
-    I->BindKey(EKeys::Two,IE_Pressed,this,&ADungeonHero::TestBunkerEnemies);
-    I->BindKey(EKeys::Three,IE_Pressed,this,&ADungeonHero::TestStormEnemies);
-    I->BindKey(EKeys::Four,IE_Pressed,this,&ADungeonHero::TestFinance);
+    // 1 is FREEDOM; 2-4 are reserved action slots. F-keys still select bosses.
     I->BindKey(EKeys::Five,IE_Pressed,this,&ADungeonHero::TestMack);
     I->BindKey(EKeys::Six,IE_Pressed,this,&ADungeonHero::TestFlashBang);
     I->BindKey(EKeys::Seven,IE_Pressed,this,&ADungeonHero::TestWebroot);
     I->BindKey(EKeys::Eight,IE_Pressed,this,&ADungeonHero::TestRime);
     I->BindKey(EKeys::Nine,IE_Pressed,this,&ADungeonHero::TestCinder);
     I->BindKey(EKeys::Zero,IE_Pressed,this,&ADungeonHero::TestTwister);
+    }
 #endif
 }
 void ADungeonHero::Attack()
@@ -263,7 +294,7 @@ void ADungeonHero::Attack()
             if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) HUD->InventoryClick();
         return;
     }
-    if(Health<=0||IsAttacking()||IsRolling()||IsCasting()) return;
+    if(!CanStrike()) return;
     AttackTime=.48f; bAttackHit=false; AttackAim=Aim; AttackDirection=DungeonView::Direction(AttackAim);
     if(QuipCooldown<=0&&FMath::FRand()<.35f)
     {
@@ -278,6 +309,7 @@ void ADungeonHero::ToggleInventory()
     if(IsRolling()) return;
     if(Health<=0) return;
     bInventoryOpen=!bInventoryOpen; InventoryMessage.Empty();
+    if(bInventoryOpen)StopBlock();
     if(auto* PC=Cast<APlayerController>(GetController())) if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) HUD->CancelInventoryGesture();
     if(auto* G=Mode(this)) G->PlaySound(bInventoryOpen?TEXT("InventoryOpen"):TEXT("InventoryClose"),.4f);
 }
@@ -323,14 +355,20 @@ bool ADungeonHero::IsBulletImmune() const
     const auto* G=Mode(this);
     return (RollTime>.14f)||(G&&G->IsFreedomActive());
 }
-void ADungeonHero::ReceiveHit(float Damage,bool PerProjectile)
+void ADungeonHero::ReceiveHit(float Damage,bool PerProjectile,TOptional<FVector2D> Source,bool BossAttack)
 {
     if(auto* G=Mode(this)) if(G->IsFreedomActive()) return;
     if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) return;
     if(Health<=0||(PerProjectile?IsBulletImmune():Invulnerable>0)) return;
-    const float Actual=FMath::Max(2.f,Damage*(HasEffect(10)?.88f:1.f)-Armor*.3f)*(1-DamageReduction);
+    if(Damage<=0)return;
+    float GuardMultiplier=1.f;
+    if(TryBlockDamage(Source.IsSet()?Source.GetValue()-DungeonView::Project(GetActorLocation()):FVector2D::ZeroVector)){
+        if(!BossAttack)return;
+        GuardMultiplier=.75f;
+    }
+    const float Actual=FMath::Max(2.f,Damage*(HasEffect(10)?.88f:1.f)-Armor*.3f)*(1-DamageReduction)*GuardMultiplier;
     Health=FMath::Max(0.f,Health-Actual);
-    if(Health<=0) StunTime=SlowTime=FlashBlindTime=0;
+    if(Health<=0) {StopBlock();StunTime=SlowTime=FlashBlindTime=0;}
     HurtTime=.18f; if(!PerProjectile) Invulnerable=.65f;
     if(auto* G=Mode(this)) G->PlaySound(Health<=0?TEXT("Death"):TEXT("Hurt"));
     if(auto* G=Mode(this)) G->AddImpact(DungeonView::Project(GetActorLocation()),Actual,true);
@@ -342,6 +380,7 @@ void ADungeonHero::Dodge()
     auto* G=Mode(this);
     if(!G||G->IsGameplayBlocked()||bInventoryOpen||Health<=0||RollCooldown>0||IsCasting()||bExhausted||Stamina<DungeonCombatBalance::DodgeCost) return;
     SpendStamina(DungeonCombatBalance::DodgeCost);
+    StopBlock(); // A deliberate dodge cancels guard and starts proportional recovery.
     RollAim=FVector2D(InputX,InputY).GetSafeNormal(); if(RollAim.IsNearlyZero()) RollAim=Aim;
     RollDirection=(FMath::RoundToInt(FMath::Atan2(RollAim.Y,RollAim.X)/(PI/2))+4)%4;
     RollTime=.48f; RollCooldown=1.15f; Invulnerable=.34f; AttackTime=0; bAttackHit=true;
@@ -390,9 +429,12 @@ void ADungeonEnemy::TakeDungeonDamage(float Damage)
     if(auto* H=Player(this))
     {
         auto Push=(P-DungeonView::Project(H->GetActorLocation())).GetSafeNormal();
-        SetActorLocation(DungeonView::Unproject(DungeonView::Clamp(P+Push*(bBoss?5:18))));
+        if(Species!=IronMatriarch::Species)SetActorLocation(DungeonView::Unproject(DungeonView::Clamp(P+Push*(bBoss?5:18))));
     }
-    if(Health<=0&&G) G->EnemyDefeated(this);
+    if(Health<=0&&G){
+        if(Species==IronMatriarch::Species){Iron.Cancel();Iron.DeathAge=0;BleedTime=PoisonTime=0;}
+        else G->EnemyDefeated(this);
+    }
 }
 ADungeonGameMode::ADungeonGameMode()
 {
@@ -407,6 +449,8 @@ void ADungeonGameMode::BeginPlay()
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteEffects"),bEffectsMuted,GGameUserSettingsIni);
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("HotbarVerify"))) { VerifyHotbar();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("TeaV4Verify"))) { VerifyTeaV4();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeVerify"))) { VerifyRustblade();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionVerify"))) { VerifyExpansion();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))) {bMenu=false;bHasRun=true;}
@@ -419,6 +463,7 @@ void ADungeonGameMode::BeginPlay()
     if(FParse::Param(FCommandLine::Get(),TEXT("FlashVerify"))) { VerifyFlashBang(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("ProgressionVerify"))) { VerifyProgression(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("IntroVerify"))) { VerifyBossIntro(); return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("IronVerify"))) { VerifyIronMatriarch(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("WeekendVerify"))) { VerifyWeekend(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("EndingVerify"))) { VerifyEndings(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("DungeonVerify"))) VerifyCampaign();
@@ -433,7 +478,48 @@ void ADungeonGameMode::BeginPlay()
 void ADungeonGameMode::Tick(float Dt)
 {
     Super::Tick(Dt);
+    #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("HotbarReview"))||FParse::Param(FCommandLine::Get(),TEXT("BlockTest")))UpdateHotbarReview(Dt);
+    const bool AllReplay=FParse::Param(FCommandLine::Get(),TEXT("RosterReplay"));
+    const bool AlignmentReplay=FParse::Param(FCommandLine::Get(),TEXT("AlignmentReplay"));
+    const bool DuelTest=FParse::Param(FCommandLine::Get(),TEXT("DuelTest"));
+    if(FParse::Param(FCommandLine::Get(),TEXT("EliteReplay"))||AllReplay){
+        const float Time=GetWorld()->GetTimeSeconds();
+        const int Segment=FMath::Clamp(int((Time-.5f)/14.f),0,DuelTest?1:AllReplay?19:AlignmentReplay?4:3);
+        const int Species[]={58,76,62,75};
+        const int AlignmentSpecies[]={58,68,62,75,76};
+        const int Selected=DuelTest?(Segment==0?68:75):AllReplay?DungeonExpansionV2::Active[Segment]:AlignmentReplay?AlignmentSpecies[Segment]:Species[Segment];
+        const float ReplayEndTime=DuelTest?28.5f:AllReplay?280.5f:AlignmentReplay?70.5f:56.5f;
+        if(Time>.5f&&EliteReviewSpecies!=Selected)StartEliteEncounter(Selected);
+        static int LastCapture=-1;
+        const int Frame=FMath::FloorToInt((Time-1.f)*10);
+        if(Frame>=0&&Frame!=LastCapture&&Time<ReplayEndTime){
+            LastCapture=Frame;
+            FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/(DuelTest?TEXT("Saved/DuelReplay"):AllReplay?TEXT("Saved/AllExpansionReplay"):AlignmentReplay?TEXT("Saved/AlignmentReplay"):TEXT("Saved/EliteReplay"))/FString::Printf(TEXT("frame-%05d.png"),Frame),true,false);
+        }
+        if(Time>ReplayEndTime){FPlatformMisc::RequestExit(false);return;}
+    }
+    if(FParse::Param(FCommandLine::Get(),TEXT("EliteTest"))||FParse::Param(FCommandLine::Get(),TEXT("RosterTest"))){
+        if(EliteReviewSpecies<0&&GetWorld()->GetTimeSeconds()>.5f){
+            int32 Selected=DuelTest?68:FParse::Param(FCommandLine::Get(),TEXT("RosterTest"))?54:58;FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Selected);
+            if(!DungeonExpansionV2::Enabled(Selected))Selected=54;
+            StartEliteEncounter(Selected);
+        }
+        if(auto* PC=UGameplayStatics::GetPlayerController(this,0)){
+            const FKey Keys[]={EKeys::One,EKeys::Two,EKeys::Three,EKeys::Four};
+            const int Species[]={58,76,62,75};
+            for(int I=0;I<(DuelTest?2:4);++I)if(PC->WasInputKeyJustPressed(Keys[I]))StartEliteEncounter(DuelTest?(I==0?68:75):Species[I]);
+            if(EliteReviewSpecies>=0){
+                if(PC->WasInputKeyJustPressed(EKeys::Left))StartEliteEncounter(DuelTest?(EliteReviewSpecies==68?75:68):DungeonExpansionV2::NextEnabled(EliteReviewSpecies,-1));
+                if(PC->WasInputKeyJustPressed(EKeys::Right))StartEliteEncounter(DuelTest?(EliteReviewSpecies==68?75:68):DungeonExpansionV2::NextEnabled(EliteReviewSpecies,1));
+                if(PC->WasInputKeyJustPressed(EKeys::R))StartEliteEncounter(EliteReviewSpecies);
+            }
+        }
+    }
+    #endif
     RunAtlasReview();
+    ReviewIronMatriarch(Dt);
+    ReviewTeaV4(Dt);
     #if WITH_EDITOR
     if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
     if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
@@ -604,7 +690,8 @@ void ADungeonGameMode::Tick(float Dt)
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonEquipmentReview"))) Name=FParse::Param(FCommandLine::Get(),TEXT("ReviewLeft"))?TEXT("EquipmentLeftReview"):TEXT("EquipmentReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeReview"))) { float Age=0;FParse::Value(FCommandLine::Get(),TEXT("RustbladeAge="),Age);Name=FString::Printf(TEXT("EnemyExpansion/RustbladeSquire/runtime-v2/UE-review-%03d"),FMath::RoundToInt(Age*100)); }
             if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeScaleReview")))Name=TEXT("EnemyExpansion/RustbladeSquire/runtime-v2/UE-scale-comparison");
-            if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))){int32 Species=50;FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Species);Name=FString::Printf(TEXT("EnemyExpansion/%s/runtime-v1/UE-review"),DungeonExpansion::Names[FMath::Clamp(Species-50,0,3)]);}
+            if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))){int32 Species=50;FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Species);Name=FString::Printf(TEXT("EnemyExpansion/%s/%s/UE-review"),DungeonExpansion::Folder(Species),DungeonExpansionV2::Is(Species)?TEXT("runtime-v2"):TEXT("runtime-v1"));}
+            if(FParse::Param(FCommandLine::Get(),TEXT("EliteTest")))Name=FString::Printf(TEXT("EnemyExpansion/%s/runtime-v2/UE-gameplay"),DungeonExpansion::Folder(EliteReviewSpecies));
             FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/TEXT("ArtSource")/(Name+TEXT(".png")),true,false);
         }
         if(Time>5.2f&&FParse::Param(FCommandLine::Get(),TEXT("TraderUISmoke"))) {
@@ -663,8 +750,8 @@ void ADungeonGameMode::SpawnWave()
     bChest=bLootClaimed=bLootRolled=false; Reward=FRewardPresentation();LootTimer=0;
     if(Wave==1) { RosterCursor=FMath::RandRange(0,5);SpawnBreakables(); }
     PendingSpawns=IsBossRoom()?1:FMath::Min(9,3+Wave+(Room-1)%DungeonProgression::RoomsPerChapter); SpawnTimer=2.f;
-    if(bAtlasActive&&AtlasChapter==0&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
-        RosterCursor=0;PendingSpawns=DungeonRoster::KeepEncounter(AtlasRooms[AtlasCurrent].Depth,Wave).Num();
+    if(bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
+        RosterCursor=0;PendingSpawns=DungeonRoster::AtlasEncounter(GetBiome(),AtlasRooms[AtlasCurrent].Depth,Wave).Num();
     }
     UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d wave=%d queued=%d"),Room,Wave,PendingSpawns);
 }
@@ -688,7 +775,7 @@ void ADungeonGameMode::SpawnOneEnemy()
     }
     FActorSpawnParameters Params; Params.SpawnCollisionHandlingOverride=ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     FVector2D Pos;
-    if(IsBossRoom()) Pos=FVector2D(640,GetBiome()==0?310:390);
+    if(IsBossRoom()) Pos=FVector2D(640,GetBiome()==0?310:GetBiome()==7?410:390);
     else
     {
         float A=FMath::FRandRange(0.f,2*PI);
@@ -697,8 +784,8 @@ void ADungeonGameMode::SpawnOneEnemy()
     if(auto* E=GetWorld()->SpawnActor<ADungeonEnemy>(DungeonView::Unproject(Pos),FRotator::ZeroRotator,Params))
     {
         E->bBoss=IsBossRoom(); E->Species=E->bBoss?GetBossSpecies():DungeonProgression::RosterBase(GetBiome())+(RosterCursor++%6);
-        if(!E->bBoss&&bAtlasActive&&AtlasChapter==0&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
-            const auto Encounter=DungeonRoster::KeepEncounter(AtlasRooms[AtlasCurrent].Depth,Wave);
+        if(!E->bBoss&&bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
+            const auto Encounter=DungeonRoster::AtlasEncounter(GetBiome(),AtlasRooms[AtlasCurrent].Depth,Wave);
             E->Species=Encounter[(RosterCursor-1)%Encounter.Num()];
         }
         // Explicit isolation tests still override the integrated Keep encounters.
@@ -709,12 +796,13 @@ void ADungeonGameMode::SpawnOneEnemy()
             E->Species=DungeonExpansion::Is(Selected)?Selected:50+((RosterCursor-1)%4);
         }
         #endif
+        if(DungeonExpansionV2::Is(E->Species)&&!DungeonExpansionV2::Enabled(E->Species)){E->Destroy();return;}
         if(E->bBoss&&E->Species>=28) E->Facing=4;
         const auto& S=DungeonRoster::Get(E->Species);
         E->MaxHealth=E->Health=DungeonCombatBalance::SpawnHealth(S.HP,Room,E->bBoss);
         Enemies.Add(E);
         if(E->bBoss) { E->SpawnTime=0; BeginBossDialogue(); }
-        PlaySound(DungeonEnemyAudio::Spawn(E->Species),.4f,DungeonEnemyAudio::Human(E->Species)?1.f:E->bBoss?.65f:1.f);
+        if(E->Species!=IronMatriarch::Species)PlaySound(DungeonEnemyAudio::Spawn(E->Species),.4f,DungeonEnemyAudio::Human(E->Species)?1.f:E->bBoss?.65f:1.f);
     }
 }
 void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
@@ -753,7 +841,7 @@ void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
 {
     if(!IsValid(E)||!Enemies.Contains(E)) return;
     if(auto* H=Player(this)) if(H->Health>0&&H->HasEffect(5)) H->Health=FMath::Min(H->MaxHealth,H->Health+6);
-    if(E->Species!=24)
+    if(E->Species!=24&&E->Species!=IronMatriarch::Species)
     {
         if(Blood.Num()>=96) Blood.RemoveAt(0);
         FDungeonBlood B; B.Position=DungeonView::Project(E->GetActorLocation()); B.Size=E->bBoss?125:80;
@@ -870,6 +958,9 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
     FString Path=FString::Printf(TEXT("/Game/Art/%s/%s.%s"),Name.StartsWith(TEXT("Ending"))?TEXT("Endings"):Name.StartsWith(TEXT("Intro"))?TEXT("Intros"):Name.StartsWith(TEXT("Theme"))?TEXT("Progression"):NewArt?TEXT("September"):TEXT("V2"),*Name,*Name);
     const int GearId=Name.StartsWith(TEXT("Loot_"))?FCString::Atoi(*Name.Mid(5)):-1;
     if(Name.StartsWith(TEXT("Rustblade_")))Path=FString::Printf(TEXT("/Game/Art/EnemyExpansion/RustbladeSquire/%s.%s"),*Name,*Name);
+    if(Name.StartsWith(TEXT("Hotbar_")))Path=FString::Printf(TEXT("/Game/Art/UI/Hotbar/%s.%s"),*Name,*Name);
+    if(Name.StartsWith(TEXT("Iron_")))Path=FString::Printf(TEXT("/Game/Art/IronMatriarch/%s.%s"),*Name,*Name);
+    if(Name.StartsWith(TEXT("TeaV4_")))Path=FString::Printf(TEXT("/Game/Art/TeaV4/%s.%s"),*Name,*Name);
     if(!DungeonExpansion::Path(Name).IsEmpty())Path=DungeonExpansion::Path(Name);
     if(GearId>=60&&GearId<DungeonLootCatalog::Count)Path=FString::Printf(TEXT("/Game/Art/V2/GearSheet_%d.GearSheet_%d"),(GearId-60)/3,(GearId-60)/3);
     auto* T=LoadObject<UTexture2D>(nullptr,*Path);
@@ -884,6 +975,12 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
 }
 void ADungeonHUD::Sprite(const FString& N,float X,float Y,float W,float H,FLinearColor Tint,float Rotation,FVector2D Pivot)
 {
+    FString Atlas;int Frame=0,Rows=1;
+    if(DungeonExpansionV2::Atlas(N,Atlas,Frame,Rows)){
+        if(auto* T=Texture(Atlas))DrawTexture(T,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale,
+            (Frame%4)/4.f,(Frame/4)/float(Rows),.25f,1.f/Rows,Tint,BLEND_Translucent,1,false,Rotation,Pivot);
+        return;
+    }
     const int GearId=N.StartsWith(TEXT("Loot_"))?FCString::Atoi(*N.Mid(5)):-1;
     const bool Sheet=GearId>=60&&GearId<DungeonLootCatalog::Count;
     if(auto* T=Texture(N)) DrawTexture(T,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale,Sheet?((GearId-60)%3)/3.f:0,0,Sheet?1.f/3.f:1.f,1,Tint,BLEND_Translucent,1,false,Rotation,Pivot);
@@ -929,20 +1026,29 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         return;
     }
     const int32 D=H->GetFacingDirection();
+    const bool Guard=H->GetGuardBlend()>.01f&&!H->IsAttacking()&&!H->IsCasting()&&H->Health>0;
     const bool Action=H->IsAttacking()||H->IsCasting();
     const int32 View=Action?AthleticHeroSockets::AttackView(D,H->GetAnimationFrame()):D;
-    const int32 F=Action?AthleticHeroSockets::AttackPose[D][H->GetAnimationFrame()]:H->GetLocomotionFrame();
-    const bool Running=!Action&&H->IsRunAnimation();
+    // Reuse the authored right-handed chest-brace poses, not the idle arm with
+    // a rotated loose weapon. NE uses its valid raised right-arm pose.
+    const int32 F=Guard?(H->GetGuardBlend()<.3f?0:D==1?1:4):Action?AthleticHeroSockets::AttackPose[D][H->GetAnimationFrame()]:H->GetLocomotionFrame();
+    const bool Running=!Action&&!Guard&&H->IsRunAnimation();
     const float BreathWeight=H->Health>0&&!H->IsAttacking()&&!H->IsCasting()&&!H->IsRolling()?FMath::Max(H->IdleBreathBlend,H->IsWalking()?.08f:0.f):0;
     const float FacingX=D==0||D==4?0:D<4?1.f:-1.f;
     auto Pose=[&](FVector2D Q){
         Q=HeroBreathing::Map(Q,H->BreathPhase,BreathWeight,FacingX);
+        if(Guard){
+            const float Brace=H->GetGuardBlend()*(.028f+.004f*FMath::Sin(H->BreathPhase))+.035f*H->GetBlockImpact()/.18f;
+            const float Weight=FMath::Clamp((116.f-float(Q.Y))/76.f,0.f,1.f);
+            Q.X-=H->GetVisualFacing().X*Weight*(1.5f*H->GetGuardBlend()+3.f*H->GetBlockImpact()/.18f);
+            Q.Y+=(116-Q.Y)*Brace; // Compress into stance/recoil while soles stay planted.
+        }
         // Authored locomotion already contains weight transfer and forward lean.
         // Only idle breathing is additive: never distort knees/feet with strip bobbing.
         return Q;
     };
     const float Bob=0; // Body motion must not lift the planted soles or shadow.
-    FString Name=Action?FString::Printf(TEXT("Athletic_Attack%s_%d_%d"),View%2?TEXT("Diagonal"):TEXT("Cardinal"),View/2,F):
+    FString Name=Action||Guard?FString::Printf(TEXT("Athletic_Attack%s_%d_%d"),View%2?TEXT("Diagonal"):TEXT("Cardinal"),View/2,F):
         FString::Printf(TEXT("Locomotion_%s_%d_%d"),Running?TEXT("Run"):TEXT("Walk"),D,F);
     Shadow(P+FVector2D(0,-2-Bob),28*DescentScale,Opacity);
     // Native alpha avoids the old body mask and its mismatched silhouette.
@@ -962,7 +1068,8 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         if(H->GetCastProgress()<.46f)
         {
             const auto Hand=P+(Pose(AthleticHeroSockets::Attack[View][F])-FVector2D(64,116))*HS;
-            KeySprite(TEXT("TeaFX_0"),Hand.X-17,Hand.Y-22,34,34,FLinearColor::White);
+            const auto& M=TeaV4::Flight[0];
+            Sprite(TEXT("TeaV4_Flight_0"),Hand.X-TeaV4::HandGrip.X,Hand.Y-TeaV4::HandGrip.Y,M.W,M.H,Fade);
         }
         return;
     }
@@ -973,10 +1080,10 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         Sprite(ItemArt(H->Equipment[2].Icon),Charm.X-7*HS,Charm.Y-7*HS,14*HS,14*HS,Fade);
     }
     const auto A=H->GetAim();
-    const FVector2D Socket=H->IsAttacking()?AthleticHeroSockets::Attack[View][F]:HeroLocomotionSockets::Hand[D][F+(Running?8:0)];
+    const FVector2D Socket=H->IsAttacking()||Guard?AthleticHeroSockets::Attack[View][F]:HeroLocomotionSockets::Hand[D][F+(Running?8:0)];
     const FVector2D Origin=P-FVector2D(64,116)*HS;
     const FVector2D Hand=Origin+Pose(Socket)*HS;
-    const float Angle=H->IsAttacking()?AthleticHeroSockets::Angles[View][F]:(D<=4||D==7?145.f:215.f);
+    const float Angle=Guard?AthleticHeroSockets::Angles[View][F]+H->GetBlockImpact()/.18f*6.f:H->IsAttacking()?AthleticHeroSockets::Angles[View][F]:(D<=4||D==7?145.f:215.f);
     if(!H->Equipment[0].IsEmpty())
     {
         const FVector2D Pivot=H->Equipment[0].CatalogId<0?HeroSockets::Grip(H->Equipment[0].Icon)/128.:HeroSockets::CatalogGrip(H->Equipment[0].CatalogId);
@@ -998,6 +1105,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         }
     }
     if(Behind&&H->Equipment[0].IsEmpty()) DrawBody();
+    DrawGuard(H);
     if(!H->Equipment[0].IsEmpty()&&H->IsAttacking()&&H->GetAttackProgress()>.25f&&H->GetAttackProgress()<.8f)
     {
         float Base=FMath::Atan2(A.Y,A.X);
@@ -1011,6 +1119,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
 }
 void ADungeonHUD::Enemy(ADungeonEnemy* E)
 {
+    if(E->Species==IronMatriarch::Species){DrawIronMatriarch(E);return;}
     if(E->Species==RustbladeSquire::Species) { Rustblade(E);return; }
     if(DungeonExpansion::Is(E->Species)){ExpansionEnemy(E);return;}
     FVector2D P=DungeonView::Project(E->GetActorLocation());
@@ -1190,12 +1299,12 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
         Row(TEXT("SHIFT"),TEXT("Sprint at twice walking speed"),427);
         Row(TEXT("SPACE"),TEXT("Dodge / roll"),456);
         Row(TEXT("LMB"),TEXT("Strike with your weapon"),485);
-        Row(TEXT("RMB"),TEXT("Throw tea  -  10s cooldown"),514);
-        Row(TEXT("MMB"),TEXT("FREEDOM  -  charge with 15 kills"),543);
-        Row(TEXT("E"),TEXT("Choose one chest / enter a gate"),572);
-        Row(TEXT("I"),TEXT("Open inventory & equipment"),601);
-        Row(TEXT("P"),TEXT("Pause / resume"),630);
-        Row(TEXT("M"),TEXT("Emerald Atlas / dungeon map"),659);
+        Row(TEXT("RMB"),TEXT("Block incoming damage / face attack / up to 5s"),514);
+        Row(TEXT("MMB"),TEXT("Throw tea  -  10s cooldown"),543);
+        Row(TEXT("1"),TEXT("FREEDOM  -  charge with 15 kills"),572);
+        Row(TEXT("E"),TEXT("Choose one chest / enter a gate"),601);
+        Row(TEXT("I"),TEXT("Inventory & equipment"),630);
+        Row(TEXT("P / M"),TEXT("Pause / Emerald Atlas"),659);
         Button(TEXT("BACK"),705);
     }
     else
@@ -1502,8 +1611,12 @@ void ADungeonHUD::DrawHUD()
     ON_SCOPE_EXIT { DrawSwordCursor(); };
     if(Textures.IsEmpty())
     {
+        for(const TCHAR* Part:{TEXT("OrbFrame"),TEXT("Slot"),TEXT("Attack"),TEXT("Block"),TEXT("Freedom"),TEXT("Wrap"),TEXT("Lightning"),TEXT("Chassis"),TEXT("Gem")})Texture(FString(TEXT("Hotbar_"))+Part);
         LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Art/V2/M_KeySprite.M_KeySprite"));
         for(int I=0;I<16;++I) Texture(FString::Printf(TEXT("TeaFX_%d"),I));
+        for(int I=0;I<8;++I)Texture(FString::Printf(TEXT("TeaV4_Flight_%d"),I));
+        for(int I=0;I<6;++I)Texture(FString::Printf(TEXT("TeaV4_Ground_%d"),I));
+        for(int I=0;I<4;++I)Texture(FString::Printf(TEXT("TeaV4_Enemy_%d"),I));
         for(int I=0;I<8;++I) Texture(FString::Printf(TEXT("Finance_%d"),I));
         if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest"))||FParse::Param(FCommandLine::Get(),TEXT("RustbladeReview"))) {
             const TCHAR* States[]={TEXT("idle"),TEXT("walk"),TEXT("attack"),TEXT("hurt"),TEXT("death")};
@@ -1728,10 +1841,18 @@ void ADungeonHUD::DrawHUD()
     DrawReward(G,H);
     for(const auto& FX:G->GetSplashes())
     {
+        if(FX.TeaKind){
+            if(FX.TeaKind==1&&TeaV4::Alive(FX.Life)){
+                const int F=TeaV4::Frame(TeaV4::GroundDuration-FX.Life,6);const auto& M=TeaV4::Ground[F];
+                Sprite(FString::Printf(TEXT("TeaV4_Ground_%d"),F),FX.Position.X-M.X,FX.Position.Y-M.Y,M.W,M.H);
+            }
+            continue; // Enemy overlays render above actors, never as shared effects.
+        }
         if(DungeonExpansion::Is(FX.ExpansionSpecies)){
             const int Count=FX.bExpansionPlayerHit?12:FX.ExpansionSpecies==52?14:16;
             const int Frame=FMath::Clamp(int((.84f-FX.Life)/.84f*Count),0,Count-1);
-            Sprite(DungeonExpansion::FX(FX.ExpansionSpecies,FX.bExpansionPlayerHit?TEXT("hero-impact"):TEXT("ground-impact"),Frame),FX.Position.X-48,FX.Position.Y-48,96,96,FLinearColor(1,1,1,FMath::Clamp(FX.Life/.2f,0.f,1.f)));continue;
+            const float Size=DungeonExpansionV2::Is(FX.ExpansionSpecies)&&DungeonExpansionV2::Get(FX.ExpansionSpecies).Elite?224.f:96.f;
+            Sprite(DungeonExpansion::FX(FX.ExpansionSpecies,FX.bExpansionPlayerHit?TEXT("hero-impact"):TEXT("ground-impact"),Frame),FX.Position.X-Size/2,FX.Position.Y-Size/2,Size,Size,FLinearColor(1,1,1,FMath::Clamp(FX.Life/.2f,0.f,1.f)));continue;
         }
         if(FX.Art>=40)
         {
@@ -1770,15 +1891,24 @@ void ADungeonHUD::DrawHUD()
     for(auto& E:G->GetEnemies()) if(IsValid(E)) Actors.Add(E);
     Actors.Sort([](const AActor& A,const AActor& B){return DungeonView::Project(A.GetActorLocation()).Y<DungeonView::Project(B.GetActorLocation()).Y;});
     for(auto* A:Actors) { if(A==H) Hero(H); else Enemy(CastChecked<ADungeonEnemy>(A)); }
+    for(const auto& FX:G->GetSplashes())if(FX.TeaKind==2&&TeaV4::Alive(FX.Life)){
+        const int F=TeaV4::Frame(TeaV4::EnemyDuration-FX.Life,4);const auto& M=TeaV4::Enemy[F];
+        Sprite(FString::Printf(TEXT("TeaV4_Enemy_%d"),F),FX.Position.X-M.X,FX.Position.Y-M.Y,M.W,M.H);
+    }
     if(H->Health>0) DrawStatus(DungeonView::Project(H->GetActorLocation())-FVector2D(0,173),H->StunTime,H->SlowTime,0,0,H->IsBulletImmune(),H->StatusClock);
     for(const auto& Shot:G->GetShots())
     {
         FVector2D P=Shot.Position;
         if(DungeonExpansion::Is(Shot.ExpansionSpecies)){
-            const int S=Shot.ExpansionSpecies;const float Size=S==50?35.f:68.f;
+            const int S=Shot.ExpansionSpecies;const float Size=DungeonExpansionV2::Is(S)&&DungeonExpansionV2::Get(S).Elite?176.f:S==50?60.f:120.f;
             float Angle=FMath::RadiansToDegrees(FMath::Atan2(Shot.Velocity.Y,Shot.Velocity.X));
             if(S==50){Shadow(P,8);P.Y-=FMath::Sin(FMath::Clamp(Shot.Age/1.1f,0.f,1.f)*PI)*30;Angle=0;}
-            Sprite(DungeonExpansion::FX(S,TEXT("projectile"),int(Shot.Age*16)%12),P.X-Size*.5f,P.Y-Size*.5f,Size,Size,FLinearColor::White,Angle);continue;
+            if(DungeonExpansionV2::Is(S)&&DungeonExpansionV2::Get(S).Arc){
+                Shadow(P,10);
+                // The art points along the shot heading; no time-based tumbling.
+            }
+            P=DungeonExpansion::ShotVisualPosition(S,P,Shot.Age,Shot.FlightTime);
+            Sprite(DungeonExpansion::FX(S,TEXT("projectile"),0),P.X-Size*.5f,P.Y-Size*.5f,Size,Size,FLinearColor::White,Angle);continue;
         }
         if(Shot.Style==14||Shot.Style==15)
         {
@@ -1817,12 +1947,15 @@ void ADungeonHUD::DrawHUD()
             }
             continue;
         }
-        const float Angle=Shot.bFriendly?Shot.Age*260:FMath::RadiansToDegrees(FMath::Atan2(Shot.Velocity.Y,Shot.Velocity.X));
+        const float Angle=FMath::RadiansToDegrees(FMath::Atan2(Shot.Velocity.Y,Shot.Velocity.X));
         if(Shot.bFriendly)
         {
             Shadow(P,12); const float T=FMath::Clamp(Shot.Age/Shot.FlightTime,0.f,1.f);
             P.Y-=50*(1-T)+FMath::Sin(T*PI)*75;
             Ring(Shot.Target,Shot.BlastRadius,FLinearColor(.95f,.71f,.33f,.3f),1);
+            const int F=TeaV4::Frame(Shot.Age,8);const auto& M=TeaV4::Flight[F];
+            Sprite(FString::Printf(TEXT("TeaV4_Flight_%d"),F),P.X-M.X,P.Y-M.Y,M.W,M.H);
+            continue; // Tumbling is baked into the eight poses. No extra rotation.
         }
         else if(Shot.Style!=12) P.Y-=22;
         const float Size=Shot.Art==1||Shot.Art==2?46:Shot.Art==3?42:Shot.bFriendly?42:48;
@@ -1854,6 +1987,14 @@ void ADungeonHUD::DrawHUD()
         DrawBossUI(E);
     }
     DrawVitals(H);
+    #if !UE_BUILD_SHIPPING
+    if(G->EliteReviewSpecies>=0){
+        const auto& Profile=DungeonExpansionV2::Get(G->EliteReviewSpecies);
+        Box(260,14,760,58,FLinearColor(.015f,.03f,.025f,.88f));
+        Label(FString::Printf(TEXT("%s / %s / %.0f HP / %.0f damage"),Profile.Elite?TEXT("ELITE"):TEXT("ENEMY"),Profile.Name,Profile.Health,Profile.Damage),278,22,Gold,.72f);
+        Label(FParse::Param(FCommandLine::Get(),TEXT("DuelTest"))?TEXT("1: Permafrost Templar   |   2: Tempest Duelist   |   R: retry"):TEXT("Left / Right: 20 active enemies   |   1-4: elites   |   R: retry"),278,46,Pale,.64f);
+    }
+    #endif
     DrawDialogue(G,H);
     if(H->IsInventoryOpen()) DrawInventory(H);
     if(G->IsAtlasMapOpen())DrawAtlas(G,H);

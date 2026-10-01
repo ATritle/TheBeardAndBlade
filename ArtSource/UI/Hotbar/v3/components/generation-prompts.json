@@ -1,0 +1,28 @@
+{
+  "tool": "built-in image_gen (imagegen skill)",
+  "reference": "../hotbar-concept-v3.png",
+  "reference_commit": "5cb880568a3ae80c9d6bcc1f0f3c67f8d858522d",
+  "transparent_background": true,
+  "assets": [
+    {
+      "file": "Hotbar_OrbFrame.png",
+      "prompt": "Use case: ui-mockup. Create ONE production game UI modular frame sprite, not a screenshot. Reference image 1 supplies the blackened iron, antique gold filigree, emerald jewels and crisp high-resolution pixel-art style. Subject: ONE perfectly front-facing circular HEALTH ORB FRAME, isolated centered on genuinely transparent background. Outer ring richly aged gold with small emerald jewels at cardinal points, restrained curled ornaments and dark iron inner rim. Round central opening completely transparent (no red fill, no glass, no text), approximately 62% of total image width. Clean silhouette, all ornaments inside canvas with padding, circle centered exactly. No scenery, no drop shadow outside frame, no lettering, no meters, no other UI. This is a reusable separate HUD component, full 1024 square canvas."
+    },
+    {
+      "file": "Hotbar_Slot.png",
+      "prompt": "Use case: ui-mockup. ONE isolated square hotbar skill-slot frame sprite for a shipped fantasy pixel-art game. Reference 1 supplies exact blackened iron / aged gold / emerald trim style. A perfectly front-facing symmetrical square dark iron frame with thin raised gold inner bevel, small emerald diamond centered on top edge, and restrained riveted antique gold ornamental corners. Square center COMPLETELY TRANSPARENT so game can draw icons and progress behind it. Outer silhouette transparent. Fill most of square canvas with even small padding. High-resolution crisp detailed pixel-art edges. No text, no key labels, no icons, no scenery, no meters, no fake checkerboard. Reusable single socket, not six sockets."
+    },
+    {
+      "file": "Hotbar_Attack.png",
+      "prompt": "Use case: stylized-concept. ONE game HUD action icon, high-resolution polished pixel-art, genuinely transparent background. Reference image 1: match ONLY the bald glasses-wearing ginger-bearded adventurer in the fifth sword attack slot. Draw his upper torso executing a powerful diagonal sword slash: round spectacles, bald head, thick orange beard, green hooded cloak, silver steel right shoulder armor, brown leather tunic. Fierce determined face and bright golden crescent sword swoosh curling across lower half. Clear recognizable silhouette readable as a 64px hotbar icon. Centered square composition, generous edge padding, no square frame or backdrop, no text, no extra objects, no other icons. Preserve his identity from reference."
+    },
+    {
+      "file": "Hotbar_Block.png",
+      "prompt": "Use case: stylized-concept. ONE isolated shield emblem sprite for the RMB BLOCK icon in a fantasy pixel-art game's HUD. Reference image 1 is style reference ONLY: match the aged gold and blackened iron detail of its far-right circular block icon. Draw a compact broad medieval heater shield, front-facing symmetrical, blackened brushed iron inset with raised rugged golden sword and wings crest, gold beveled edges and one small emerald rivet at top. Shield alone, NO circular frame, no progress ring or meter, no background, no text. Centered square canvas with safe padding. Crisp high resolution polished pixel art, restrained highlights, clear silhouette readable at 40 pixels. Genuine alpha transparency outside shield."
+    },
+    {
+      "file": "Hotbar_Freedom.png",
+      "prompt": "Use case: stylized-concept. ONE isolated game ability icon matching the first FREEDOM action slot in reference image 1. Bold bald eagle head and upper neck in three-quarter side view facing right, white layered feathers, fierce eye, open golden beak calling out, dark brown wing sweeping along left edge, restrained golden lightning accent below. Rich high-resolution polished pixel-art in the same aged-gold fantasy game style. Composition fills a square and remains clearly readable at 60 pixels. Truly transparent background, no text, no border, no frame, no scenery. This is a HUD sprite, not a whole eagle flying sideways."
+    }
+  ]
+}

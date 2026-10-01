@@ -48,7 +48,7 @@ void ADungeonHUD::DrawBreakables(ADungeonGameMode* G,ADungeonHero* H)
 {
     auto* Atlas=Texture(TEXT("DestructiblesAtlas"));if(!Atlas)return;
     // Source sheet rows follow campaign order, whereas biome IDs predate that order.
-    const int Rows[]={0,3,4,5,6,2,1};const int Row=Rows[G->GetBiome()];
+    const int Rows[]={0,3,4,5,6,2,1,5};const int Row=Rows[G->GetBiome()];
     // Measured gutters prevent neighboring row pixels appearing under a prop.
     const float Tops[]={2,195,377,567,761,958,1143};
     const float Heights[]={189,180,189,193,197,185,197};
@@ -75,8 +75,6 @@ void ADungeonHUD::DrawBreakables(ADungeonGameMode* G,ADungeonHero* H)
                 const auto C=Colors[FMath::Clamp(B.Loot.Rarity,0,4)];
                 Shadow(P,17);Sprite(B.Loot.Art(),P.X-24,P.Y-44,48,48);
                 Box(P.X-16,P.Y+6,32,2,C);
-                if(FVector2D::Distance(Hero,P)<85)
-                    Label(B.BagFull?TEXT("Bag full - I to manage"):B.Loot.Name+TEXT(" / E to collect"),P.X<640?P.X-45:P.X-190,P.Y+18,C,.7f);
             }
         }
     }

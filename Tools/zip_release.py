@@ -2,7 +2,7 @@
 from pathlib import Path
 import zipfile,hashlib,argparse
 parser=argparse.ArgumentParser()
-parser.add_argument('--version',default='v0.4.1')
+parser.add_argument('--version',default='v0.4.2')
 parser.add_argument('--streaming',action='store_true',help='Use StreamPixel Windows layout and hosting checklist')
 args=parser.parse_args()
 assert all(c.isalnum() or c in '.-_' for c in args.version)
@@ -22,7 +22,7 @@ with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
         if not file.is_file() or file.suffix.lower() in ('.pdb','.log') or 'Saved' in file.relative_to(build).parts:continue
         if file.name.startswith('Manifest_'):continue
         z.write(file,archive_root/file.relative_to(build))
-    docs=('STREAMPixel_SETUP.md',) if args.streaming else ('README.md','RELEASE_NOTES.md','PROGRESSION_PLAYTEST.md','FLASH_BANG_PLAYTEST.md')
+    docs=('STREAMPixel_SETUP.md',) if args.streaming else ('README.md','RELEASE_NOTES.md','PLAYTEST.md')
     for name in docs:
         z.write(root/name,archive_root/name)
 with zipfile.ZipFile(out) as z:

@@ -1,6 +1,6 @@
 {
   "sourceCheckOnly": true,
-  "sheets": 51,
+  "sheets": 67,
   "checks": [
     {
       "file": "walk-N.png",
@@ -37,7 +37,41 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-N.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "ranged-a-N.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-N.png",
       "size": [
         1448,
         1086
@@ -88,7 +122,41 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-NE.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "ranged-a-NE.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-NE.png",
       "size": [
         1448,
         1086
@@ -124,6 +192,23 @@
     {
       "file": "attack-a-E.png",
       "size": [
+        1840,
+        1266
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-E.png",
+      "size": [
         1448,
         1086
       ],
@@ -132,17 +217,31 @@
         255
       ],
       "poses": 12,
-      "components": 11,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        10,
-        11
-      ]
+      "cropWarnings": []
     },
     {
       "file": "ranged-a-E.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-E.png",
       "size": [
         1448,
         1086
@@ -193,7 +292,41 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SE.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "ranged-a-SE.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-SE.png",
       "size": [
         1448,
         1086
@@ -244,7 +377,41 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-S.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "ranged-a-S.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-S.png",
       "size": [
         1448,
         1086
@@ -295,7 +462,41 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SW.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "ranged-a-SW.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-SW.png",
       "size": [
         1448,
         1086
@@ -346,7 +547,41 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-W.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "ranged-a-W.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-W.png",
       "size": [
         1448,
         1086
@@ -382,6 +617,40 @@
     {
       "file": "attack-a-NW.png",
       "size": [
+        1916,
+        1287
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NW.png",
+      "size": [
+        1664,
+        1071
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-NW.png",
+      "size": [
         1448,
         1086
       ],
@@ -390,17 +659,14 @@
         255
       ],
       "poses": 12,
-      "components": 11,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        10,
-        11
-      ]
+      "cropWarnings": []
     },
     {
-      "file": "ranged-a-NW.png",
+      "file": "ranged-b-NW.png",
       "size": [
         1448,
         1086
@@ -877,5 +1143,5 @@
     }
   ],
   "walkCells": 128,
-  "attackCells": 96
+  "attackCells": 192
 }

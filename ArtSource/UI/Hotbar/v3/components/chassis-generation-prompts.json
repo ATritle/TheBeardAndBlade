@@ -1,0 +1,14 @@
+{
+  "mode": "builtin imagegen",
+  "reference": "../hotbar-concept-v3.png",
+  "assets": [
+    {
+      "file": "Hotbar_Chassis.png",
+      "prompt": "Use case: precise-object-edit. Image 1 is the approved game HUD concept. Produce a production transparent HUD CHASSIS from this design, isolated with no dungeon backdrop. Preserve the gold dragon ornament left, round health housing, integrated upper-left stamina channel and six square sockets connected seamlessly to the right of the health orb. Main housing ONLY, exclude the separate green block circle entirely. Remove all icons, red liquid, blue fill, text, numbers and mouse icons. Health circle center and each of six sockets should be flat opaque near-black enamel empty recesses; the narrow upper-left stamina crescent should be an EMPTY dark channel with polished narrow gold inner and outer rims. Its arc must flow BEHIND the orb's left dragon ornament and terminate at the upper-right lightning mount, an empty small circle. Lower rail runs directly along bottom edges of the six square sockets, not a tall empty strip below. Six empty black gold-bordered keycap plaques overlap the lower rail, centered under each socket. Cohesive single continuous connected piece, no seams or cut joins. Strictly match original reference's visual quality: aged gold beveled highlights, deep emerald diamond accents, textured black iron. Entire silhouette fully visible, centered and as wide as possible in a landscape transparent canvas, minimal margins. No lettering, no symbols, no block circle, no map circle, no backgrounds, genuine alpha outside silhouette. Transparent outside only, opaque dark empty recesses within."
+    },
+    {
+      "file": "Hotbar_Gem.png",
+      "prompt": "Use case: stylized-concept. Production game UI meter texture, a single perfectly circular continuous polished gemstone ring on genuinely transparent background. STRICTLY GRAYSCALE / neutral silver-white gemstone, NO colored pixels. Ring centered exactly in square canvas, outer radius 44% of canvas width, inner radius 34% of canvas width. Entire central hole transparent. Glossy chamfered outer and inner edges, broad flat bevelled gem face, subtle mineral facet texture with silver-white highlights and charcoal recesses. One uninterrupted ring with no segmentation, no decorations, no gold frame, no text, no icons, no perspective, no drop shadow, no outer glow. Top-left soft lighting, sharp beveled highlights along both rims. It will be tinted sapphire blue and emerald green and clipped to arcs dynamically in a game; keep entire circle geometrically regular and symmetrical, leave generous transparent border. Detailed fantasy pixel-art interface quality, crisp not blurry."
+    }
+  ]
+}

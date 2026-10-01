@@ -1,12 +1,12 @@
 {
   "sourceCheckOnly": true,
-  "sheets": 11,
+  "sheets": 67,
   "checks": [
     {
       "file": "walk-N-consistent-v2.png",
       "size": [
-        1254,
-        1254
+        1512,
+        1516
       ],
       "alpha": [
         0,
@@ -14,6 +14,74 @@
       ],
       "poses": 16,
       "components": 16,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-a-N.png",
+      "size": [
+        1712,
+        1209
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-N.png",
+      "size": [
+        1708,
+        1227
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-N.png",
+      "size": [
+        1648,
+        1275
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-N.png",
+      "size": [
+        1676,
+        1281
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
@@ -37,10 +105,78 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-a-NE.png",
+      "size": [
+        1788,
+        1323
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NE.png",
+      "size": [
+        1556,
+        1284
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-NE.png",
+      "size": [
+        1576,
+        1353
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-NE.png",
+      "size": [
+        1468,
+        1284
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-E-consistent-v2.png",
       "size": [
-        1254,
-        1254
+        1408,
+        1536
       ],
       "alpha": [
         0,
@@ -48,6 +184,74 @@
       ],
       "poses": 16,
       "components": 16,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-a-E.png",
+      "size": [
+        1700,
+        1293
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-E.png",
+      "size": [
+        1660,
+        1299
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-E.png",
+      "size": [
+        1528,
+        1080
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-E.png",
+      "size": [
+        1700,
+        1290
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
@@ -71,6 +275,74 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-a-SE.png",
+      "size": [
+        1828,
+        1374
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-SE.png",
+      "size": [
+        1644,
+        1290
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-SE.png",
+      "size": [
+        1724,
+        1275
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-SE.png",
+      "size": [
+        1668,
+        1182
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-S-consistent-v2.png",
       "size": [
         1254,
@@ -82,6 +354,74 @@
       ],
       "poses": 16,
       "components": 16,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-a-S.png",
+      "size": [
+        1656,
+        1182
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-S.png",
+      "size": [
+        1640,
+        1230
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-S.png",
+      "size": [
+        1772,
+        1272
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-S.png",
+      "size": [
+        1624,
+        1206
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
@@ -105,6 +445,74 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-a-SW.png",
+      "size": [
+        1800,
+        1215
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-SW.png",
+      "size": [
+        1812,
+        1236
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-SW.png",
+      "size": [
+        1684,
+        1269
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-SW.png",
+      "size": [
+        1708,
+        1257
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-W-consistent-v2.png",
       "size": [
         1254,
@@ -122,6 +530,74 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-a-W.png",
+      "size": [
+        1604,
+        1263
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-W.png",
+      "size": [
+        1552,
+        1320
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-W.png",
+      "size": [
+        1688,
+        1281
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-W.png",
+      "size": [
+        1504,
+        1125
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-NW-consistent-v2.png",
       "size": [
         1254,
@@ -133,6 +609,74 @@
       ],
       "poses": 16,
       "components": 16,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-a-NW.png",
+      "size": [
+        1764,
+        1335
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NW.png",
+      "size": [
+        1688,
+        1266
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-a-NW.png",
+      "size": [
+        1652,
+        1329
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "ranged-b-NW.png",
+      "size": [
+        1548,
+        1263
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
@@ -187,15 +731,417 @@
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        9,
-        10,
-        12,
-        15,
-        16
-      ]
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-N.png",
+      "size": [
+        1920,
+        964
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-N.png",
+      "size": [
+        1599,
+        976
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-N.png",
+      "size": [
+        1804,
+        1119
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-NE.png",
+      "size": [
+        1736,
+        1008
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-NE.png",
+      "size": [
+        1536,
+        1068
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-NE.png",
+      "size": [
+        1788,
+        1305
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-E.png",
+      "size": [
+        1732,
+        1000
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-E.png",
+      "size": [
+        1488,
+        1024
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-E.png",
+      "size": [
+        1760,
+        1263
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-SE.png",
+      "size": [
+        2036,
+        1014
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-SE.png",
+      "size": [
+        1641,
+        1110
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-SE.png",
+      "size": [
+        1764,
+        1257
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-S.png",
+      "size": [
+        1956,
+        930
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-S.png",
+      "size": [
+        1641,
+        1056
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-S.png",
+      "size": [
+        1792,
+        1194
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-SW.png",
+      "size": [
+        2116,
+        968
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-SW.png",
+      "size": [
+        1632,
+        1002
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-SW.png",
+      "size": [
+        1836,
+        1200
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-W.png",
+      "size": [
+        1716,
+        1030
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-W.png",
+      "size": [
+        1467,
+        980
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-W.png",
+      "size": [
+        1828,
+        1386
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "idle-NW.png",
+      "size": [
+        1940,
+        1002
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 8,
+      "components": 8,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "hurt-NW.png",
+      "size": [
+        1671,
+        1032
+      ],
+      "alpha": [
+        0,
+        254
+      ],
+      "poses": 6,
+      "components": 6,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "death-NW.png",
+      "size": [
+        1788,
+        1290
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
     }
   ],
   "walkCells": 128,
-  "attackCells": 0
+  "attackCells": 192
 }

@@ -11,7 +11,7 @@ void ADungeonHero::Freedom()
 
 bool ADungeonGameMode::ActivateFreedom(ADungeonHero* H)
 {
-    if(!H||H->Health<=0||H->StunTime>0||H->IsInventoryOpen()||IsGameplayBlocked()||IsFreedomActive()||FreedomKills<15||bChest||bLootClaimed) return false;
+    if(!H||!H->CanUseFreedom()) return false;
     FreedomKills=0; FreedomTime=3.f; bFreedomResolved=false;
     H->CancelCombatActions();
     Shots.Empty();
@@ -48,8 +48,8 @@ void ADungeonHUD::DrawCombatFX(ADungeonGameMode* G,bool Foreground)
     {
         if(DungeonExpansion::Is(B.ExpansionSpecies)){
             if(!Foreground&&B.Age<5){
-                const float S=DungeonExpansion::RenderSize,Alpha=FMath::Clamp((5-B.Age)/1.4f,0.f,1.f);
-                Sprite(DungeonExpansion::Art(B.ExpansionSpecies,B.ExpansionDirection,TEXT("death"),FMath::Clamp(int(B.Age/.14f),0,7)),B.Position.X-S*.5f,B.Position.Y-S*DungeonExpansion::RootY,S,S,FLinearColor(1,1,1,Alpha));
+                const float S=DungeonExpansion::Size(B.ExpansionSpecies),Alpha=FMath::Clamp((5-B.Age)/1.4f,0.f,1.f);
+                Sprite(DungeonExpansion::Art(B.ExpansionSpecies,B.ExpansionDirection,TEXT("death"),FMath::Clamp(int(B.Age/.14f),0,DungeonExpansion::Count(B.ExpansionSpecies,TEXT("death"))-1)),B.Position.X-S*.5f,B.Position.Y-S*DungeonExpansion::Root(B.ExpansionSpecies),S,S,FLinearColor(1,1,1,Alpha));
             }continue;
         }
         if(B.RustDirection>=0) {

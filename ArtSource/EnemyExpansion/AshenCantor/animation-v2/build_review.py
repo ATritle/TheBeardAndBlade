@@ -37,6 +37,9 @@ for job in jobs:
  im=Image.open(path).convert('RGBA');w,h=im.size;alpha=im.getchannel('A');mask=alpha.point(lambda v:255 if v>64 else 0);px=mask.load()
  profile=[sum(px[x,y]>0 for x in range(w)) for y in range(h)]
  ys=[0]+[boundary(profile,h*r/job['rows'],h/job['rows']*.4) for r in range(1,job['rows'])]+[h]
+ # The spark at y264 belongs to the SECOND impact row, not frame3 above it.
+ # Measured inter-row gap avoids borrowing that neighboring burst fragment.
+ if job['file']=='ground-impact.png':ys=[0,250,504,761,h]
  frames=[]
  for row in range(job['rows']):
   y0,y1=ys[row:row+2]

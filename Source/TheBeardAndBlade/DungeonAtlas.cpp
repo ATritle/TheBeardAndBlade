@@ -36,16 +36,21 @@ void ADungeonGameMode::DisableAtlas()
 void ADungeonGameMode::InitializeAtlasFloor(int32 Seed,int32 Chapter)
 {
     DisableAtlas();bAtlasActive=true;AtlasChapter=FMath::Clamp(Chapter,0,DungeonProgression::Chapters-1);
-    // Eight unique cells: five-edge main route and two genuine reward/trader dead ends.
+    // Fourteen unique cells: eight combat rooms before the boss, two optional
+    // combat rooms, plus entrance, trader and reward. Stable special-room IDs.
     // Each theme gets a fresh rotated/reflected layout and independent discovery/state.
-    const FIntPoint Layout[]={{0,0},{0,1},{1,1},{1,2},{0,2},{0,3},{-1,1},{2,2}};
+    const FIntPoint Layout[]={{0,0},{0,1},{1,1},{1,2},{0,2},{-2,5},{-1,1},{2,2},
+        {-1,2},{-1,3},{-2,3},{-2,4},{2,1},{3,1}};
+    const int Depths[]={0,1,2,3,4,9,2,4,5,6,7,8,3,4};
     FRandomStream Random(Seed);const int Rotation=Random.RandRange(0,3);const bool Mirror=Random.RandRange(0,1)!=0;
-    AtlasRooms.SetNum(8);
-    for(int I=0;I<8;++I){auto& R=AtlasRooms[I];R.Cell=Layout[I];if(Mirror)R.Cell.X=-R.Cell.X;for(int J=0;J<Rotation;++J)R.Cell=FIntPoint(-R.Cell.Y,R.Cell.X);R.Depth=I<6?I:I==6?2:4;}
+    AtlasRooms.SetNum(UE_ARRAY_COUNT(Layout));
+    for(int I=0;I<AtlasRooms.Num();++I){auto& R=AtlasRooms[I];R.Cell=Layout[I];if(Mirror)R.Cell.X=-R.Cell.X;for(int J=0;J<Rotation;++J)R.Cell=FIntPoint(-R.Cell.Y,R.Cell.X);R.Depth=Depths[I];}
     AtlasRooms[0].Type=EAtlasRoom::Entrance;AtlasRooms[5].Type=EAtlasRoom::Boss;
     AtlasRooms[6].Type=EAtlasRoom::Trader;AtlasRooms[7].Type=EAtlasRoom::Reward;
     auto Link=[&](int A,int B){const auto Delta=AtlasRooms[B].Cell-AtlasRooms[A].Cell;for(int D=0;D<4;++D)if(Delta==Steps[D]){AtlasRooms[A].Links[D]=B;AtlasRooms[B].Links[(D+2)%4]=A;}};
-    for(int I=0;I<5;++I)Link(I,I+1);Link(1,6);Link(3,7);
+    for(int I=0;I<4;++I)Link(I,I+1);
+    Link(4,8);Link(8,9);Link(9,10);Link(10,11);Link(11,5);
+    Link(1,6);Link(3,7);Link(2,12);Link(12,13);
     EnterAtlasRoom(0,-1);
 }
 void ADungeonGameMode::SaveAtlasRoom()
@@ -88,7 +93,7 @@ void ADungeonGameMode::ToggleAtlasMap()
 {
     if(bAtlasMap){bAtlasMap=false;PlaySound(TEXT("Paper"),.5f);return;}
     auto* H=AtlasHero(this);if(!bAtlasActive||!H||H->Health<=0||H->IsInventoryOpen()||IsGameplayBlocked())return;
-    SaveAtlasRoom();bAtlasMap=true;PlaySound(TEXT("Paper"),.5f);
+    H->StopBlock();SaveAtlasRoom();bAtlasMap=true;PlaySound(TEXT("Paper"),.5f);
 }
 bool ADungeonGameMode::AtlasInteract(ADungeonHero* H)
 {
@@ -216,13 +221,45 @@ void ADungeonGameMode::VerifyAtlas()
     for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter)for(int Seed=0;Seed<128;++Seed){
         InitializeAtlasFloor(Seed,Chapter);TSet<FIntPoint> Cells;int Traders=0,Rewards=0,Bosses=0,Edges=0;
         Check(GetBiome()==DungeonProgression::Themes[Chapter]&&GetBossSpecies()==DungeonProgression::Bosses[Chapter],TEXT("Floor retains theme and boss order"));
-        TArray<int> Distance;Distance.Init(-1,8);Distance[0]=0;TArray<int> Queue;Queue.Add(0);
+        TArray<int> Distance;Distance.Init(-1,AtlasRooms.Num());Distance[0]=0;TArray<int> Queue;Queue.Add(0);
         for(int K=0;K<Queue.Num();++K){int I=Queue[K];for(int D=0;D<4;++D){int J=AtlasRooms[I].Links[D];if(J>=0){Check(AtlasRooms[J].Links[(D+2)%4]==I,TEXT("Reciprocal doorway"));Check(AtlasRooms[J].Cell-AtlasRooms[I].Cell==Steps[D],TEXT("Physical adjacency"));if(Distance[J]<0){Distance[J]=Distance[I]+1;Queue.Add(J);}}}}
-        for(int I=0;I<8;++I){const auto& R=AtlasRooms[I];Cells.Add(R.Cell);Traders+=R.Type==EAtlasRoom::Trader;Rewards+=R.Type==EAtlasRoom::Reward;Bosses+=R.Type==EAtlasRoom::Boss;int Degree=0;for(int D=0;D<4;++D)Degree+=R.Links[D]>=0;Edges+=Degree;if(R.Type==EAtlasRoom::Boss||R.Type==EAtlasRoom::Trader||R.Type==EAtlasRoom::Reward)Check(Degree==1,TEXT("Special rooms are branch endpoints"));}
-        Check(Cells.Num()==8&&Queue.Num()==8&&Edges==14,TEXT("Unique connected non-crossing tree"));
-        Check(Traders==1&&Rewards==1&&Bosses==1&&Distance[5]==5,TEXT("One trader, reward, distant boss"));
+        for(int I=0;I<AtlasRooms.Num();++I){const auto& R=AtlasRooms[I];Cells.Add(R.Cell);Traders+=R.Type==EAtlasRoom::Trader;Rewards+=R.Type==EAtlasRoom::Reward;Bosses+=R.Type==EAtlasRoom::Boss;int Degree=0;for(int D=0;D<4;++D)Degree+=R.Links[D]>=0;Edges+=Degree;Check(R.Depth==Distance[I],TEXT("Encounter depth equals shortest route"));if(R.Type==EAtlasRoom::Boss||R.Type==EAtlasRoom::Trader||R.Type==EAtlasRoom::Reward)Check(Degree==1,TEXT("Special rooms are branch endpoints"));}
+        Check(Cells.Num()==14&&Queue.Num()==14&&Edges==26,TEXT("Unique connected non-crossing expanded tree"));
+        Check(Traders==1&&Rewards==1&&Bosses==1&&Distance[5]==9,TEXT("One trader, reward, distant boss"));
         Check(AtlasRooms.FilterByPredicate([](const FAtlasRoom& R){return R.Visited;}).Num()==1,TEXT("Only entrance revealed initially"));
     }
+    // Exercise every new campaign encounter through real spawn/clear/backtrack.
+    TSet<int32> SeenExpansion;
+    for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter){
+        InitializeAtlasFloor(37,Chapter);
+        for(int Index:{11,13,10,9,8,12,4,3,2,1}){
+            EnterAtlasRoom(Index,-1);
+            const int Depth=AtlasRooms[Index].Depth;
+            for(int ExpectedWave=1;ExpectedWave<=2;++ExpectedWave){
+                const auto Plan=DungeonRoster::AtlasEncounter(GetBiome(),Depth,ExpectedWave);
+                Check(Wave==ExpectedWave&&PendingSpawns==Plan.Num(),TEXT("Expanded encounter wave budget"));
+                int Elites=0;
+                for(int Species:Plan){
+                    SpawnOneEnemy();--PendingSpawns;
+                    Check(!Enemies.IsEmpty()&&Enemies.Last()->Species==Species,TEXT("Expanded theme roster spawns exactly"));
+                    if(DungeonExpansionV2::Is(Species)){
+                        SeenExpansion.Add(Species);
+                        Check(DungeonExpansionV2::Enabled(Species),TEXT("Removed species never enter campaign"));
+                        const bool Elite=DungeonExpansionV2::Get(Species).Elite||Species==68;
+                        Elites+=Elite;
+                        Check(!Elite||Depth>=6,TEXT("Heavy elites reserved for late rooms"));
+                    }
+                    if(!Enemies.IsEmpty())Check(FMath::IsNearlyEqual(Enemies.Last()->MaxHealth,DungeonCombatBalance::SpawnHealth(DungeonRoster::Get(Species).HP,Room,false)),TEXT("Expanded health uses existing scaling once"));
+                }
+                Check(Elites<=1,TEXT("No stacked elites in encounter wave"));
+                const auto Defeated=Enemies;for(const auto& E:Defeated)EnemyDefeated(E.Get());
+            }
+            Check(AtlasRooms[Index].Cleared&&AreDoorsOpen(),TEXT("Expanded room clear unlocks exits"));
+            SaveAtlasRoom();EnterAtlasRoom(0,-1);EnterAtlasRoom(Index,-1);
+            Check(Enemies.IsEmpty()&&PendingSpawns==0,TEXT("Expanded room remains cleared on backtrack"));
+        }
+    }
+    for(int Species:DungeonExpansionV2::Active)Check(SeenExpansion.Contains(Species),TEXT("Every approved new enemy appears in campaign"));
     H->Restart();
     // Integrated Keep: room depth controls both waves regardless of visit order.
     // Exercise real spawn/defeat paths, not just the encounter table.
@@ -346,6 +383,12 @@ void ADungeonGameMode::RunAtlasReview()
 #if !UE_BUILD_SHIPPING
     if(!FParse::Param(FCommandLine::Get(),TEXT("AtlasReview")))return;
     static int Step=0;const float Time=GetWorld()->GetTimeSeconds();auto* H=AtlasHero(this);if(!H)return;
+    if(FParse::Param(FCommandLine::Get(),TEXT("AtlasExpandedMapReview"))){
+        if(Step==0&&Time>2){StartGame();InitializeAtlasFloor(12);for(auto& R:AtlasRooms){R.Visited=true;R.Cleared=true;}ToggleAtlasMap();++Step;}
+        if(Step==1&&Time>4){FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/TEXT("Saved/AtlasExpandedMap.png"),false,false);++Step;}
+        if(Step==2&&Time>5)FPlatformMisc::RequestExit(false);
+        return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("AtlasCurrencyReview"))){
         auto Shot=[&](const TCHAR* Name){FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/TEXT("ArtSource/")+Name+TEXT(".png"),false,false);};
         if(Step==0&&Time>2){StartGame();InitializeAtlasFloor(12);AtlasRooms[4].Visited=AtlasRooms[4].Cleared=true;EnterAtlasRoom(4,-1);H->Coins=12345;++Step;}

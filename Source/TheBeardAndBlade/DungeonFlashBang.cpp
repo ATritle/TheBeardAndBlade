@@ -20,25 +20,30 @@ namespace FlashBang
     }
 }
 
-bool ADungeonHero::ApplyFlashBang(FVector2D Explosion,float Radius)
+bool ADungeonHero::ApplyFlashBang(FVector2D Explosion,float Radius,bool BossAttack)
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
     if(Health<=0||!G||G->IsGameplayBlocked()||IsInventoryOpen()||G->IsFreedomActive()) return false;
     if(!FlashBang::Exposed(DungeonView::Project(GetActorLocation()),GetVisualFacing(),Explosion,Radius)) return false;
     // No chained stun extension while recovering from the same encounter's flash.
     if(FlashBlindTime>0) return false;
+    if(TryBlockDamage(Explosion-DungeonView::Project(GetActorLocation()))){
+        if(BossAttack)ReceiveHit(DungeonRoster::Get(30).Damage,true,Explosion,true);
+        return false; // Guard still prevents flash status and teleport combo.
+    }
     CancelCombatActions(); StunTime=FMath::Max(StunTime,.6f);
     SlowTime=FMath::Max(SlowTime,2.5f); FlashBlindTime=2.2f;
-    ReceiveHit(DungeonRoster::Get(30).Damage,true);
+    ReceiveHit(DungeonRoster::Get(30).Damage,true,Explosion,BossAttack);
     return true;
 }
 
-void ADungeonHero::ReceiveFlashStab()
+void ADungeonHero::ReceiveFlashStab(TOptional<FVector2D> Source)
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
     if(!G||G->IsGameplayBlocked()||G->IsFreedomActive()||Health<=0)return;
+    const bool Guarded=TryBlockDamage(Source.IsSet()?Source.GetValue()-DungeonView::Project(GetActorLocation()):FVector2D::ZeroVector);
     // Percentage of current health at impact, not max health or armor-reduced base damage.
-    const float Damage=Health*.25f;Health-=Damage;HurtTime=.18f;
+    const float Damage=Health*.25f*(Guarded?.75f:1.f);Health-=Damage;HurtTime=.18f;
     G->AddImpact(DungeonView::Project(GetActorLocation()),Damage,true);G->PlaySound(TEXT("Hurt"));
 }
 
@@ -64,7 +69,7 @@ void ADungeonEnemy::TickFlashBoss(float Dt,ADungeonHero* H,ADungeonGameMode* G)
         const float Before=ActionTime;ActionTime=FMath::Max(0.f,ActionTime-Dt);
         if(Before>.32f&&ActionTime<=.32f&&H->Health>0)
         {
-            H->ReceiveFlashStab();G->PlaySound(TEXT("Sword"),.75f);
+            H->ReceiveFlashStab(P);G->PlaySound(TEXT("Sword"),.75f);
         }
         if(ActionTime<=0)
         {
@@ -101,7 +106,7 @@ void ADungeonGameMode::ThrowFlashBang(ADungeonEnemy* E)
 {
     if(!IsValid(E)||E->Health<=0||IsGameplayBlocked()) return;
     FDungeonShot Shot;
-    Shot.SourceEnemy=E;
+    Shot.SourceEnemy=E;Shot.bBossAttack=E->bBoss;
     Shot.Style=13;Shot.Art=20;Shot.Damage=20;Shot.Radius=10;Shot.BlastRadius=300;
     Shot.Position=Shot.Origin=DungeonView::Project(E->GetActorLocation())+FVector2D(E->Facing==6?-35:35,-70);
     Shot.Target=DungeonView::Clamp(E->AttackTarget);

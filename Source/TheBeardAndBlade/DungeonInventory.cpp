@@ -132,7 +132,9 @@ int32 ADungeonHUD::VerifyInventoryGestures(ADungeonHero* H)
     Drag(476,198,350,590);Check(H->Equipment[3].CatalogId==48&&H->Equipment[3].CoinValue==RingItem.CoinValue);
     Check(H->Unequip(3)&&H->Equipment[3].IsEmpty());
     CancelInventoryGesture();Mouse(476,198);InventoryClick();InventoryClick();Check(H->Equipment[3].CatalogId==48);
-    Drag(350,590,666,388);
+    // Aim inside the destination cell, not exactly on its boundary:
+    // viewport scaling rounds synthetic cursor positions to physical pixels.
+    Drag(350,590,676,398);
     Check(H->Equipment[3].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3)&&H->Inventory[0].Item.CoinValue==RingItem.CoinValue);
     CancelInventoryGesture();Mouse(666,388);InventoryClick();InventoryClick();Check(H->Equipment[3].CatalogId==48);
     CancelInventoryGesture();Mouse(350,590);InventoryClick();InventoryClick();Check(H->Equipment[3].IsEmpty()&&H->Inventory.Num()==1);
@@ -143,7 +145,7 @@ int32 ADungeonHUD::VerifyInventoryGestures(ADungeonHero* H)
     Check(!H->UnequipToCell(3,FIntPoint(6,0))&&!H->UnequipToCell(-1,FIntPoint(0,0)));
     H->Inventory.Empty();H->Equip(ADungeonGameMode::RollItem(26,4));
     Drag(350,450,786,498);Check(!H->Equipment[1].IsEmpty()&&H->Inventory.IsEmpty());
-    Drag(350,450,666,378);Check(H->Equipment[1].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3));
+    Drag(350,450,676,388);Check(H->Equipment[1].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3));
     for(int S=4;S<DungeonLootCatalog::EquipmentSlots;++S) {
         H->Inventory.Empty();FDungeonItem Empty;Empty.Slot=S;H->Equip(Empty);
         const int ID=60+(S-4)*3;H->AddToInventory(ADungeonGameMode::RollItem(ID,3,4));
@@ -152,7 +154,7 @@ int32 ADungeonHUD::VerifyInventoryGestures(ADungeonHero* H)
         CancelInventoryGesture();Mouse(P.X,P.Y);InventoryClick();InventoryClick();
         Check(H->Equipment[S].IsEmpty()&&H->Inventory.Num()==1);
         CancelInventoryGesture();Mouse(476,198);InventoryClick();InventoryClick();Check(H->Equipment[S].CatalogId==ID);
-        Drag(P.X,P.Y,666,388);Check(H->Equipment[S].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3));
+        Drag(P.X,P.Y,676,398);Check(H->Equipment[S].IsEmpty()&&H->Inventory.Num()==1&&H->Inventory[0].Cell==FIntPoint(3,3));
     }
     H->Inventory=Bag;H->Equipment=Gear;H->RebuildStats();H->Health=HP;H->Stamina=SP;H->SelectedItem=INDEX_NONE;H->InventoryMessage.Empty();CancelInventoryGesture();
     return Errors;

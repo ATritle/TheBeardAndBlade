@@ -1,10 +1,12 @@
 #pragma once
+#include "IronMatriarch.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/HUD.h"
 #include "DungeonProgression.h"
 #include "DungeonDescent.h"
+#include "DungeonBlock.h"
 #include "DungeonActors.generated.h"
 
 namespace DungeonLootCatalog { constexpr int32 Count=72,EquipmentSlots=8; }
@@ -98,10 +100,16 @@ struct FDungeonShot
     FVector2D Origin,Target;
     float Age=0,FlightTime=1,BlastRadius=0;
     bool bFriendly=false;
-    bool bMotionTuned=false,bTrackingStopped=false;
+    bool bMelee=false;
+    bool bBossAttack=false; // Snapshot provenance; survives the firing actor's death.
+    FVector2D MeleeOrigin=FVector2D::ZeroVector;
+    bool bMotionTuned=false,bTrackingStopped=false,bPlayerBodyHit=false;
 };
 struct FDungeonSplash
 {
+    int32 TeaKind=0; // 0 shared/non-TEA, 1 ground, 2 confirmed enemy overlay
+    TWeakObjectPtr<class ADungeonEnemy> TeaEnemy;
+    float TeaHeight=0;
     int32 ExpansionSpecies=-1;
     bool bExpansionPlayerHit=false;
     FVector2D Position;
@@ -128,6 +136,22 @@ public:
     float QuipTime=0,QuipCooldown=0;
     void PowerMove();
     void Freedom();
+    void BlockPressed();
+    void BlockReleased(){Block.Release();}
+    void StopBlock(){Block.Stop();}
+    bool IsBlocking() const{return Block.Active;}
+    bool CanStartBlock() const;
+    bool CanUseTea() const;
+    bool CanUseFreedom() const;
+    bool CanStrike() const;
+    float GetBlockFraction() const{return Block.Fraction();}
+    float GetBlockCountdown() const{return Block.Active?FDungeonBlock::Limit-Block.Elapsed:Block.Cooldown;}
+    float GetBlockCooldown() const{return Block.Cooldown;}
+    float GetBlockImpact() const{return Block.Impact;}
+    bool NeedsBlockRelease() const{return Block.Held&&!Block.Active&&!Block.Exhausted;}
+    bool ReceiveMeleeHit(float Damage,FVector2D Attacker,bool BossAttack=false);
+    bool TryBlockDamage(FVector2D ToSource);
+    float GetGuardBlend() const{return GuardBlend;}
     bool IsCasting() const { return PowerCastTime>0; }
     float GetPowerCooldown() const { return PowerCooldown; }
     float GetCastProgress() const { return 1.f-PowerCastTime/.48f; }
@@ -160,7 +184,7 @@ public:
     void TransitionWalk(FVector2D From,FVector2D To,float Progress,float GaitScale=1.f);
     void Interact();
     void Restart();
-    void ReceiveHit(float Damage,bool PerProjectile=false);
+    void ReceiveHit(float Damage,bool PerProjectile=false,TOptional<FVector2D> Source={},bool BossAttack=false);
     bool IsBulletImmune() const;
     FVector2D ScreenVelocity=FVector2D::ZeroVector;
     void Equip(const FDungeonItem& Item);
@@ -205,14 +229,16 @@ public:
     float Health=150,MaxHealth=150,AttackPower=24,Armor=8,HurtTime=0;
     float StunTime=0,SlowTime=0,StatusClock=0;
     float FlashBlindTime=0;
-    bool ApplyFlashBang(FVector2D Explosion,float Radius);
-    void ReceiveFlashStab();
+    bool ApplyFlashBang(FVector2D Explosion,float Radius,bool BossAttack=false);
+    void ReceiveFlashStab(TOptional<FVector2D> Source={});
     float IdleBreathBlend=0,BreathPhase=0;
     bool IsDamageImmune() const;
     void ApplyBurgerStatus();
     TArray<FDungeonItem> Equipment;
     UPROPERTY(VisibleAnywhere) UCameraComponent* Camera;
 private:
+    FDungeonBlock Block;
+    float GuardBlend=0;
     float InputX=0,InputY=0,WalkDistance=0,AttackTime=0,Invulnerable=0;
     float RollTime=0,RollCooldown=0;
     float StaminaDelay=0;
@@ -245,10 +271,13 @@ public:
     FVector2D ActionFrom,ActionTo;
     float HealthLag=0;
     void TickNewBoss(float Dt,ADungeonHero* H,ADungeonGameMode* G);
+    IronMatriarch::FState Iron;
+    void TickIronMatriarch(float Dt,ADungeonHero* H,ADungeonGameMode* G);
+    void BeginIronAttack(int Attack,ADungeonHero* H,ADungeonGameMode* G);
     void TickFlashBoss(float Dt,ADungeonHero* H,ADungeonGameMode* G);
     void TickRustblade(float Dt,ADungeonHero* H,ADungeonGameMode* G);
     void TickExpansion(float Dt,ADungeonHero* H,ADungeonGameMode* G);
-    float ExpansionAttackAge=-1,ExpansionHurtAge=-1;
+    float ExpansionAttackAge=-1,ExpansionHurtAge=-1,ExpansionAdvanceTime=0;
     bool bExpansionReleased=false,bExpansionRanged=false;
     float RustAttackAge=-1,RustHurtAge=-1;
     bool bRustStrikeFired=false;
@@ -287,6 +316,8 @@ public:
     virtual void Tick(float Dt) override;
     void PlayerAttack(ADungeonHero* Hero);
     void PlaySound(const FString& Name,float Volume=1.f,float Pitch=1.f);
+    void VerifyIronMatriarch();
+    void ReviewIronMatriarch(float Dt);
     void UpdateAudio();
     void RefreshMusicVolume();
     void StopMusic();
@@ -304,6 +335,7 @@ public:
     int32 FreedomKills=0;
     float FreedomTime=0;
     bool IsFreedomActive() const { return FreedomTime>0; }
+    bool IsFreedomReady() const {return !IsFreedomActive()&&FreedomKills>=15&&!bChest&&!bLootClaimed;}
     float FreedomProgress() const { return 1.f-FreedomTime/3.f; }
     TArray<FDungeonBlood> Blood;
     void RestartRun();
@@ -314,6 +346,10 @@ public:
     void VerifyWeekend();
     void VerifyRustblade();
     void VerifyExpansion();
+    void VerifyHotbar();
+    void UpdateHotbarReview(float Dt);
+    void StartEliteEncounter(int32 Species);
+    int32 EliteReviewSpecies=-1;
     void ReleaseExpansion(ADungeonEnemy* E,ADungeonHero* H);
     void UpdateExpansionShot(FDungeonShot& S,float Dt,ADungeonHero* H);
     void RunEndingPreview();
@@ -395,6 +431,8 @@ public:
     void VerifyProgression();
     void ThrowFlashBang(ADungeonEnemy* Enemy);
     void VerifyFlashBang();
+    void VerifyTeaV4();
+    void ReviewTeaV4(float Dt);
     void UpdateReward(float Dt);
     void SpawnBreakables();
     void StrikeBreakables(ADungeonHero* Hero);
@@ -509,6 +547,12 @@ private:
     void DrawCombatFX(ADungeonGameMode* G,bool Foreground);
     void SpeechBubble(FVector2D Position,FVector2D Size,FVector2D Speaker);
     void DrawVitals(ADungeonHero* H);
+    void DrawIronMatriarch(ADungeonEnemy* E);
+    void IronSprite(const FString& Name,int Frame,int Frames,FVector2D Origin,FVector2D Size,FLinearColor Tint=FLinearColor::White,float Angle=0,FVector2D Pivot=FVector2D(.5,.5));
+    void DrawGuard(ADungeonHero* H);
+    void MeterArc(FVector2D Center,float Radius,float Start,float Sweep,float Fraction,FLinearColor Color,float Width);
+    void GemMeter(FVector2D Center,float Radius,float Width,float Start,float Sweep,float Fraction,FLinearColor Tint,int Pieces);
+    float DisplayHealth=-1,DisplayStamina=-1;
     void DrawPotions(ADungeonGameMode* G);
     void DrawCoinDrops(ADungeonGameMode* G);
     void Orb(FVector2D Center,float Fraction,FLinearColor Color);

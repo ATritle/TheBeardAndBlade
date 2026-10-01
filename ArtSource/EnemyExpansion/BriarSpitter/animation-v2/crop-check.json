@@ -1,6 +1,6 @@
 {
   "sourceCheckOnly": true,
-  "sheets": 43,
+  "sheets": 51,
   "checks": [
     {
       "file": "walk-N-rear-v2.png",
@@ -21,6 +21,23 @@
     },
     {
       "file": "attack-a-N-facing-v3.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-N-facing-v3.png",
       "size": [
         1448,
         1086
@@ -68,9 +85,24 @@
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        12
-      ]
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NE-facing-v3.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
     },
     {
       "file": "walk-E.png",
@@ -91,6 +123,23 @@
     },
     {
       "file": "attack-a-E.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-E.png",
       "size": [
         1448,
         1086
@@ -141,6 +190,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SE.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-S-front-v2.png",
       "size": [
         1254,
@@ -160,6 +226,23 @@
     {
       "file": "attack-a-S.png",
       "size": [
+        1500,
+        1269
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-S.png",
+      "size": [
         1448,
         1086
       ],
@@ -168,7 +251,7 @@
         255
       ],
       "poses": 12,
-      "components": 13,
+      "components": 12,
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
@@ -196,6 +279,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-SW.png",
+      "size": [
+        1572,
+        1104
       ],
       "alpha": [
         0,
@@ -243,6 +343,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-W.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-NW-rear-v2.png",
       "size": [
         1254,
@@ -261,6 +378,23 @@
     },
     {
       "file": "attack-a-NW-facing-v3.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NW-facing-v3.png",
       "size": [
         1448,
         1086
@@ -478,9 +612,7 @@
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        4
-      ]
+      "cropWarnings": []
     },
     {
       "file": "idle-SE.png",
@@ -739,5 +871,5 @@
     }
   ],
   "walkCells": 128,
-  "attackCells": 96
+  "attackCells": 192
 }

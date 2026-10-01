@@ -79,20 +79,9 @@ void ADungeonHUD::DrawReward(ADungeonGameMode* G,ADungeonHero* H)
         Sprite(FString::Printf(TEXT("RarityGlow_%d"),Item.Rarity*6+int(LandAge*6)%6),R.Landing.X-80,R.Landing.Y-154,160,160);
         if(LandAge<.67f) Sprite(FString::Printf(TEXT("LootEffect_%d"),8+FMath::Clamp(int(LandAge*12),0,7)),P.X-48,P.Y-45,96,96);
         P.Y-=FMath::Abs(FMath::Sin(LandAge*18))*8*FMath::Exp(-LandAge*6);
-        if(G->CanCollectReward(H))
-        {
-            static const TCHAR* Rarity[]={TEXT("Common"),TEXT("Uncommon"),TEXT("Rare"),TEXT("Epic"),TEXT("Legendary")};
-            Label(Item.Name+TEXT(" / ")+Rarity[Item.Rarity]+TEXT(" / E"),P.X-65,P.Y+25,FLinearColor(1,.86f,.5f),.72f);
-        }
     }
     Shadow(P,15); P.Y-=55*(1-T)+FMath::Sin(T*PI)*65;
     Sprite(Item.Art(),P.X-28,P.Y-53,56,56);
-    if(R.Phase==ERewardPhase::Available)
-    {
-        Box(340,650,600,38,FLinearColor(.015f,.02f,.025f,.94f));
-        Label(R.BagFull?TEXT("Bag full - make space with I, or leave loot and enter an exit"):
-            TEXT("E to collect loot / You may leave it behind and enter an exit"),355,663,FLinearColor(1,.86f,.5f),.85f);
-    }
 }
 
 bool ADungeonHero::IsDamageImmune() const
@@ -152,7 +141,7 @@ void ADungeonHUD::DrawBossUI(ADungeonEnemy* E)
     }
     // Measured per-border openings from the reproducible art manifest.
     static const FVector4 Openings[]={FVector4(.190909f,.501805f,.654545f,.158845f),FVector4(.211688f,.455197f,.611688f,.146953f),FVector4(.207792f,.505576f,.62987f,.156134f),FVector4(.201299f,.420339f,.645455f,.149153f),FVector4(.168508f,.447917f,.644567f,.117188f),FVector4(.161142f,.430412f,.653775f,.110825f),FVector4(.106607f,.355556f,.786787f,.294444f)};
-    const int Border=I;
+    const int Border=E->Species==IronMatriarch::Species?6:I;
     const auto O=Openings[Border]; const float X=565+O.X*333,Y=12+O.Y*90,W=O.Z*333,H=O.W*90;
     Box(X,Y,W,H,FLinearColor(.1f,.015f,.02f));
     Box(X,Y,W*FMath::Clamp(E->HealthLag/FMath::Max(1.f,E->MaxHealth),0.f,1.f),H,FLinearColor(.85f,.5f,.1f));
@@ -229,7 +218,7 @@ void ADungeonGameMode::EmitBossShot(ADungeonEnemy* E,bool Burger)
     }
     const float A=E->Facing*PI/4;
     const FVector2D Aim(FMath::Sin(A),-FMath::Cos(A)),Side(-Aim.Y,Aim.X);
-    FDungeonShot S; S.Art=Burger?16:18; S.Style=Burger?10:11;
+    FDungeonShot S; S.bBossAttack=E->bBoss; S.Art=Burger?16:18; S.Style=Burger?10:11;
     // Origins are shared with muzzle flash rendering and direction-specific sprite sockets.
     const FVector2D Muzzles[8][2]={{{-80,-176},{80,-176}},{{105,-168},{85,-142}},{{103,-101},{90,-70}},{{62,-22},{90,-63}},{{-66,-20},{55,-4}},{{-102,-56},{-68,-18}},{{-106,-103},{-93,-73}},{{-106,-172},{-105,-139}}};
     const int Rifle=E->ShotSerial++%2;

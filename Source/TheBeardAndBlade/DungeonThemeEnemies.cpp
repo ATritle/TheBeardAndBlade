@@ -21,7 +21,7 @@ void ADungeonGameMode::FireThemeAttack(ADungeonEnemy* E)
         FX.Art=E->Species==31?50:E->Species==47?51:49;Splashes.Add(FX);
         PlaySound(Spec.AttackStyle==0?TEXT("Sword"):TEXT("Explosion"),.6f);
         auto D=DungeonView::Project(H->GetActorLocation())-P;D.Y/=.7f;
-        if(D.Size()<Spec.Range+20)H->ReceiveHit(Spec.Damage*1.8f);
+        if(D.Size()<Spec.Range+20)H->ReceiveMeleeHit(Spec.Damage*1.8f,P);
         return;
     }
     const bool Grenade=E->Species==39,Arc=E->Species==33||E->Species==42;
@@ -49,7 +49,7 @@ void ADungeonGameMode::FireThemeAttack(ADungeonEnemy* E)
 void ADungeonGameMode::VerifyProgression()
 {
     int Failures=0;auto Check=[&](bool Good,const TCHAR* What){if(!Good)++Failures;UE_LOG(LogTemp,Display,TEXT("PROGRESSION %s %s"),Good?TEXT("PASS"):TEXT("FAIL"),What);};
-    const int Order[]={24,28,30,25,26,27,29};const int Themes[]={0,6,5,1,2,3,4};
+    const int Order[]={24,28,30,25,26,27,29,79};const int Themes[]={0,6,5,1,2,3,4,7};
     for(int R=1;R<=DungeonProgression::CampaignRooms;++R)
     {
         StartPlaytestRoom(R);Check(GetBossSpecies()==Order[DungeonProgression::Chapter(R)]&&GetBiome()==Themes[DungeonProgression::Chapter(R)],TEXT("Room boss and theme mapping"));

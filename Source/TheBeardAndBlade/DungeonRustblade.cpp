@@ -30,7 +30,7 @@ void ADungeonEnemy::TickRustblade(float Dt,ADungeonHero* H,ADungeonGameMode* G)
             G->PlaySound(TEXT("Sword"),.42f);
             // Facing/aim are locked for the whole swing. ReceiveHit owns dodge,
             // armor, damage reduction and invulnerability, exactly as other melee.
-            if(Hits(Target-P,ChargeAim))H->ReceiveHit(Profile.Damage);
+            if(Hits(Target-P,ChargeAim))H->ReceiveMeleeHit(Profile.Damage,P);
         }
         if(RustAttackAge>=AttackDuration) {
             RustAttackAge=-1;Windup=0;Recovery=.32f;

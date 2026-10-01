@@ -1,6 +1,6 @@
 {
   "sourceCheckOnly": true,
-  "sheets": 43,
+  "sheets": 51,
   "checks": [
     {
       "file": "walk-N.png",
@@ -24,6 +24,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-N.png",
+      "size": [
+        1488,
+        1146
       ],
       "alpha": [
         0,
@@ -71,6 +88,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-NE.png",
+      "size": [
+        1728,
+        1200
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-E-grip-v2.png",
       "size": [
         1254,
@@ -92,6 +126,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-E.png",
+      "size": [
+        1672,
+        1263
       ],
       "alpha": [
         0,
@@ -139,6 +190,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SE.png",
+      "size": [
+        1700,
+        1293
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-S.png",
       "size": [
         1254,
@@ -160,6 +228,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-S.png",
+      "size": [
+        1508,
+        1296
       ],
       "alpha": [
         0,
@@ -207,6 +292,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SW.png",
+      "size": [
+        1800,
+        1263
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-W.png",
       "size": [
         1254,
@@ -241,6 +343,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-W.png",
+      "size": [
+        1824,
+        1308
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-NW-grip-v3.png",
       "size": [
         1254,
@@ -262,6 +381,23 @@
       "size": [
         1448,
         1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NW.png",
+      "size": [
+        1700,
+        1296
       ],
       "alpha": [
         0,
@@ -735,5 +871,5 @@
     }
   ],
   "walkCells": 128,
-  "attackCells": 96
+  "attackCells": 192
 }

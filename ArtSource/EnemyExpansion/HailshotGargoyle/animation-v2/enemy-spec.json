@@ -10,7 +10,7 @@
   "appearance": "Squat winged stone gargoyle with hail-crystal cheeks and a hollow cannon-like mouth.",
   "attack": "Spits one large hail pellet.",
   "projectileConcept": "Hail pellet: rotating white-blue ice ball with wind streaks; player impact hail chips; floor/wall impact stone dust and broken ice.",
-  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "assetStatus": "SPRITES_COMPLETE_UE_TEST_READY",
   "animation": {
     "directions": [
       "N",
@@ -71,10 +71,23 @@
     "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
   },
   "sourceProgress": {
-    "selectedSheetsSaved": 19,
+    "selectedSheetsSaved": 51,
     "selectedSheetsPlanned": 51,
     "visualReviewComplete": false,
-    "ueImportTested": false,
-    "status": "INCOMPLETE_REVIEW_DRAFT"
+    "ueImportTested": true,
+    "status": "SPRITES_COMPLETE_UE_TEST_READY"
+  },
+  "runtimeReview": {
+    "species": 65,
+    "atlasCount": 43,
+    "poseCount": 568,
+    "sourceCropAuditPassed": true,
+    "atlasBoundsAuditPassed": true,
+    "automatedUETestPassed": true,
+    "visualReviewScope": "Directional source repair review, cross-state scale boards, eight-direction attack contact boards; automated combat captures for the five elites.",
+    "userGameplayApproval": false,
+    "exhaustiveManualGameplay": false,
+    "timingAuthority": "Source/TheBeardAndBlade/DungeonExpansionV2.h::ReleaseFrame",
+    "report": "ArtSource/EnemyExpansion/HomePCHandoff-v2/COMPLETION-AND-TEST.md"
   }
 }

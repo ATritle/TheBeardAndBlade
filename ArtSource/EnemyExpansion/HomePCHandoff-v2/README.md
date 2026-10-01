@@ -1,6 +1,10 @@
-# Enemy expansion — home PC continuation checkpoint
+# Enemy expansion — completed sprites / local test
 
-796 of 1345 selected sprite sheets are included for 25 active enemies. **549 sheets remain ungenerated.** This is unfinished source art, not a gameplay release or an approved animation pack.
+**Current status (v0.4.2):** the 25 expansion enemy packs are complete and imported; the current campaign roster is defined in DungeonRoster.h. See the project-root PLAYTEST.md for current testing. One-off CMD launchers are retired. The older checkpoint below is production history; its pending-generation/import instructions are superseded.
+
+## Historical source checkpoint
+
+1345 of 1345 selected sprite sheets are included for 25 active enemies. **0 sheets remain ungenerated.** This is unfinished source art, not a gameplay release or an approved animation pack.
 
 Open `preview.html` locally after pulling the repo to browse each enemy. GitHub itself does not play the HTML previews.
 

@@ -547,27 +547,21 @@
       "cropWarnings": []
     },
     {
-      "file": "idle-E-clean-v2.png",
+      "file": "idle-E-margin-v4.png",
       "size": [
-        1774,
-        887
+        1024,
+        1536
       ],
       "alpha": [
         0,
-        255
+        254
       ],
       "poses": 8,
       "components": 8,
       "empty": 0,
       "overlappingMaskRows": 0,
-      "sourceBorderPoses": [
-        4,
-        8
-      ],
-      "cropWarnings": [
-        4,
-        8
-      ]
+      "sourceBorderPoses": [],
+      "cropWarnings": []
     },
     {
       "file": "hurt-E-clean-v2.png",
@@ -601,9 +595,7 @@
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        12
-      ]
+      "cropWarnings": []
     },
     {
       "file": "idle-SE-clean-v2.png",

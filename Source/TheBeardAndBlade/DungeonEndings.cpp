@@ -56,9 +56,9 @@ void ADungeonHUD::DrawEnding(ADungeonGameMode* G)
     };
     if(G->IsVictory())
     {
-        CenterLine(TEXT("Seven guardians silenced. Seven dungeon floors conquered."),607,.95f);
+        CenterLine(TEXT("Eight guardians silenced. Eight dungeon floors conquered."),607,.95f);
         CenterLine(TEXT("Through frost, fire and flying paperwork, the bearded adventurer kept his blade sharp"),633,.9f);
-        CenterLine(TEXT("and his tea hotter. At last, the storm fell silent. He raised his cup to the dawn:"),657,.9f);
+        CenterLine(TEXT("and his tea hotter. At last, the iron wings fell silent. He raised his cup to the dawn:"),657,.9f);
         CenterLine(TEXT("\"Not a bad day's work. Now, who's putting the kettle on?\""),681,.9f);
     }
     else
@@ -147,10 +147,11 @@ void ADungeonGameMode::VerifyEndings()
     RestartFromEnding();Check(HasEnding(),TEXT("Input guard prevents accidental restart"));
     ToggleMenu();Check(!bMenu&&HasEnding(),TEXT("Pause cannot hide ending"));
     Tick(1);H->Confirm();Check(!HasEnding()&&H->Health==H->MaxHealth&&Room==1&&PendingSpawns>0,TEXT("Enter starts fresh run"));
-    for(int R:{4,24,28})
+    for(int R:{4,24,28,32})
     {
         StartPlaytestRoom(R);Tick(2.1f);DialogueWait=0;AdvanceBossDialogue(true);BossGrace=0;
         const auto Batch=Enemies;for(auto& E:Batch)if(IsValid(E)){E->SpawnTime=0;E->TakeDungeonDamage(100000);}
+        for(auto& E:Batch)if(IsValid(E)&&E->Species==IronMatriarch::Species)E->TickIronMatriarch(2,H,this);
         if(R<DungeonProgression::CampaignRooms)Check(!HasEnding()&&bChest,TEXT("Earlier bosses still award chests"));
         else
         {

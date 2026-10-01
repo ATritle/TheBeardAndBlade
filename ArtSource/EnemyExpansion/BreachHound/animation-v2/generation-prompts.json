@@ -417,17 +417,18 @@
       "reference": "ArtSource/EnemyExpansion/BreachHound/animation-v2/walk-NE-rear-v2.png"
     },
     {
-      "file": "idle-E-clean-v2.png",
+      "file": "idle-E-margin-v4.png",
       "state": "idle",
       "direction": "E",
       "frames": 8,
-      "columns": 4,
-      "rows": 2,
-      "prompt": "ALL poses face EAST, strict RIGHT side profile; face and attack point to RIGHT edge. Reference is the exact matching-direction movement sheet; preserve that view and identity. Breach Hound: Four-legged armored mechanical hound with red glass eye and an exposed piston jaw. Preserve exact identity, compact pixel clusters, same weapon hands and appendage count. Exactly 8 distinct sequential idle poses, 4 columns x2 rows, row-major. One subtle breathing/ready loop; body stays planted and alert. First/last join smoothly. Stable character scale, fixed root anchor and whole-body framing. Every complete pose has 20% transparent margin. No text, grids, floor, shadows, haze, detached projectile or other characters. Genuine alpha transparency. Clean isolated pixel art on fully transparent alpha-zero background. Absolutely no brown halo, glow, floor, shadow or vignette. Preserve four-legged hound anatomy and machinery; do not copy a background. Keep the same facing as reference in every frame.",
+      "columns": 2,
+      "rows": 4,
+      "prompt": "Use case: identity-preserve. Reference image is Breach Hound design and EAST-facing idle poses. Rebuild this sprite sheet in a DIFFERENT layout: exactly TWO COLUMNS and FOUR ROWS, eight poses total. Tall portrait canvas. This layout change is mandatory to prevent cropping; DO NOT produce 4 columns. Each of the 8 full mechanical dogs occupies only 65% of its cell width, with broad fully transparent gutters around it. All 8 snouts, paws and rear antenna/tails must be complete and well separated from every border. Eight subtle mechanical idle settling poses, all strict right-facing side profile, four natural legs, no walking, no attacks, no turn. Preserve exact compact low broad mechanical quadruped, scratched olive flap armor, dorsal carrying handle, exposed ribbed mechanical sides, red eye, toothed snout, rear antenna, paws/piston joints. Uniform body scale, stance and camera, paws on a consistent baseline within each cell. First and last match for idle loop. Same crisp detailed pixel-art identity, not a redesign. No text, no grid, no shadows, no background, actual transparent alpha. Reference 4 and 8 have clipped noses: redraw complete noses, never reproduce clipping. Essential final layout TWO columns FOUR rows, generous blank space around all eight small characters.",
       "enemy": "Breach Hound",
       "slug": "breach-hound",
       "root": "ArtSource/EnemyExpansion/BreachHound/animation-v2",
-      "reference": "ArtSource/EnemyExpansion/BreachHound/animation-v2/walk-E.png"
+      "reference": "ArtSource/EnemyExpansion/BreachHound/animation-v2/idle-E-clean-v2.png",
+      "generationMode": "built-in imagegen"
     },
     {
       "file": "hurt-E-clean-v2.png",

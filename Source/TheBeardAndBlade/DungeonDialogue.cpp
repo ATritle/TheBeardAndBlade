@@ -16,6 +16,7 @@ namespace
 
 void ADungeonHero::CancelCombatActions()
 {
+    StopBlock();
     AttackTime=PowerCastTime=RollTime=0;
     bWalking=false; bAttackHit=true; bTeaReleased=true;
     QuipTime=QuipCooldown=0; AttackQuip.Empty();
@@ -55,7 +56,9 @@ void ADungeonGameMode::BeginBossDialogue()
         {TEXT("Lovely bunker. Terrible lighting."),TEXT("Flash Bang Guy. I can brighten your day."),TEXT("Is that a rifle or just part of the outfit?"),TEXT("Watch the grenade. Or don't. Your choice."),TEXT("Turn away when it pops. Got it."),TEXT("Let's see how quickly you learn!")}
     };
     DialogueLines.Empty(); DialogueIndex=0; DialogueWait=.8f; BossGrace=0;
-    for(const TCHAR* Line:Conversations[GetBossSpecies()-24]) DialogueLines.Add(Line);
+    if(GetBossSpecies()==IronMatriarch::Species){
+        DialogueLines={TEXT("Five heads. I should have brought a larger kettle."),TEXT("FLESH FADES. IRON ENDURES."),TEXT("Let's see how well it handles a dent."),TEXT("THEN ENTER THE FIRE.")};
+    }else for(const TCHAR* Line:Conversations[GetBossSpecies()-24]) DialogueLines.Add(Line);
     Shots.Empty(); Splashes.Empty(); Impacts.Empty();
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) H->CancelCombatActions();
     StartBossIntro();

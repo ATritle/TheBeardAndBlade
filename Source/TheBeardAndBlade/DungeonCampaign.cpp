@@ -46,6 +46,7 @@ void ADungeonGameMode::ToggleMenu()
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) if(H->IsInventoryOpen()) H->ToggleInventory();
     if(bMenu&&!bHasRun) { StartGame(); return; }
     bMenu=!bMenu; bShowControls=false;
+    if(bMenu)if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))H->StopBlock();
     PlaySound(TEXT("UI"),.5f);
 }
 void ADungeonGameMode::StartTransition(int32 Door)
@@ -61,12 +62,15 @@ void ADungeonEnemy::Tick(float Dt)
     Super::Tick(Dt);
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
     auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
-    if(!G||G->IsGameplayBlocked()||!H||H->IsInventoryOpen()||H->Health<=0||Health<=0) return;
+    if(!G||G->IsGameplayBlocked()||!H||H->IsInventoryOpen()||H->Health<=0) return;
+    if(Species==IronMatriarch::Species&&Iron.DeathAge>=0){TickIronMatriarch(Dt,H,G);return;}
+    if(Health<=0)return;
     const auto& S=DungeonRoster::Get(Species);
     HurtTime=FMath::Max(0.f,HurtTime-Dt); FreedomImmuneTime=FMath::Max(0.f,FreedomImmuneTime-Dt); bWalking=false;
     UpdateAilments(Dt); if(Health<=0||IsActorBeingDestroyed()) return;
     MotionClock+=Dt;
     HealthLag=HealthLag<=0?Health:FMath::Max(Health,HealthLag-Dt*MaxHealth*.3f);
+    if(Species==IronMatriarch::Species){TickIronMatriarch(Dt,H,G);return;}
     if(Species==RustbladeSquire::Species) { TickRustblade(Dt,H,G); return; }
     if(DungeonExpansion::Is(Species)) { TickExpansion(Dt,H,G);return; }
     if(Species==30) { TickFlashBoss(Dt,H,G); return; }
@@ -86,7 +90,7 @@ void ADungeonEnemy::Tick(float Dt)
         SetActorLocation(DungeonView::Unproject(Next)); bWalking=true;
         const FVector2D Segment=Next-P;
         const float T=Segment.IsNearlyZero()?0:FMath::Clamp(FVector2D::DotProduct(Target-P,Segment)/Segment.SizeSquared(),0.,1.);
-        if(FVector2D::Distance(P+Segment*T,Target)<(bBoss?48:30)) H->ReceiveHit(S.Damage*(bBoss?1.32f:1.8f));
+        if(FVector2D::Distance(P+Segment*T,Target)<(bBoss?48:30)) H->ReceiveMeleeHit(S.Damage*(bBoss?1.32f:1.8f),P,bBoss);
         return;
     }
     if(Windup>0)
@@ -181,7 +185,7 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
         for(int I=-1;I<=1;++I)
         {
             const float A=FMath::Atan2(Aim.Y,Aim.X)+I*.12f;
-            FDungeonShot Shot;Shot.Style=12;Shot.Art=4;Shot.Origin=Mouth;
+            FDungeonShot Shot; Shot.bBossAttack=E->bBoss;Shot.Style=12;Shot.Art=4;Shot.Origin=Mouth;
             Shot.Position=Mouth+Aim*22;Shot.Target=Target;Shot.Radius=8;
             Shot.Damage=S.Damage*1.8f;Shot.BlastRadius=48;
             Shot.Velocity=FVector2D(FMath::Cos(A),FMath::Sin(A))*240;
@@ -197,8 +201,9 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
         if(E->BossAttack==0||E->BossAttack==2)
         {
             // Resolve at the locked telegraph position, never the player's new position.
-            FDungeonShot Blast; Blast.Art=Art; Blast.Radius=10; Blast.BlastRadius=E->AttackRadius;
+            FDungeonShot Blast; Blast.bBossAttack=E->bBoss; Blast.Art=Art; Blast.Radius=10; Blast.BlastRadius=E->AttackRadius;
             Blast.Damage=Damage*(E->BossAttack==2?1.65f:1.f);
+            Blast.bMelee=E->BossAttack==0;Blast.MeleeOrigin=P;
             ResolveProjectile(Blast,E->AttackTarget); AddImpact(E->AttackTarget,0,true);
             PlaySound(E->BossAttack==2?TEXT("Explosion"):TEXT("Sword"),.8f);
             if(E->BossAttack==0||E->Species!=27) return;
@@ -211,7 +216,7 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
         for(int I=0;I<Count;++I)
         {
             const float A=Radial?Base+I*2*PI/Count:Base+(I-(Count-1)*.5f)*.15f;
-            FDungeonShot Shot; Shot.Position=Shot.Origin=P; Shot.Target=E->AttackTarget;
+            FDungeonShot Shot; Shot.bBossAttack=E->bBoss; Shot.Position=Shot.Origin=P; Shot.Target=E->AttackTarget;
             Shot.Art=Art; Shot.Style=Radial?6:3; Shot.Radius=E->Species==25?12:8;
             Shot.Damage=Damage*(Radial?.7f:.9f); Shot.BlastRadius=E->Species==25?65:40;
             Shot.Velocity=FVector2D(FMath::Cos(A),FMath::Sin(A))*(E->Species==26?280.f:E->Species==25?200.f:240.f);
@@ -224,7 +229,7 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
     {
         const float Radius=S.AttackStyle==4?(E->bBoss?145.f:S.Range):S.Range;
         FVector2D Delta=DungeonView::Project(H->GetActorLocation())-E->AttackTarget; Delta.Y/=.65f;
-        if(Delta.Size()<Radius) H->ReceiveHit(S.Damage*1.8f);
+        if(Delta.Size()<Radius) H->ReceiveMeleeHit(S.Damage*1.8f,P,E->bBoss);
         AddImpact(E->AttackTarget,0,true);
         if(E->Species!=27) return; // The forge boss also throws a radial ember burst.
     }
@@ -237,7 +242,7 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
     for(int I=0;I<Count;++I)
     {
         float A=Ring?I*2*PI/Count:Base+(I-(Count-1)*.5f)*.18f;
-        FDungeonShot Shot; Shot.Position=P; Shot.Style=S.AttackStyle; Shot.Damage=S.Damage*1.8f;
+        FDungeonShot Shot; Shot.bBossAttack=E->bBoss; Shot.Position=P; Shot.Style=S.AttackStyle; Shot.Damage=S.Damage*1.8f;
         Shot.Radius=S.AttackStyle==5?12:8;
         Shot.Velocity=FVector2D(FMath::Cos(A),FMath::Sin(A))*(S.AttackStyle==5?125.f:190.f);
         Shot.Art=E->Species==1?3:E->Species==3||E->Species==16?14:

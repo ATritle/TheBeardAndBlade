@@ -87,3 +87,10 @@ CC0 option selected: https://creativecommons.org/publicdomain/zero/1.0/
 Used for Rime Empress's opening attack yell, replacing the previous attack grunts.
 The spoken "ALRIGHT" and "YES" excerpts are excluded from playback.
 Modified: one excerpt, mono PCM16, trimmed, faded and level-matched; no pitch shift.
+
+Dragon — Breviceps
+https://freesound.org/people/Breviceps/sounds/466830/
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+Used for Iron Matriarch intro and gameplay vocals.
+Source: supplied high-quality MP3; original WAV unavailable.
+Modified: excerpts, level adjustment, short fades and PCM conversion; no pitch shift.

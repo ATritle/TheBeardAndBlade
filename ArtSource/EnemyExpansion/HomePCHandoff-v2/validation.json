@@ -1,9 +1,10 @@
 {
-  "selectedSheets": 796,
-  "remainingSheets": 549,
+  "selectedSheets": 1345,
+  "remainingSheets": 0,
   "previews": 25,
   "referencesResolvableOrPlanned": true,
   "renderedBrowserTested": false,
-  "ueTested": false,
-  "previewControlChecksPassed": 25
+  "ueTested": true,
+  "previewControlChecksPassed": 25,
+  "runtimeCompletionReport": "completion-report.json"
 }

@@ -1,0 +1,177 @@
+[
+  {
+    "enemy": "AshenCantor",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "BellowsBrute",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "BreachHound",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "BriarSpitter",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "BunkerBulwark",
+    "atlases": 51,
+    "poses": 760,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "CinderPitcher",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "Coalgnash",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "CoilSaboteur",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "CrucibleColossus",
+    "atlases": 51,
+    "poses": 760,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "GaleTalon",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "GlacierbackRam",
+    "atlases": 51,
+    "poses": 760,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "HailshotGargoyle",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "IcicleFlinger",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "MossmawStalker",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "PermafrostTemplar",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "RimeclawCub",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "RivetGunner",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "SilkfangSkitter",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "SnowveilOracle",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "SporebellWitch",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "StormcoilBehemoth",
+    "atlases": 51,
+    "poses": 760,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "TempestDuelist",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "ThornweaveSentinel",
+    "atlases": 51,
+    "poses": 760,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "ThunderheadAdept",
+    "atlases": 43,
+    "poses": 568,
+    "boundsPassed": true,
+    "visualApproval": false
+  },
+  {
+    "enemy": "TrenchShivver",
+    "atlases": 42,
+    "poses": 544,
+    "boundsPassed": true,
+    "visualApproval": false
+  }
+]

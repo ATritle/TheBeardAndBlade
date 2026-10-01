@@ -10,7 +10,7 @@
   "appearance": "Tall woven root guardian with a spider-silk mantle, one massive thorn arm and glowing violet core.",
   "attack": "Close thorn sweep or launch a large silk-wrapped seed that briefly slows on direct hit.",
   "projectileConcept": "Silk seed: rotating cocoon with two short thread ribbons; player impact silk strands unwind; floor/wall impact flattened cocoon and snapping threads.",
-  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "assetStatus": "SPRITES_COMPLETE_UE_TEST_READY",
   "animation": {
     "directions": [
       "N",
@@ -71,10 +71,23 @@
     "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
   },
   "sourceProgress": {
-    "selectedSheetsSaved": 35,
+    "selectedSheetsSaved": 67,
     "selectedSheetsPlanned": 67,
     "visualReviewComplete": false,
-    "ueImportTested": false,
-    "status": "INCOMPLETE_REVIEW_DRAFT"
+    "ueImportTested": true,
+    "status": "SPRITES_COMPLETE_UE_TEST_READY"
+  },
+  "runtimeReview": {
+    "species": 76,
+    "atlasCount": 51,
+    "poseCount": 760,
+    "sourceCropAuditPassed": true,
+    "atlasBoundsAuditPassed": true,
+    "automatedUETestPassed": true,
+    "visualReviewScope": "Directional source repair review, cross-state scale boards, eight-direction attack contact boards; automated combat captures for the five elites.",
+    "userGameplayApproval": false,
+    "exhaustiveManualGameplay": false,
+    "timingAuthority": "Source/TheBeardAndBlade/DungeonExpansionV2.h::ReleaseFrame",
+    "report": "ArtSource/EnemyExpansion/HomePCHandoff-v2/COMPLETION-AND-TEST.md"
   }
 }

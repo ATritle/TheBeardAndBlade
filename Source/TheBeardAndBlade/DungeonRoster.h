@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "RustbladeSquire.h"
 #include "DungeonExpansion.h"
+#include "IronMatriarch.h"
 struct FDungeonSpecies
 {
     const TCHAR* Name;
@@ -15,13 +16,44 @@ namespace DungeonRoster
 // Replace slots in the original 4/5/6/6 budgets; retain light Keep wildlife.
 inline TArray<int32> KeepEncounter(int32 Depth,int32 Wave=1)
 {
-    // Only one heavy/caster introduction per room, even with two waves.
+    // Later gauntlet mixes established specialists without stacking elites.
+    if(Depth>=5){
+        if(Wave>1)return {49,50,49,52,4,49};
+        return {49,50,Depth>=7?53:51,49,4,49};
+    }
     if(Wave>1&&Depth==2)return {49,49,50,4,2};
     if(Wave>1&&Depth>=3)return {49,49,50,4,2,49};
     if(Depth<=1)return {49,49,50,4};
     if(Depth==2)return {49,51,49,50,4};
     if(Depth==3)return {49,52,49,2,49,4};
     return {49,53,49,50,4,49};
+}
+// Theme-matched campaign encounters. Depth is graph distance, never visit count;
+// late specialists replace slots rather than inflating simultaneous enemy counts.
+inline TArray<int32> AtlasEncounter(int32 Biome,int32 Depth,int32 Wave)
+{
+    if(Biome==7){
+        if(Depth==1)return {37,38,40,41};
+        if(Depth<4)return {78,70,40,37,61};
+        if(Depth<6)return {70,55,61,78,40,59};
+        return {70,61,Wave==1?(Depth%2?62:58):55,78,40,59};
+    }
+    if(Biome==0)return KeepEncounter(Depth,Wave);
+    const int Bases[]={0,6,12,18,43,37,31};
+    const int Base=Bases[FMath::Clamp(Biome,0,6)];
+    TArray<int32> Result;
+    const int Count=Depth<=1?4:Depth<=3?5:6;
+    for(int I=0;I<Count;++I)Result.Add(Base+(I+Depth+Wave-2)%6);
+    if(Depth<2)return Result;
+    // Light melee/ranged introductions, then casters, then heavy/elite guards.
+    const int Newcomers[][4]={{49,50,52,53},{71,57,73,76},{66,65,72,68},
+        {60,59,54,62},{63,65,77,75},{78,70,61,58},{32,33,35,31}};
+    const auto& N=Newcomers[FMath::Clamp(Biome,0,6)];
+    Result[0]=N[(Depth+Wave)%2];
+    if(Depth>=4)Result[1]=N[2];
+    if(Depth>=5&&Biome==3)Result[2]=55; // Bellows Brute before the Colossus.
+    if(Depth>=6&&Wave==1)Result[2]=N[3]; // One late heavy per room, not per wave.
+    return Result;
 }
 // Attack styles: slash, aimed bolt, charge, fan, slam, venom, radial volley.
 inline const FDungeonSpecies Species[]={
@@ -80,13 +112,29 @@ inline const FDungeonSpecies Species[]={
  {TEXT("Candle Hexer"),45,76,15,300,.9f,1.2f,1,true},
  {TEXT("Sepulcher Lancer"),43,175,26,310,1.2f,1.6f,1,false}
 };
-inline const FDungeonSpecies& Get(int32 I) { return Species[FMath::Clamp(I,0,int32(UE_ARRAY_COUNT(Species))-1)]; }
+inline const FDungeonSpecies& Get(int32 I) {
+    if(I==IronMatriarch::Species){static const FDungeonSpecies Iron={TEXT("IRON MATRIARCH"),0,IronMatriarch::BaseHealth,IronMatriarch::SlamDamage,230,2,1.7f,11,false};return Iron;}
+    if(DungeonExpansionV2::Is(I)){
+        static const TArray<FDungeonSpecies> Expanded=[]{
+            TArray<FDungeonSpecies> Result;
+            for(const auto& P:DungeonExpansionV2::Profiles){
+                const int Id=DungeonExpansionV2::First+Result.Num();
+                const float MoveSpeed=Id==75?82.f*1.5f:P.Elite?82.f:P.ProjectileSpeed>0?48.f:68.f;
+                Result.Add({P.Name,MoveSpeed,P.Health,P.Damage,P.ProjectileSpeed>0?310.f:95.f,P.Windup,P.Recovery,P.ProjectileSpeed>0?1:0,false});
+            }
+            return Result;
+        }();
+        return Expanded[I-DungeonExpansionV2::First];
+    }
+    return Species[FMath::Clamp(I,0,int32(UE_ARRAY_COUNT(Species))-1)];
+}
 inline float RenderSize(int32 I)
 {
+    if(I==IronMatriarch::Species)return IronMatriarch::DrawSize;
     if(I==RustbladeSquire::Species)return RustbladeSquire::RenderSize;
     if(DungeonExpansion::Is(I))return 180.f; // Receive-hit volume, not padded 512px art canvas.
     const float Sizes[]={178,168,112,132,110,190,210,195,220,160,240,178,205,145,210,220,185,210,190,235,215,180,235,260,225,350,330,380,320,330,205,240,145,165,180,200,150,190,215,180,155,195,190,170,240,230,205,285,170};
     return Sizes[FMath::Clamp(I,0,48)];
 }
-inline const TCHAR* Biome(int32 I) { const TCHAR* N[]={TEXT("THE FORGOTTEN KEEP"),TEXT("WEBROOT HOLLOWS"),TEXT("GLACIAL RELIQUARY"),TEXT("CINDER FOUNDRY"),TEXT("STORMBREACH CITADEL"),TEXT("BLACKOUT BUNKER"),TEXT("THE GREASEWORKS")}; return N[FMath::Clamp(I,0,6)]; }
+inline const TCHAR* Biome(int32 I) { const TCHAR* N[]={TEXT("THE FORGOTTEN KEEP"),TEXT("WEBROOT HOLLOWS"),TEXT("GLACIAL RELIQUARY"),TEXT("CINDER FOUNDRY"),TEXT("STORMBREACH CITADEL"),TEXT("BLACKOUT BUNKER"),TEXT("THE GREASEWORKS"),TEXT("THE IRON AERIE")}; return N[FMath::Clamp(I,0,7)]; }
 }

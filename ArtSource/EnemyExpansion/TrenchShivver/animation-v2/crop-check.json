@@ -1,6 +1,6 @@
 {
   "sourceCheckOnly": true,
-  "sheets": 46,
+  "sheets": 50,
   "checks": [
     {
       "file": "walk-N.png",
@@ -136,9 +136,24 @@
       "empty": 0,
       "overlappingMaskRows": 0,
       "sourceBorderPoses": [],
-      "cropWarnings": [
-        12
-      ]
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-E-facing-v3.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
     },
     {
       "file": "walk-SE.png",
@@ -277,6 +292,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-SW-v2.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-W-v2.png",
       "size": [
         1254,
@@ -311,6 +343,23 @@
       "cropWarnings": []
     },
     {
+      "file": "attack-b-W-v2.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
       "file": "walk-NW-grip-v3.png",
       "size": [
         1254,
@@ -329,6 +378,23 @@
     },
     {
       "file": "attack-a-NW-facing-v3.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "poses": 12,
+      "components": 12,
+      "empty": 0,
+      "overlappingMaskRows": 0,
+      "sourceBorderPoses": [],
+      "cropWarnings": []
+    },
+    {
+      "file": "attack-b-NW-facing-v3.png",
       "size": [
         1448,
         1086
@@ -788,5 +854,5 @@
     }
   ],
   "walkCells": 128,
-  "attackCells": 144
+  "attackCells": 192
 }

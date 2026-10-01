@@ -37,7 +37,7 @@ void ADungeonGameMode::PlaySound(const FString& Name,float Volume,float Pitch)
     if(bEffectsMuted||!GetWorld()) return;
     const double Now=GetWorld()->GetTimeSeconds();
     // Volley and AoE callbacks can fire many times in one frame. Limit each cue.
-    const double Gap=Name.StartsWith(TEXT("Rime"))?.65:Name==TEXT("DroneFlight")?2.3:Name.EndsWith(TEXT("Spawn"))?.24:Name.EndsWith(TEXT("Pain"))?.18:Name.EndsWith(TEXT("Death"))?.13:.055;
+    const double Gap=Name==TEXT("IronHurtVoice")?.65:Name.StartsWith(TEXT("Rime"))?.65:Name==TEXT("DroneFlight")?2.3:Name.EndsWith(TEXT("Spawn"))?.24:Name.EndsWith(TEXT("Pain"))?.18:Name.EndsWith(TEXT("Death"))?.13:.055;
     if(const double* Last=LastSoundTime.Find(Name)) if(Now-*Last<Gap) return;
     LastSoundTime.Add(Name,Now);
     FString AssetName=Name;

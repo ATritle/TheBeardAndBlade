@@ -10,7 +10,7 @@
   "appearance": "Lean foundry imp in a leather smith apron carrying a bucket of glowing slag lumps.",
   "attack": "Throws one glowing slag lump on a visible arc.",
   "projectileConcept": "Slag lump: tumbling black crust around orange core, ember flecks; player impact hot sparks; floor impact cooling slag splash, no lingering damage.",
-  "assetStatus": "SOURCE_GENERATION_IN_PROGRESS",
+  "assetStatus": "SPRITES_COMPLETE_UE_TEST_READY",
   "animation": {
     "directions": [
       "N",
@@ -71,10 +71,23 @@
     "impactArt": "Separate from projectile and hero artwork; anchor to collision point; never follow player after resolution."
   },
   "sourceProgress": {
-    "selectedSheetsSaved": 43,
+    "selectedSheetsSaved": 51,
     "selectedSheetsPlanned": 51,
     "visualReviewComplete": false,
-    "ueImportTested": false,
-    "status": "INCOMPLETE_REVIEW_DRAFT"
+    "ueImportTested": true,
+    "status": "SPRITES_COMPLETE_UE_TEST_READY"
+  },
+  "runtimeReview": {
+    "species": 59,
+    "atlasCount": 43,
+    "poseCount": 568,
+    "sourceCropAuditPassed": true,
+    "atlasBoundsAuditPassed": true,
+    "automatedUETestPassed": true,
+    "visualReviewScope": "Directional source repair review, cross-state scale boards, eight-direction attack contact boards; automated combat captures for the five elites.",
+    "userGameplayApproval": false,
+    "exhaustiveManualGameplay": false,
+    "timingAuthority": "Source/TheBeardAndBlade/DungeonExpansionV2.h::ReleaseFrame",
+    "report": "ArtSource/EnemyExpansion/HomePCHandoff-v2/COMPLETION-AND-TEST.md"
   }
 }

@@ -1,0 +1,14 @@
+{
+  "mode": "builtin imagegen",
+  "reference": "../hotbar-concept-v3.png",
+  "assets": [
+    {
+      "file": "Hotbar_Wrap.png",
+      "prompt": "Use case: stylized-concept. Asset type: game HUD ornamental backplate, isolated transparent PNG. Reference image is STYLE ONLY: match the blackened iron, aged gold rails, tiny emerald diamonds, clean detailed pixel-fantasy ornament. Create one continuous VERY WIDE horizontal HUD background frame, approx 5:1 silhouette centered in a landscape canvas. Left end has a large circular dark iron mounting disc (diameter equal to full silhouette height), connected seamlessly to a long slim dark iron rectangular tray occupying remaining width, with a smaller rounded right end. Tray height about 65% of left disc diameter and aligned along bottom. The tray interior is uninterrupted subtly textured almost black metal, EMPTY, no individual slots, no dividers, no symbols. Ornamental gold outer rails and emerald accents only around perimeter, elegant not overly busy. This plate will underlay a health orb at left, six small skill tiles across middle and shield/map at right, which engine draws separately. NO orb fill, NO icons, NO lettering, NO text, NO meters, NO numbers, NO dungeon scene. Genuine alpha transparency outside silhouette, crisp fully opaque material inside, flat frontal UI, no perspective. Use entire canvas width with minimal margins; do not cut off ornament."
+    },
+    {
+      "file": "Hotbar_Lightning.png",
+      "prompt": "Use case: stylized-concept. Asset type: small stamina HUD medallion transparent PNG. Reference image STYLE ONLY. Create one finished circular stamina emblem, front-on: a very clear broad GOLD LIGHTNING BOLT with beveled warm gold highlights inset on deep navy blue enamel, surrounded by narrow aged-gold and blackened iron circular rim with four tiny rivets. Match detailed crisp fantasy pixel-art game interface. Strong simple lightning silhouette readable at 36 pixels. Centered disk fills 90 percent of square image, genuine alpha transparency outside round rim. No lettering, no Z glyph, no text, no extra emblems, no background scenery, no glow haze outside silhouette."
+    }
+  ]
+}
