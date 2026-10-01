@@ -32,10 +32,10 @@ static_assert(UE_ARRAY_COUNT(Catalog)==DungeonLootCatalog::Count);
 FString FDungeonItem::EffectText() const
 {
  const TCHAR* Texts[]={TEXT(""),TEXT("10% on hit: Bleed, 20% damage/sec for 4s"),TEXT("10% on hit: Poison, 14% damage/sec for 6s"),
- TEXT("Chill: slow movement 35% for 3s"),TEXT("Leech: heal 5% of direct damage"),TEXT("Harvest: heal 6 health per kill"),
- TEXT("Second wind: critical hits restore 12 stamina"),TEXT("Echo: every third strike splashes 35% damage"),
+ TEXT("Chill: slow movement 35% for 3s"),TEXT("Leech: heal 2.5% of direct damage; shared heal cap"),TEXT("Harvest: heal 2 health per kill; shared heal cap"),
+ TEXT("Second wind: critical hits restore 6 stamina"),TEXT("Echo: every third strike splashes 35% damage"),
  TEXT("Execute: +35% damage below 30% enemy health"),TEXT("Berserk: +30% damage below 40% health"),
- TEXT("Aegis: reduce incoming damage by 12%")};
+ TEXT("Aegis: reduce incoming damage by 8%")};
  return Texts[FMath::Clamp(Effect,0,10)];
 }
 float FDungeonItem::EquippedScale() const
@@ -53,11 +53,11 @@ FDungeonItem ADungeonGameMode::RollItem(int32 Definition,int32 Rarity,int32 Leve
  I.Rarity=FMath::Clamp(Rarity,0,4); const auto& B=Catalog[I.CatalogId]; I.Name=B.Name;
  I.Slot=I.CatalogId<24?0:I.CatalogId<36?1:I.CatalogId<48?2:I.CatalogId<60?3:4+(I.CatalogId-60)/3;
  I.Icon=I.Slot*3+(I.CatalogId%3);
- const float Scale=(1.f+.08f*(I.ItemLevel-1))*(1.f+.3f*I.Rarity)*FMath::FRandRange(.88f,1.12f);
+ const float Scale=DungeonBalance::PrimaryScale(I.ItemLevel,I.Rarity)*FMath::FRandRange(.94f,1.06f);
  if(I.Slot==0) { I.Attack=B.Power*Scale; I.Speed=B.Speed; }
  if(I.Slot==1) { I.Defense=B.Power*Scale; I.Vitality=8*Scale; I.Speed=B.Speed; }
  if(I.Slot==2) I.Vitality=B.Power*Scale;
- const float PercentScale=(1.f+.012f*(I.ItemLevel-1))*(1.f+.18f*I.Rarity)*FMath::FRandRange(.9f,1.1f);
+ const float PercentScale=DungeonBalance::PercentScale(I.ItemLevel,I.Rarity)*FMath::FRandRange(.95f,1.05f);
  if(I.Slot==4) I.StaminaBonus=B.Power*PercentScale;
  if(I.Slot==5) I.Speed=B.Power*PercentScale;
  if(I.Slot==6) I.Defense=B.Power*Scale;
@@ -66,7 +66,7 @@ FDungeonItem ADungeonGameMode::RollItem(int32 Definition,int32 Rarity,int32 Leve
   const float Q=FMath::FRandRange(.9f,1.1f)*(1+.22f*I.Rarity);
   switch((I.CatalogId-48)%6) {
    case 0:I.BleedChance=.04f*Q;break; case 1:I.PoisonChance=.04f*Q;break;
-   case 2:I.StaminaBonus=.12f*Q;break; case 3:I.Leech=.02f*Q;break;
+   case 2:I.StaminaBonus=.12f*Q;break; case 3:I.Leech=.012f*Q;break;
    case 4:I.Reduction=.05f*Q;break; case 5:I.HealthBonus=.10f*Q;break;
   }
  }
@@ -77,13 +77,13 @@ FDungeonItem ADungeonGameMode::RollItem(int32 Definition,int32 Rarity,int32 Leve
   int Pick=FMath::RandRange(0,Pool.Num()-1),Affix=Pool[Pick]; Pool.RemoveAt(Pick);
   const float Q=FMath::FRandRange(.75f,1.f)*(1+.15f*I.Rarity);
   switch(Affix) {
-   case 0:I.CritChance+=.035f*Q;break; case 1:I.CritDamage+=.22f*Q;break;
-   case 2:I.Speed+=.09f*Q;break; case 3:I.Regen+=.18f*Q;break;
-   case 4:I.Vitality+=12*Q;break; case 5:I.Defense+=4*Q;break;
+   case 0:I.CritChance+=.018f*Q;break; case 1:I.CritDamage+=.12f*Q;break;
+   case 2:I.Speed+=.045f*Q;break; case 3:I.Regen+=.10f*Q;break;
+   case 4:I.Vitality+=8*Q;break; case 5:I.Defense+=3*Q;break;
   }
  }
  // Rare/epic signature effects let players try ailment builds before legendary drops.
- if(I.Rarity==4||(I.Rarity>=2&&FMath::FRand()<.4f)) I.Effect=B.Effect;
+ if(I.Rarity==4||(I.Rarity>=2&&FMath::FRand()<.3f)) I.Effect=B.Effect;
  I.CoinValue=FMath::RoundToInt(1.5f*(30+I.ItemLevel*12)*(1+I.Rarity*1.8f)*FMath::FRandRange(.9f,1.1f));
  return I;
 }
@@ -98,11 +98,11 @@ void ADungeonHero::RebuildStats()
  for(const auto& I:Equipment) if(!I.IsEmpty()) { AttackPower+=I.Attack;Armor+=I.Defense;MaxHealth+=I.Vitality;CritChance+=I.CritChance;CritMultiplier+=I.CritDamage;AttackSpeed+=I.Speed;StaminaRegen+=I.Regen; }
  for(const auto& I:Equipment)if(!I.IsEmpty())MovementSpeed+=I.Movement;
  MovementSpeed=FMath::Clamp(MovementSpeed,1.f,1.35f);
- CritChance=FMath::Clamp(CritChance,0.f,.75f);AttackSpeed=FMath::Clamp(AttackSpeed,.5f,2.f);
+ CritChance=FMath::Clamp(CritChance,0.f,.45f);AttackSpeed=FMath::Clamp(AttackSpeed,.5f,1.65f);
  MaxHealth*=1+FMath::Clamp(HPBonus,0.f,1.f);MaxStamina*=1+FMath::Clamp(SPBonus,0.f,1.f);
  BleedChance=FMath::Clamp(BleedChance+(HasEffect(1)?.1f:0),0.f,.35f);
  PoisonChance=FMath::Clamp(PoisonChance+(HasEffect(2)?.1f:0),0.f,.35f);
- Leech=FMath::Clamp(Leech,0.f,.15f);DamageReduction=FMath::Clamp(DamageReduction,0.f,.5f);
+ Leech=FMath::Clamp(Leech,0.f,.06f);DamageReduction=FMath::Clamp(DamageReduction,0.f,.30f);
  Stamina=FMath::Clamp(Stamina,0.f,MaxStamina);
  Health=FMath::Clamp(Health,0.f,MaxHealth);
 }

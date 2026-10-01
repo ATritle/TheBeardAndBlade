@@ -1,5 +1,15 @@
 # v0.4.2 — Iron Aerie, expanded enemies and combat HUD
 
+## October 1 refresh — Tea Spirit, progression balance and packaging correction
+
+- Skill 2 is Tea Spirit: five seconds of invulnerability (including boss attacks), 50% increased movement speed, and a 30-second recharge after the effect ends.
+- Eight dedicated, foot-aligned raise/sip/lower poses replace the temporary drinking animation. The 1.2-second drink is part of the protected window. Pulsing gold glow, soft outward-radiating waves and a distinct emerald-and-gold HUD icon provide feedback. MMB still throws tea.
+- Rebalanced enemy health and damage by role, floor and room depth, without scaling encounters to the player's equipped gear. Tougher enemies remain concentrated in later rooms.
+- Reduced runaway loot/affix growth, capped attack speed/critical chance and damage reduction, replaced flat armor subtraction with diminishing-return mitigation, and capped combined gear healing. Potions and trader stock were tuned alongside the new progression.
+- Enemy attack coordination and resistance to repeated stagger interruptions keep encounters active without piling every windup into the same instant. Cleared rooms remain cleared when backtracking.
+
+The Windows and StreamPixel downloads were rebuilt under the same v0.4.2 version to include 1,105 omitted expansion enemy sprite assets. This fixes invisible enemies whose shadows, health bars and attacks remained active. The packaging configuration now includes the complete EnemyExpansion folder and checks for missing cooked enemy assets. Re-download and extract the entire corrected ZIP into a fresh folder; StreamPixel users must upload and activate the replacement ZIP.
+
 - Expanded dungeon floors with tougher late-room enemies and persistent exploration.
 - Completed directional enemy animation packs, corrected anchors, revised elite scale and projectile presentation.
 - New Iron Aerie floor and Iron Matriarch boss, with cinematic intro and recorded dragon audio.

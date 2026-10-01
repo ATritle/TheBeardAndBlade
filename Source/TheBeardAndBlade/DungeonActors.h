@@ -7,6 +7,8 @@
 #include "DungeonProgression.h"
 #include "DungeonDescent.h"
 #include "DungeonBlock.h"
+#include "DungeonBalance.h"
+#include "DungeonTeaSpirit.h"
 #include "DungeonActors.generated.h"
 
 namespace DungeonLootCatalog { constexpr int32 Count=72,EquipmentSlots=8; }
@@ -136,6 +138,13 @@ public:
     float QuipTime=0,QuipCooldown=0;
     void PowerMove();
     void Freedom();
+    void DrinkTea();
+    bool CanDrinkTea() const;
+    bool IsTeaEmpowered() const { return Health>0&&TeaSpirit.Active>0; }
+    bool IsDrinkingTea() const { return TeaSpirit.Sip>0; }
+    float GetTeaSpiritTime() const { return TeaSpirit.Active; }
+    float GetTeaSpiritCooldown() const { return TeaSpirit.Cooldown; }
+    float GetTeaSipProgress() const { return 1-TeaSpirit.Sip/FDungeonTeaSpirit::SipDuration; }
     void BlockPressed();
     void BlockReleased(){Block.Release();}
     void StopBlock(){Block.Stop();}
@@ -185,6 +194,8 @@ public:
     void Interact();
     void Restart();
     void ReceiveHit(float Damage,bool PerProjectile=false,TOptional<FVector2D> Source={},bool BossAttack=false);
+    void RestoreHealth(float Amount,bool FromGear=false);
+    float GearHealBudget=0;
     bool IsBulletImmune() const;
     FVector2D ScreenVelocity=FVector2D::ZeroVector;
     void Equip(const FDungeonItem& Item);
@@ -243,6 +254,7 @@ private:
     float RollTime=0,RollCooldown=0;
     float StaminaDelay=0;
     float PowerCooldown=0,PowerCastTime=0;
+    FDungeonTeaSpirit TeaSpirit;
     int32 PowerDirection=4;
     FVector2D PowerAim=FVector2D(0,1),PowerTarget;
     bool bTeaReleased=false;
@@ -264,6 +276,8 @@ public:
     virtual void Tick(float Dt) override;
     void TakeDungeonDamage(float Damage);
     int32 Species=0;
+    float StaggerGuard=0;
+    int32 BalanceMeleeHits=0;
     int32 AttackCount=0;
     int32 BossAttack=0; // 0 close strike, 1 aimed volley, 2 heavy area strike, 3 radial barrage
     float MotionClock=0,ActionTime=0,ActionDuration=0,ShotTimer=0,FlashTime=0;
@@ -315,6 +329,24 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float Dt) override;
     void PlayerAttack(ADungeonHero* Hero);
+    int BalanceFloor() const;
+    int BalanceDepth() const;
+    int LootLevel() const;
+    float IncomingDamageScale(bool Boss) const;
+    bool PermitEnemyAttack(ADungeonEnemy* Enemy);
+    void BeginBalanceRoom();
+    void VerifyBalance();
+    void VerifyTeaSpirit();
+    void ReviewTeaSpirit(float Dt);
+    void EndBalanceRoom(const TCHAR* Outcome);
+    void BalanceEvent(const TCHAR* Event,float Value=0,int Species=-1);
+    struct FBalanceReport {
+        bool Active=false;
+        int Floor=0,Depth=0,Node=0,Kills=0,Attacks=0,Landed=0,Blocked=0,Avoided=0,MeleeHits=0;
+        float Seconds=0,DamageTaken=0,Healing=0,StartHealth=0;
+    } Balance;
+    float NextEnemyAttack=0;
+    FString BalanceRun;
     void PlaySound(const FString& Name,float Volume=1.f,float Pitch=1.f);
     void VerifyIronMatriarch();
     void ReviewIronMatriarch(float Dt);
@@ -550,6 +582,7 @@ private:
     void DrawIronMatriarch(ADungeonEnemy* E);
     void IronSprite(const FString& Name,int Frame,int Frames,FVector2D Origin,FVector2D Size,FLinearColor Tint=FLinearColor::White,float Angle=0,FVector2D Pivot=FVector2D(.5,.5));
     void DrawGuard(ADungeonHero* H);
+    void DrawTeaSpiritAura(ADungeonHero* H,FVector2D Position,float HeroScale,float Opacity);
     void MeterArc(FVector2D Center,float Radius,float Start,float Sweep,float Fraction,FLinearColor Color,float Width);
     void GemMeter(FVector2D Center,float Radius,float Width,float Start,float Sweep,float Fraction,FLinearColor Tint,int Pieces);
     float DisplayHealth=-1,DisplayStamina=-1;

@@ -101,12 +101,13 @@ void ADungeonHero::Restart()
     Equipment[2]=FDungeonItem(); Equipment[2].Slot=2; Equipment[2].Icon=6;
     Equipment[3]=FDungeonItem(); Equipment[3].Slot=3;
     Inventory.Empty(); Coins=0;SelectedItem=INDEX_NONE; bInventoryOpen=false; InventoryMessage.Empty();
-    Health=MaxHealth=150; AttackPower=24; Armor=8; HurtTime=Invulnerable=AttackTime=0;
+    Health=MaxHealth=150;GearHealBudget=150*DungeonBalance::GearHealingPerSecond; AttackPower=24; Armor=8; HurtTime=Invulnerable=AttackTime=0;
     CritChance=.05f;CritMultiplier=1.5f;AttackSpeed=StaminaRegen=MovementSpeed=1;StrikeCount=0;
     Stamina=MaxStamina=100; StaminaDelay=0; bExhausted=false;
     BleedChance=PoisonChance=Leech=DamageReduction=0;
     InputX=InputY=WalkDistance=FootstepDistance=MoveBlend=RunBlend=0;GaitTravel=FVector2D::ZeroVector; IdleBreathBlend=BreathPhase=0;bSprinting=bWalking=false; Aim=FVector2D(0,1); Facing=4;
     RollTime=RollCooldown=PowerCooldown=PowerCastTime=0; bTeaReleased=false;
+    TeaSpirit={};
     StunTime=SlowTime=StatusClock=FlashBlindTime=0;
     SetActorLocation(DungeonView::Unproject(FVector2D(640,520)));
 }
@@ -117,6 +118,14 @@ void ADungeonHero::Tick(float Dt)
     if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) {StopBlock();return;}
     if(bInventoryOpen) { StopBlock();bWalking=false; return; }
     if(Health<=0||StunTime>0)StopBlock();
+    GearHealBudget=FMath::Min(MaxHealth*DungeonBalance::GearHealingPerSecond,GearHealBudget+Dt*MaxHealth*DungeonBalance::GearHealingPerSecond);
+    TeaSpirit.Tick(Dt);
+    #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritReview"))){
+        InputX=IsTeaEmpowered()&&TeaSpirit.Active<3.4f&&TeaSpirit.Active>2.6f?1.f:0.f;
+        InputY=0;
+    }
+    #endif
     Block.Tick(Dt);
     GuardBlend=FMath::FInterpConstantTo(GuardBlend,IsBlocking()?1.f:0.f,Dt,IsBlocking()?7.f:9.f);
     #if !UE_BUILD_SHIPPING
@@ -162,12 +171,13 @@ void ADungeonHero::Tick(float Dt)
     }
     FVector2D P=DungeonView::Project(GetActorLocation());
     FVector2D Move(InputX,InputY);
+    if(IsDrinkingTea())Move=FVector2D::ZeroVector; // Plant the feet for the brief sip.
     Move=Move.GetClampedToMaxSize(1);
     const bool Sprinting=bSprinting&&!bExhausted&&Stamina>0&&!Move.IsNearlyZero()&&
         !DungeonView::Clamp(P+Move).Equals(P,.001f);
     // Split the final sprint frame so speed never exceeds the stamina available.
     const float SprintSeconds=Sprinting?FMath::Min(Dt,Stamina/DungeonCombatBalance::SprintCost):0;
-    const FVector2D Next=DungeonView::Clamp(P+Move*(190.f*Dt+190.f*SprintSeconds)*MovementSpeed*(IsAttacking()?.5f:1.f)*(SlowTime>0?.6f:1.f));
+    const FVector2D Next=DungeonView::Clamp(P+Move*(190.f*Dt+190.f*SprintSeconds)*MovementSpeed*(IsTeaEmpowered()?FDungeonTeaSpirit::Speed:1.f)*(IsAttacking()?.5f:1.f)*(SlowTime>0?.6f:1.f));
     UpdateStamina(Dt,Sprinting);
     bWalking=FVector2D::Distance(Next,P)>.01f;
     MoveBlend=HeroLocomotion::Blend(MoveBlend,bWalking?1.f:0.f,Dt,bWalking?15.f:12.f);
@@ -238,7 +248,10 @@ void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
     I->BindKey(EKeys::RightMouseButton,IE_Pressed,this,&ADungeonHero::BlockPressed);
     I->BindKey(EKeys::RightMouseButton,IE_Released,this,&ADungeonHero::BlockReleased);
     if(!FParse::Param(FCommandLine::Get(),TEXT("EliteTest"))&&!FParse::Param(FCommandLine::Get(),TEXT("RosterTest")))
+    {
         I->BindKey(EKeys::One,IE_Pressed,this,&ADungeonHero::Freedom);
+        I->BindKey(EKeys::Two,IE_Pressed,this,&ADungeonHero::DrinkTea);
+    }
     // Reserve M for the atlas even if an older user config still maps it to music.
     I->BindKey(EKeys::F8,IE_Pressed,this,&ADungeonHero::ToggleMusic);
     // SFX mute is a visible menu control, not an accidental N press beside Map.
@@ -261,7 +274,7 @@ void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
     I->BindKey(EKeys::F9,IE_Pressed,this,&ADungeonHero::TestFinance);
     I->BindKey(EKeys::F10,IE_Pressed,this,&ADungeonHero::TestTwister);
     I->BindKey(EKeys::F11,IE_Pressed,this,&ADungeonHero::TestFlashBang);
-    // 1 is FREEDOM; 2-4 are reserved action slots. F-keys still select bosses.
+    // 1 is FREEDOM, 2 is drinking tea; 3-4 remain reserved.
     I->BindKey(EKeys::Five,IE_Pressed,this,&ADungeonHero::TestMack);
     I->BindKey(EKeys::Six,IE_Pressed,this,&ADungeonHero::TestFlashBang);
     I->BindKey(EKeys::Seven,IE_Pressed,this,&ADungeonHero::TestWebroot);
@@ -353,20 +366,24 @@ bool ADungeonHero::Unequip(int32 Slot)
 bool ADungeonHero::IsBulletImmune() const
 {
     const auto* G=Mode(this);
-    return (RollTime>.14f)||(G&&G->IsFreedomActive());
+    return IsTeaEmpowered()||(RollTime>.14f)||(G&&G->IsFreedomActive());
 }
 void ADungeonHero::ReceiveHit(float Damage,bool PerProjectile,TOptional<FVector2D> Source,bool BossAttack)
 {
     if(auto* G=Mode(this)) if(G->IsFreedomActive()) return;
     if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) return;
-    if(Health<=0||(PerProjectile?IsBulletImmune():Invulnerable>0)) return;
+    if(Health<=0)return;
+    if(IsTeaEmpowered()||(PerProjectile?IsBulletImmune():Invulnerable>0)){if(auto* G=Mode(this))if(G->Balance.Active)++G->Balance.Avoided;return;}
     if(Damage<=0)return;
     float GuardMultiplier=1.f;
     if(TryBlockDamage(Source.IsSet()?Source.GetValue()-DungeonView::Project(GetActorLocation()):FVector2D::ZeroVector)){
+        if(auto* G=Mode(this))if(G->Balance.Active)++G->Balance.Blocked;
         if(!BossAttack)return;
         GuardMultiplier=.75f;
     }
-    const float Actual=FMath::Max(2.f,Damage*(HasEffect(10)?.88f:1.f)-Armor*.3f)*(1-DamageReduction)*GuardMultiplier;
+    const auto* BalanceMode=Mode(this);
+    const float Actual=DungeonBalance::Mitigated(Damage*(BalanceMode?BalanceMode->IncomingDamageScale(BossAttack):1.f),Armor,DamageReduction,HasEffect(10))*GuardMultiplier;
+    if(auto* Report=Mode(this))if(Report->Balance.Active){++Report->Balance.Landed;Report->Balance.DamageTaken+=FMath::Min(Health,Actual);}
     Health=FMath::Max(0.f,Health-Actual);
     if(Health<=0) {StopBlock();StunTime=SlowTime=FlashBlindTime=0;}
     HurtTime=.18f; if(!PerProjectile) Invulnerable=.65f;
@@ -376,7 +393,7 @@ void ADungeonHero::ReceiveHit(float Damage,bool PerProjectile,TOptional<FVector2
 void ADungeonHero::Dodge()
 {
     if(auto* Intro=Mode(this))if(Intro->IsBossIntroActive()){SkipIntro();return;}
-    if(StunTime>0) return;
+    if(StunTime>0||IsDrinkingTea()) return;
     auto* G=Mode(this);
     if(!G||G->IsGameplayBlocked()||bInventoryOpen||Health<=0||RollCooldown>0||IsCasting()||bExhausted||Stamina<DungeonCombatBalance::DodgeCost) return;
     SpendStamina(DungeonCombatBalance::DodgeCost);
@@ -398,10 +415,12 @@ void ADungeonHero::TransitionWalk(FVector2D From,FVector2D To,float Progress,flo
 void ADungeonHero::Equip(const FDungeonItem& Item)
 {
     if(!Equipment.IsValidIndex(Item.Slot)) return;
+    if(auto* G=Mode(this))G->BalanceEvent(TEXT("before_equip"),Item.Rarity,Item.CatalogId);
     Equipment[Item.Slot]=Item;
     if(auto* G=Mode(this)) G->PlaySound(TEXT("Equip"),.65f);
     RebuildStats();
     Health=FMath::Clamp(Health,0.f,MaxHealth); // Swapping vitality gear must not repeatedly heal.
+    if(auto* G=Mode(this))G->BalanceEvent(TEXT("equipped"),Item.Rarity,Item.CatalogId);
 }
 ADungeonEnemy::ADungeonEnemy()
 {
@@ -413,15 +432,17 @@ void ADungeonEnemy::TakeDungeonDamage(float Damage)
     if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) return;
     if(Health<=0||SpawnTime>0) return;
     const float Dealt=FMath::Min(Health,FMath::Max(0.f,Damage));
-    Health=FMath::Max(0.f,Health-Damage); HurtTime=.2f;
-    if(DungeonExpansion::Is(Species)&&Dealt>0){
+    Health=FMath::Max(0.f,Health-Dealt); HurtTime=.2f;
+    const bool Stagger=Dealt>0&&StaggerGuard<=0;
+    if(Stagger)StaggerGuard=DungeonBalance::StaggerCooldown;
+    if(DungeonExpansion::Is(Species)&&Stagger){
         ExpansionHurtAge=0;ExpansionAttackAge=-1;bExpansionReleased=true;Windup=0;Recovery=.25f;bWalking=false;
     }
-    if(Species==RustbladeSquire::Species&&Dealt>0) {
+    if(Species==RustbladeSquire::Species&&Stagger) {
         RustHurtAge=0;RustAttackAge=-1;bRustStrikeFired=true;
         Windup=0;Recovery=.25f;bWalking=false;
     }
-    if(auto* H=Player(this)) if(H->Health>0) H->Health=FMath::Min(H->MaxHealth,H->Health+Dealt*H->Leech);
+    if(auto* H=Player(this)) H->RestoreHealth(Dealt*H->Leech,true);
     auto* G=Mode(this);
     const FVector2D P=DungeonView::Project(GetActorLocation());
     if(G) G->AddImpact(P,Damage);
@@ -429,7 +450,7 @@ void ADungeonEnemy::TakeDungeonDamage(float Damage)
     if(auto* H=Player(this))
     {
         auto Push=(P-DungeonView::Project(H->GetActorLocation())).GetSafeNormal();
-        if(Species!=IronMatriarch::Species)SetActorLocation(DungeonView::Unproject(DungeonView::Clamp(P+Push*(bBoss?5:18))));
+        if(Stagger&&Species!=IronMatriarch::Species)SetActorLocation(DungeonView::Unproject(DungeonView::Clamp(P+Push*(bBoss?5:18))));
     }
     if(Health<=0&&G){
         if(Species==IronMatriarch::Species){Iron.Cancel();Iron.DeathAge=0;BleedTime=PoisonTime=0;}
@@ -449,6 +470,7 @@ void ADungeonGameMode::BeginPlay()
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteEffects"),bEffectsMuted,GGameUserSettingsIni);
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritVerify"))) { VerifyTeaSpirit();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("HotbarVerify"))) { VerifyHotbar();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaV4Verify"))) { VerifyTeaV4();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeVerify"))) { VerifyRustblade();return; }
@@ -466,6 +488,7 @@ void ADungeonGameMode::BeginPlay()
     if(FParse::Param(FCommandLine::Get(),TEXT("IronVerify"))) { VerifyIronMatriarch(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("WeekendVerify"))) { VerifyWeekend(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("EndingVerify"))) { VerifyEndings(); return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("BalanceVerify"))) { VerifyBalance(); return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("DungeonVerify"))) VerifyCampaign();
     if(FParse::Param(FCommandLine::Get(),TEXT("DungeonCapture"))&&!FParse::Param(FCommandLine::Get(),TEXT("DungeonMenuPreview"))) { bMenu=false; bHasRun=true; SpawnWave(); }
     int32 PreviewBiome=0;
@@ -520,6 +543,7 @@ void ADungeonGameMode::Tick(float Dt)
     RunAtlasReview();
     ReviewIronMatriarch(Dt);
     ReviewTeaV4(Dt);
+    ReviewTeaSpirit(Dt);
     #if WITH_EDITOR
     if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
     if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
@@ -725,6 +749,7 @@ void ADungeonGameMode::Tick(float Dt)
         return;
     }
     if(auto* H=Player(this)) if(H->IsInventoryOpen()) return;
+    if(Balance.Active)Balance.Seconds+=Dt;
     UpdateFreedom(Dt);
     for(auto& B:Blood) B.Age+=Dt;
     Blood.RemoveAll([](const FDungeonBlood& B){ return B.Age>14.f; });
@@ -748,10 +773,10 @@ void ADungeonGameMode::SpawnWave()
 {
     // Combat and rewards must never coexist, including when a wave is rescheduled.
     bChest=bLootClaimed=bLootRolled=false; Reward=FRewardPresentation();LootTimer=0;
-    if(Wave==1) { RosterCursor=FMath::RandRange(0,5);SpawnBreakables(); }
+    if(Wave==1) { BeginBalanceRoom();RosterCursor=FMath::RandRange(0,5);SpawnBreakables(); }
     PendingSpawns=IsBossRoom()?1:FMath::Min(9,3+Wave+(Room-1)%DungeonProgression::RoomsPerChapter); SpawnTimer=2.f;
     if(bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
-        RosterCursor=0;PendingSpawns=DungeonRoster::AtlasEncounter(GetBiome(),AtlasRooms[AtlasCurrent].Depth,Wave).Num();
+        RosterCursor=0;PendingSpawns=DungeonRoster::AtlasEncounter(GetBiome(),BalanceDepth(),Wave).Num();
     }
     UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d wave=%d queued=%d"),Room,Wave,PendingSpawns);
 }
@@ -760,6 +785,7 @@ void ADungeonGameMode::CompleteRoom()
     if(HasEnding()) return;
     if(!Enemies.IsEmpty()||PendingSpawns>0||bChest||bLootClaimed) return;
     if(Room>=DungeonProgression::CampaignRooms) { FinishRun(!IsDead());return; }
+    EndBalanceRoom(TEXT("cleared"));
     SpawnTimer=0;
     if(bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent))AtlasRooms[AtlasCurrent].Cleared=true;
     Reward=FRewardPresentation();bChest=true;
@@ -785,7 +811,7 @@ void ADungeonGameMode::SpawnOneEnemy()
     {
         E->bBoss=IsBossRoom(); E->Species=E->bBoss?GetBossSpecies():DungeonProgression::RosterBase(GetBiome())+(RosterCursor++%6);
         if(!E->bBoss&&bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Type==EAtlasRoom::Combat){
-            const auto Encounter=DungeonRoster::AtlasEncounter(GetBiome(),AtlasRooms[AtlasCurrent].Depth,Wave);
+            const auto Encounter=DungeonRoster::AtlasEncounter(GetBiome(),BalanceDepth(),Wave);
             E->Species=Encounter[(RosterCursor-1)%Encounter.Num()];
         }
         // Explicit isolation tests still override the integrated Keep encounters.
@@ -799,7 +825,8 @@ void ADungeonGameMode::SpawnOneEnemy()
         if(DungeonExpansionV2::Is(E->Species)&&!DungeonExpansionV2::Enabled(E->Species)){E->Destroy();return;}
         if(E->bBoss&&E->Species>=28) E->Facing=4;
         const auto& S=DungeonRoster::Get(E->Species);
-        E->MaxHealth=E->Health=DungeonCombatBalance::SpawnHealth(S.HP,Room,E->bBoss);
+        E->MaxHealth=E->Health=DungeonBalance::EnemyHealth(DungeonRoster::BalanceRole(E->Species,E->bBoss),BalanceFloor(),BalanceDepth());
+        BalanceEvent(TEXT("enemy_spawn_hp"),E->MaxHealth,E->Species);
         Enemies.Add(E);
         if(E->bBoss) { E->SpawnTime=0; BeginBossDialogue(); }
         if(E->Species!=IronMatriarch::Species)PlaySound(DungeonEnemyAudio::Spawn(E->Species),.4f,DungeonEnemyAudio::Human(E->Species)?1.f:E->bBoss?.65f:1.f);
@@ -827,9 +854,10 @@ void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
         if(FMath::FRand()<H->BleedChance) { E->BleedTime=4;E->BleedDPS=Damage*.2f; }
         if(FMath::FRand()<H->PoisonChance) { E->PoisonTime=6;E->PoisonDPS=Damage*.14f; }
         if(H->HasEffect(3)) E->SlowTime=3;
+        ++E->BalanceMeleeHits;if(Balance.Active)++Balance.MeleeHits;
         E->TakeDungeonDamage(Damage);
-        if(H->HasEffect(4)) H->Health=FMath::Min(H->MaxHealth,H->Health+Dealt*.05f);
-        if(Crit&&H->HasEffect(6)) H->Stamina=FMath::Min(H->MaxStamina,H->Stamina+12);
+        if(H->HasEffect(4)) H->RestoreHealth(Dealt*DungeonBalance::SignatureLeech,true);
+        if(Crit&&H->HasEffect(6)) H->Stamina=FMath::Min(H->MaxStamina,H->Stamina+6);
     }
     if(!Hits.IsEmpty()&&H->HasEffect(7)&&H->StrikeCount%3==0)
     {
@@ -840,7 +868,9 @@ void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
 void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
 {
     if(!IsValid(E)||!Enemies.Contains(E)) return;
-    if(auto* H=Player(this)) if(H->Health>0&&H->HasEffect(5)) H->Health=FMath::Min(H->MaxHealth,H->Health+6);
+    if(Balance.Active)++Balance.Kills;
+    BalanceEvent(TEXT("enemy_killed_melee_hits"),E->BalanceMeleeHits,E->Species);
+    if(auto* H=Player(this)) if(H->HasEffect(5)) H->RestoreHealth(DungeonBalance::HarvestHealing,true);
     if(E->Species!=24&&E->Species!=IronMatriarch::Species)
     {
         if(Blood.Num()>=96) Blood.RemoveAt(0);
@@ -851,7 +881,7 @@ void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
         Blood.Add(B);
     }
     if(!IsFreedomActive()) FreedomKills=FMath::Min(15,FreedomKills+1);
-    if(E->bBoss||FMath::FRand()<.12f) { FDungeonPotion P; P.Position=DungeonView::Clamp(DungeonView::Project(E->GetActorLocation())); Potions.Add(P); }
+    if(E->bBoss||FMath::FRand()<DungeonBalance::PotionChance) { FDungeonPotion P; P.Position=DungeonView::Clamp(DungeonView::Project(E->GetActorLocation())); Potions.Add(P); }
     if(FMath::FRand()<(E->bBoss?.85f:.40f)) {
         FDungeonCoinDrop C;C.Position=DungeonView::Clamp(DungeonView::Project(E->GetActorLocation()));
         C.Amount=FMath::RandRange(E->bBoss?80:12,E->bBoss?140:28)*(DungeonProgression::Chapter(Room)+1);CoinDrops.Add(C);
@@ -887,9 +917,8 @@ FDungeonItem ADungeonGameMode::MakeItem(int32 Icon,int32 Rarity)
 }
 FDungeonItem ADungeonGameMode::RollChestLoot(bool Boss,int32 Level)
 {
-    const int32 Roll=FMath::RandRange(1,100);
-    const int32 Rarity=Roll<=35?0:Roll<=65?1:Roll<=85?2:Roll<=97?3:4;
-    return RollItem(FMath::RandRange(0,DungeonLootCatalog::Count-1),Boss?4:Rarity,Level);
+    const int32 Rarity=DungeonBalance::ChestRarity(FMath::FRand(),Level,Boss);
+    return RollItem(FMath::RandRange(0,DungeonLootCatalog::Count-1),Rarity,Level);
 }
 void ADungeonGameMode::PlayerInteract(ADungeonHero* H)
 {
@@ -927,6 +956,7 @@ void ADungeonGameMode::NextRoom()
 }
 void ADungeonGameMode::RestartRun()
 {
+    EndBalanceRoom(TEXT("restart"));BalanceRun.Empty();
     DisableAtlas();
     bTraderOpen=bTraderVisited=false;TraderStock.Empty();TraderMessage.Empty();
     EndState=0;EndTime=0;bEndingCleaned=false;
@@ -961,6 +991,7 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
     if(Name.StartsWith(TEXT("Hotbar_")))Path=FString::Printf(TEXT("/Game/Art/UI/Hotbar/%s.%s"),*Name,*Name);
     if(Name.StartsWith(TEXT("Iron_")))Path=FString::Printf(TEXT("/Game/Art/IronMatriarch/%s.%s"),*Name,*Name);
     if(Name.StartsWith(TEXT("TeaV4_")))Path=FString::Printf(TEXT("/Game/Art/TeaV4/%s.%s"),*Name,*Name);
+    if(Name.StartsWith(TEXT("TeaSpirit_")))Path=FString::Printf(TEXT("/Game/Art/TeaSpirit/%s.%s"),*Name,*Name);
     if(!DungeonExpansion::Path(Name).IsEmpty())Path=DungeonExpansion::Path(Name);
     if(GearId>=60&&GearId<DungeonLootCatalog::Count)Path=FString::Printf(TEXT("/Game/Art/V2/GearSheet_%d.GearSheet_%d"),(GearId-60)/3,(GearId-60)/3);
     auto* T=LoadObject<UTexture2D>(nullptr,*Path);
@@ -1016,13 +1047,50 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     }
     if(auto* G=Mode(this);G&&G->IsAtlasTravel())Opacity=G->AtlasHeroOpacity();
     if(Opacity<=0.f) return;
-    const FLinearColor Fade(1,1,1,Opacity);
+    const float TeaPulse=H->IsTeaEmpowered()?.5f+.5f*FMath::Sin((5-H->GetTeaSpiritTime())*PI*4):0;
+    const FLinearColor Fade=H->IsTeaEmpowered()?FLinearColor(1.f,.82f+.18f*TeaPulse,.48f+.52f*TeaPulse,Opacity*(.58f+.42f*TeaPulse)):FLinearColor(1,1,1,Opacity);
     FVector2D P=DungeonView::Project(H->GetActorLocation());
+    DrawTeaSpiritAura(H,P,HS,Opacity);
+    if(H->IsTeaEmpowered()){
+        for(int I=0;I<12;++I){
+            const float A=I*PI/6+(5-H->GetTeaSpiritTime())*.8f;
+            const FVector2D Q=P+FVector2D(FMath::Cos(A)*42*HS,(-60+FMath::Sin(A)*54)*HS);
+            const FLinearColor Spark(1,.77f,.25f,Opacity*(.35f+.55f*TeaPulse));
+            Box(Q.X-2,Q.Y-1,4,2,Spark);Box(Q.X-1,Q.Y-2,2,4,Spark);
+        }
+    }
+    auto TeaGlow=[&](const FString& Art){
+        if(!H->IsTeaEmpowered())return;
+        auto* T=Texture(Art);if(!T)return;
+        // Alpha silhouette outlines, not a rectangular overlay. Two gentle pulses/sec.
+        for(int I=0;I<8;++I){
+            const float A=I*PI/4,Radius=(2.5f+TeaPulse*1.5f)*HS;
+            DrawTexture(T,Offset.X+(P.X-64*HS+FMath::Cos(A)*Radius)*Scale,Offset.Y+(P.Y-116*HS+FMath::Sin(A)*Radius)*Scale,
+                128*HS*Scale,128*HS*Scale,0,0,1,1,FLinearColor(4,2.8f,.8f,Opacity*(.14f+.16f*TeaPulse)),BLEND_Translucent);
+        }
+    };
+    if(H->IsDrinkingTea()){
+        const auto& R=DungeonTeaDrink::Regions[DungeonTeaDrink::Frame(H->GetTeaSipProgress()*DungeonTeaDrink::Duration)];
+        const float K=DungeonTeaDrink::PixelScale*HS;
+        Shadow(P,28*DescentScale,Opacity);
+        if(auto* T=Texture(TEXT("TeaSpirit_DrinkSheet"))){
+            // Cup and right hand are authored together. No floating overlay cup,
+            // equipment weapon, or inherited attack pose during this animation.
+            const FVector2D TL=P+FVector2D(R.X-R.FootX,R.Y-R.FootY)*K;
+            DrawTexture(T,Offset.X+TL.X*Scale,Offset.Y+TL.Y*Scale,R.W*K*Scale,R.H*K*Scale,
+                R.X/DungeonTeaDrink::SheetWidth,R.Y/DungeonTeaDrink::SheetHeight,
+                R.W/DungeonTeaDrink::SheetWidth,R.H/DungeonTeaDrink::SheetHeight,
+                FLinearColor(1,1,.92f,Opacity),BLEND_Translucent);
+        }
+        else Sprite(TEXT("Locomotion_Walk_4_2"),P.X-64*HS,P.Y-116*HS,128*HS,128*HS,FLinearColor(1,1,1,Opacity));
+        return;
+    }
     if(H->IsRolling())
     {
         Shadow(P,27);
         FString RollName=FString::Printf(TEXT("Roll_%d_%d"),H->GetRollDirection(),FMath::Clamp((int)(H->RollProgress()*8),0,7));
-        Sprite(TEXT("Athletic_")+RollName,P.X-64*HS,P.Y-116*HS,128*HS,128*HS,FLinearColor::White);
+        TeaGlow(TEXT("Athletic_")+RollName);
+        Sprite(TEXT("Athletic_")+RollName,P.X-64*HS,P.Y-116*HS,128*HS,128*HS,Fade);
         return;
     }
     const int32 D=H->GetFacingDirection();
@@ -1051,6 +1119,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     FString Name=Action||Guard?FString::Printf(TEXT("Athletic_Attack%s_%d_%d"),View%2?TEXT("Diagonal"):TEXT("Cardinal"),View/2,F):
         FString::Printf(TEXT("Locomotion_%s_%d_%d"),Running?TEXT("Run"):TEXT("Walk"),D,F);
     Shadow(P+FVector2D(0,-2-Bob),28*DescentScale,Opacity);
+    TeaGlow(Name);
     // Native alpha avoids the old body mask and its mismatched silhouette.
     auto DrawBody=[&]() { if(auto* T=Texture(Name)) for(int Row=0;Row<128;Row+=2)
     {
@@ -1302,9 +1371,10 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
         Row(TEXT("RMB"),TEXT("Block incoming damage / face attack / up to 5s"),514);
         Row(TEXT("MMB"),TEXT("Throw tea  -  10s cooldown"),543);
         Row(TEXT("1"),TEXT("FREEDOM  -  charge with 15 kills"),572);
-        Row(TEXT("E"),TEXT("Choose one chest / enter a gate"),601);
-        Row(TEXT("I"),TEXT("Inventory & equipment"),630);
-        Row(TEXT("P / M"),TEXT("Pause / Emerald Atlas"),659);
+        Row(TEXT("2"),TEXT("Drink tea: 5s immunity / +50% speed"),601);
+        Row(TEXT("E"),TEXT("Choose chest / enter gate"),628);
+        Row(TEXT("I"),TEXT("Inventory & equipment"),655);
+        Row(TEXT("P / M"),TEXT("Pause / Emerald Atlas"),682);
         Button(TEXT("BACK"),705);
     }
     else
@@ -1532,11 +1602,11 @@ void ADungeonHUD::DrawAdventurerStats(const ADungeonHero* H)
     Row(TEXT("DPS (before crits)"),FString::Printf(TEXT("%.1f"),H->AttackPower*H->AttackSpeed/.48f),Pale);
     Row(TEXT("Critical chance"),FString::Printf(TEXT("%.1f%%"),100*H->CritChance),Purple);
     Row(TEXT("Critical damage"),FString::Printf(TEXT("%.0f%% of hit"),100*H->CritMultiplier),Purple);
-    Row(TEXT("Armor"),FString::Printf(TEXT("%.1f"),H->Armor),Green);
+    Row(TEXT("Armor / mitigation"),FString::Printf(TEXT("%.0f / %.0f%%"),H->Armor,100*DungeonBalance::ArmorReduction(H->Armor)),Green);
     Row(TEXT("Damage reduction"),FString::Printf(TEXT("%.1f%%"),100*H->DamageReduction),Green);
     Row(TEXT("Bleed chance"),FString::Printf(TEXT("%.1f%%"),100*H->BleedChance),Purple);
     Row(TEXT("Poison chance"),FString::Printf(TEXT("%.1f%%"),100*H->PoisonChance),Purple);
-    Row(TEXT("All-damage leech"),FString::Printf(TEXT("%.1f%%"),100*H->Leech),Green);
+    Row(TEXT("Leech / heal cap"),FString::Printf(TEXT("%.1f%% / %.1f HP/s"),100*H->Leech,H->MaxHealth*DungeonBalance::GearHealingPerSecond),Green);
     Box(884,Y+2,322,1,Gold);Y+=12;
     CardText(TEXT("GEAR EFFECTS"),892,Y,Gold,18,304,22);Y+=24;
     // Signatures are presence-based in combat, not additive per equipped copy.
@@ -1611,6 +1681,8 @@ void ADungeonHUD::DrawHUD()
     ON_SCOPE_EXIT { DrawSwordCursor(); };
     if(Textures.IsEmpty())
     {
+        Texture(TEXT("TeaSpirit_DrinkSheet"));
+        Texture(TEXT("Hotbar_TeaSpirit"));
         for(const TCHAR* Part:{TEXT("OrbFrame"),TEXT("Slot"),TEXT("Attack"),TEXT("Block"),TEXT("Freedom"),TEXT("Wrap"),TEXT("Lightning"),TEXT("Chassis"),TEXT("Gem")})Texture(FString(TEXT("Hotbar_"))+Part);
         LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Art/V2/M_KeySprite.M_KeySprite"));
         for(int I=0;I<16;++I) Texture(FString::Printf(TEXT("TeaFX_%d"),I));

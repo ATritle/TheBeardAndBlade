@@ -64,6 +64,7 @@ void ADungeonGameMode::SaveAtlasRoom()
 void ADungeonGameMode::EnterAtlasRoom(int32 Index,int32 EntryDoor)
 {
     if(!AtlasRooms.IsValidIndex(Index))return;
+    EndBalanceRoom(TEXT("left"));
     for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;
     FreedomTime=0;bFreedomResolved=false;
     Shots.Empty();Splashes.Empty();Impacts.Empty();Blood.Empty();CancelBossIntro();DialogueLines.Empty();DialogueIndex=0;BossGrace=0;
@@ -75,10 +76,10 @@ void ADungeonGameMode::EnterAtlasRoom(int32 Index,int32 EntryDoor)
     const bool First=!R.Visited;R.Visited=true;
     if(First){
         if(R.Type==EAtlasRoom::Combat||R.Type==EAtlasRoom::Boss)SpawnWave();
-        else {R.Cleared=true;if(R.Type!=EAtlasRoom::Trader)SpawnBreakables();if(R.Type==EAtlasRoom::Reward){bChest=true;for(int I=0;I<3;++I){ChestRolled[I]=true;ChestLoot[I]=RollItem(FMath::RandRange(0,DungeonLootCatalog::Count-1),FMath::RandRange(2,3),Room);}}}
+        else {R.Cleared=true;if(R.Type!=EAtlasRoom::Trader)SpawnBreakables();if(R.Type==EAtlasRoom::Reward){bChest=true;for(int I=0;I<3;++I){ChestRolled[I]=true;ChestLoot[I]=RollItem(FMath::RandRange(0,DungeonLootCatalog::Count-1),2,LootLevel());}}}
     }
     if(R.Type==EAtlasRoom::Trader){
-        if(!R.StockMade){R.Stock=CreateTraderStock(Room);R.StockMade=true;}
+        if(!R.StockMade){R.Stock=CreateTraderStock(LootLevel());R.StockMade=true;for(const auto& Item:R.Stock)BalanceEvent(TEXT("trader_offer"),Item.Rarity,Item.CatalogId);}
         TraderStock=R.Stock;
     }
     if(auto* H=AtlasHero(this)){
@@ -234,7 +235,7 @@ void ADungeonGameMode::VerifyAtlas()
         InitializeAtlasFloor(37,Chapter);
         for(int Index:{11,13,10,9,8,12,4,3,2,1}){
             EnterAtlasRoom(Index,-1);
-            const int Depth=AtlasRooms[Index].Depth;
+            const int Depth=BalanceDepth();
             for(int ExpectedWave=1;ExpectedWave<=2;++ExpectedWave){
                 const auto Plan=DungeonRoster::AtlasEncounter(GetBiome(),Depth,ExpectedWave);
                 Check(Wave==ExpectedWave&&PendingSpawns==Plan.Num(),TEXT("Expanded encounter wave budget"));
@@ -249,7 +250,7 @@ void ADungeonGameMode::VerifyAtlas()
                         Elites+=Elite;
                         Check(!Elite||Depth>=6,TEXT("Heavy elites reserved for late rooms"));
                     }
-                    if(!Enemies.IsEmpty())Check(FMath::IsNearlyEqual(Enemies.Last()->MaxHealth,DungeonCombatBalance::SpawnHealth(DungeonRoster::Get(Species).HP,Room,false)),TEXT("Expanded health uses existing scaling once"));
+                    if(!Enemies.IsEmpty())Check(FMath::IsNearlyEqual(Enemies.Last()->MaxHealth,DungeonBalance::EnemyHealth(DungeonRoster::BalanceRole(Species),BalanceFloor(),BalanceDepth())),TEXT("Expanded health uses role floor and depth once"));
                 }
                 Check(Elites<=1,TEXT("No stacked elites in encounter wave"));
                 const auto Defeated=Enemies;for(const auto& E:Defeated)EnemyDefeated(E.Get());
@@ -276,14 +277,14 @@ void ADungeonGameMode::VerifyAtlas()
                     Check(!Enemies.IsEmpty()&&Enemies.Last()->Species==Species,TEXT("Keep depth composition independent of visit order"));
                     if(!Enemies.IsEmpty()){
                         auto* E=Enemies.Last().Get();
-                        Check(FMath::IsNearlyEqual(E->MaxHealth,DungeonCombatBalance::SpawnHealth(DungeonRoster::Get(Species).HP,Room,false)),TEXT("Keep health scaling applied once"));
+                        Check(FMath::IsNearlyEqual(E->MaxHealth,DungeonBalance::EnemyHealth(DungeonRoster::BalanceRole(Species),BalanceFloor(),BalanceDepth())),TEXT("Keep health scaling applied once"));
                         Lancers+=E->Species==53;Bailiffs+=E->Species==51;Hexers+=E->Species==52;
                     }
                 }
                 const auto Defeated=Enemies;
                 for(const auto& E:Defeated)EnemyDefeated(E.Get());
             }
-            Check(Lancers==(Index==4?1:0)&&Bailiffs==(Index==2?1:0)&&Hexers==(Index==3?1:0),TEXT("One specialist in its introduction room"));
+            Check(Lancers==0&&Bailiffs==(Index==2?1:0)&&Hexers==((Index==3||Index==4)?1:0),TEXT("Introduce specialists before late-room elites"));
             Check(AtlasRooms[Index].Cleared&&AreDoorsOpen()&&PendingSpawns==0,TEXT("Both Keep waves clear before exit"));
             SaveAtlasRoom();EnterAtlasRoom(0,-1);EnterAtlasRoom(Index,-1);
             Check(Enemies.IsEmpty()&&PendingSpawns==0&&AreDoorsOpen(),TEXT("Cleared Keep room never respawns"));
@@ -327,11 +328,11 @@ void ADungeonGameMode::VerifyAtlas()
     int ShopDoor=0;while(ShopDoor<4&&AtlasRooms[1].Links[ShopDoor]!=6)++ShopDoor;
     const int ParentProps=Breakables.Num();SaveAtlasRoom();StartAtlasTravel(ShopDoor);TickAtlasTravel(TravelDuration);
     Check(AtlasCurrent==6&&bTraderOpen&&AtlasArrivalTime==0&&Breakables.IsEmpty(),TEXT("Door opens shop directly without playable chamber"));H->Coins=100000;
-    Check(BuyTraderItem(H,0),TEXT("Trader purchase"));const int64 Balance=H->Coins;ContinueFromTrader();
+    Check(BuyTraderItem(H,0),TEXT("Trader purchase"));const int64 WalletAfter=H->Coins;ContinueFromTrader();
     Check(AtlasCurrent==1&&!bTraderOpen&&AtlasArrivalTime>0&&Breakables.Num()==ParentProps,TEXT("Leave shop restores parent room and fades in"));
     Check(AtlasArrivalFrom.Equals(AtlasDoor(ShopDoor)),TEXT("Return through same parent doorway"));
     ContinueFromTrader();Check(AtlasCurrent==1,TEXT("Repeated close cannot travel twice"));TickAtlasTravel(ArrivalDuration);
-    StartAtlasTravel(ShopDoor);TickAtlasTravel(TravelDuration);Check(bTraderOpen&&TraderStock[0].IsEmpty()&&H->Coins==Balance,TEXT("Backtracking keeps stock and wallet"));ContinueFromTrader();TickAtlasTravel(ArrivalDuration);
+    StartAtlasTravel(ShopDoor);TickAtlasTravel(TravelDuration);Check(bTraderOpen&&TraderStock[0].IsEmpty()&&H->Coins==WalletAfter,TEXT("Backtracking keeps stock and wallet"));ContinueFromTrader();TickAtlasTravel(ArrivalDuration);
     // Boss only spawns at endpoint; return visits cannot respawn it.
     EnterAtlasRoom(5,-1);Check(IsBossRoom()&&PendingSpawns==1,TEXT("Boss endpoint queues Finance"));
     SpawnOneEnemy();PendingSpawns=0;Check(Enemies.Num()==1&&Enemies[0]->Species==24,TEXT("Finance Guy encounter"));
@@ -355,11 +356,11 @@ void ADungeonGameMode::VerifyAtlas()
         for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;CompleteRoom();
         Check(AtlasRooms[1].Cleared&&AreDoorsOpen(),TEXT("Normal clear unlocks floor exits"));
         Breakables[0].BrokenAge=2;Breakables[0].Loot=RollItem(48,3,Room);const auto Drop=Breakables[0].Loot;SaveAtlasRoom();
-        EnterAtlasRoom(6,-1);Check(bTraderOpen&&TraderStock.Num()>=3&&TraderStock.Num()<=5&&TraderStock[0].ItemLevel==Chapter*4+4,TEXT("Each floor has premium level-scaled shop"));
+        EnterAtlasRoom(6,-1);Check(bTraderOpen&&TraderStock.Num()>=3&&TraderStock.Num()<=5&&TraderStock[0].ItemLevel==FMath::Min(25,2+Chapter*3),TEXT("Each floor has premium level-scaled shop"));
         H->Inventory.Empty();Check(BuyTraderItem(H,0),TEXT("Purchase on each floor"));ContinueFromTrader();TickAtlasTravel(ArrivalDuration);
         Check(AtlasCurrent==1&&Enemies.IsEmpty()&&PendingSpawns==0&&Breakables[0].BrokenAge==2&&Breakables[0].Loot.Stats()==Drop.Stats(),TEXT("Parent clear and floor loot survive shop visit"));
         SaveAtlasRoom();EnterAtlasRoom(6,-1);Check(TraderStock[0].IsEmpty(),TEXT("Each floor preserves sold stock"));ContinueFromTrader();TickAtlasTravel(ArrivalDuration);
-        EnterAtlasRoom(7,-1);Check(bChest&&ChestRolled[0]&&ChestLoot[0].ItemLevel==Chapter*4+3,TEXT("Reward endpoint scales with floor"));
+        EnterAtlasRoom(7,-1);Check(bChest&&ChestRolled[0]&&ChestLoot[0].ItemLevel==LootLevel(),TEXT("Reward endpoint scales with floor"));
         EnterAtlasRoom(5,-1);SpawnOneEnemy();PendingSpawns=0;
         Check(Enemies.Num()==1&&Enemies[0]->Species==DungeonProgression::Bosses[Chapter],TEXT("Campaign boss progression unchanged"));
         CancelBossIntro();DialogueLines.Empty();DialogueIndex=0;BossGrace=0;

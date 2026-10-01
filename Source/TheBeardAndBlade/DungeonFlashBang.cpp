@@ -23,7 +23,7 @@ namespace FlashBang
 bool ADungeonHero::ApplyFlashBang(FVector2D Explosion,float Radius,bool BossAttack)
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    if(Health<=0||!G||G->IsGameplayBlocked()||IsInventoryOpen()||G->IsFreedomActive()) return false;
+    if(Health<=0||IsTeaEmpowered()||!G||G->IsGameplayBlocked()||IsInventoryOpen()||G->IsFreedomActive()) return false;
     if(!FlashBang::Exposed(DungeonView::Project(GetActorLocation()),GetVisualFacing(),Explosion,Radius)) return false;
     // No chained stun extension while recovering from the same encounter's flash.
     if(FlashBlindTime>0) return false;
@@ -40,10 +40,11 @@ bool ADungeonHero::ApplyFlashBang(FVector2D Explosion,float Radius,bool BossAtta
 void ADungeonHero::ReceiveFlashStab(TOptional<FVector2D> Source)
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    if(!G||G->IsGameplayBlocked()||G->IsFreedomActive()||Health<=0)return;
+    if(!G||G->IsGameplayBlocked()||G->IsFreedomActive()||IsTeaEmpowered()||Health<=0)return;
     const bool Guarded=TryBlockDamage(Source.IsSet()?Source.GetValue()-DungeonView::Project(GetActorLocation()):FVector2D::ZeroVector);
     // Percentage of current health at impact, not max health or armor-reduced base damage.
     const float Damage=Health*.25f*(Guarded?.75f:1.f);Health-=Damage;HurtTime=.18f;
+    if(G->Balance.Active){++G->Balance.Landed;if(Guarded)++G->Balance.Blocked;G->Balance.DamageTaken+=Damage;}
     G->AddImpact(DungeonView::Project(GetActorLocation()),Damage,true);G->PlaySound(TEXT("Hurt"));
 }
 

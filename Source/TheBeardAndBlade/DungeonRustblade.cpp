@@ -40,12 +40,14 @@ void ADungeonEnemy::TickRustblade(float Dt,ADungeonHero* H,ADungeonGameMode* G)
     if(Recovery>0) { Recovery=FMath::Max(0.f,Recovery-Dt);return; }
     const auto Delta=Target-P;
     if(!Delta.IsNearlyZero())Facing=Direction(Delta);
-    if(Delta.Size()<=Profile.Range) {
+    if(Delta.Size()<=Profile.Range&&G->PermitEnemyAttack(this)) {
         RustAttackAge=0;bRustStrikeFired=false;Windup=StrikeTime;
         ChargeAim=Aim(Facing);AttackTarget=Target;
         return;
     }
-    FVector2D Velocity=Delta.GetSafeNormal()*Profile.Speed*(SlowTime>0?.65f:1.f);
+    const bool Waiting=Delta.Size()<=Profile.Range;
+    const auto TravelAim=Waiting?FVector2D(-Delta.Y,Delta.X).GetSafeNormal():Delta.GetSafeNormal();
+    FVector2D Velocity=TravelAim*Profile.Speed*(Waiting?.4f:1.f)*(SlowTime>0?.65f:1.f);
     for(const auto& Other:G->GetEnemies())if(IsValid(Other)&&Other!=this) {
         const auto Apart=P-DungeonView::Project(Other->GetActorLocation());
         if(Apart.SizeSquared()>1&&Apart.SizeSquared()<1600)Velocity+=Apart.GetSafeNormal()*26;
@@ -110,7 +112,7 @@ void ADungeonGameMode::VerifyRustblade()
     Check(DungeonCombatBalance::FreedomDamage(25,100,false)==18.75f,TEXT("exact threshold survives"));
     Check(DungeonCombatBalance::FreedomDamage(20,100,false)==20.f,TEXT("low health execution"));
     Check(DungeonCombatBalance::FreedomDamage(100,100,true)==0.f,TEXT("boss immunity unchanged"));
-    Check(FMath::IsNearlyEqual(DungeonCombatBalance::SpawnHealth(65,1,false),93.4375f),TEXT("base health scales once"));
+    Check(FMath::IsNearlyEqual(DungeonBalance::EnemyHealth(DungeonBalance::Role::Melee,0,1),114.6f),TEXT("melee health uses first floor and depth once"));
     auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
     Check(H!=nullptr,TEXT("player exists for integration checks"));
     if(H) {

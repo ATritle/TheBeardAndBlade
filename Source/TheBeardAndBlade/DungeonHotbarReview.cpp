@@ -77,7 +77,7 @@ void ADungeonGameMode::VerifyHotbar()
         Reset();H->BlockPressed();H->ApplyFlashBang(P+FVector2D(0,-40),175,true);
         Check(H->Health<150&&H->FlashBlindTime==0,TEXT("boss flash guard takes damage but prevents blind"));
         Reset();H->Armor=20;H->DamageReduction=.2f;H->BlockPressed();H->ReceiveHit(40,true,P+FVector2D(0,-40),true);
-        Check(FMath::IsNearlyEqual(H->Health,150-(40-6)*.8f*.75f),TEXT("boss block removes exactly one quarter after gear mitigation"));
+        Check(FMath::IsNearlyEqual(H->Health,150-DungeonBalance::Mitigated(40*IncomingDamageScale(true),20,.2f,false)*.75f),TEXT("boss block removes exactly one quarter after gear mitigation"));
         Reset();H->BlockPressed();H->Attack();H->PowerMove();H->Freedom();Check(!H->IsAttacking()&&!H->IsCasting()&&FreedomTime==0,TEXT("guard rejects conflicting offensive actions"));
         Reset();H->Attack();H->BlockPressed();Check(!H->IsBlocking(),TEXT("sword recovery prevents guard"));
         Reset();H->PowerMove();H->BlockPressed();Check(!H->IsBlocking(),TEXT("tea cast prevents guard"));

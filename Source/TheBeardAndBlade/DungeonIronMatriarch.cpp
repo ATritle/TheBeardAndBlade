@@ -180,7 +180,7 @@ void ADungeonGameMode::VerifyIronMatriarch()
         Check(Attack!=0||E->Iron.Landings==1,TEXT("one landing event"));
         Check(Attack!=1||E->Iron.BreathTicks==5,TEXT("five shared flame ticks, not per-head or frame"));
         Check(Attack!=2||E->Iron.MeteorHits==5,TEXT("each meteor impacts once"));
-        if(Attack==1)Check(FMath::IsNearlyEqual(H->Health,10000-BreathDamage*10,.01f),TEXT("overlapping heads never stack damage"));
+        if(Attack==1)Check(FMath::IsNearlyEqual(H->Health,10000-BreathDamage*10*IncomingDamageScale(true),.01f),TEXT("overlapping heads never stack damage"));
     }
     Check(View({-200,100})==1&&View({200,100})==2,TEXT("independent three-quarter views, no mirroring"));
     Check(Frame(0,SlamImpact)==12&&Frame(2,MeteorRelease)==7,TEXT("damage events match authored impact/release poses"));
@@ -192,15 +192,15 @@ void ADungeonGameMode::VerifyIronMatriarch()
     H->Restart();H->Armor=H->DamageReduction=0;H->MaxHealth=H->Health=10000;
     E->SetActorLocation(DungeonView::Unproject({640,410}));H->SetActorLocation(DungeonView::Unproject({640,575}));
     E->BeginIronAttack(1,H,this);E->TickIronMatriarch(1.61f,H,this);
-    Check(FMath::IsNearlyEqual(10000-H->Health,30.f),TEXT("first two flame ticks deal 12 then 18"));
+    Check(FMath::IsNearlyEqual(10000-H->Health,30.f*IncomingDamageScale(true),.01f),TEXT("first two flame ticks scale from 12 then 18"));
     H->SetActorLocation(DungeonView::Unproject({1000,575}));E->TickIronMatriarch(.1f,H,this);
     Check(E->Iron.FlameExposure==0,TEXT("leaving flame immediately resets exposure"));
     H->SetActorLocation(DungeonView::Unproject({640,575}));const float ReentryHP=H->Health;E->TickIronMatriarch(.3f,H,this);
-    Check(FMath::IsNearlyEqual(ReentryHP-H->Health,12.f),TEXT("reentering flame begins at base damage"));
-    H->Restart();H->Armor=H->DamageReduction=0;E->SetActorLocation(DungeonView::Unproject({640,410}));H->SetActorLocation(DungeonView::Unproject({640,575}));
+    Check(FMath::IsNearlyEqual(ReentryHP-H->Health,12.f*IncomingDamageScale(true),.01f),TEXT("reentering flame begins at scaled base damage"));
+    H->Restart();H->MaxHealth=H->Health=10000;H->Armor=H->DamageReduction=0;E->SetActorLocation(DungeonView::Unproject({640,410}));H->SetActorLocation(DungeonView::Unproject({640,575}));
     H->SetFlashReviewAim({0,-1});H->BlockPressed();const float GuardHealth=H->Health;
     E->BeginIronAttack(1,H,this);E->TickIronMatriarch(3.25f,H,this);
-    Check(FMath::IsNearlyEqual(H->Health,GuardHealth-BreathDamage*10*.75f)&&H->Stamina==100,TEXT("facing boss block absorbs only 25 percent without stamina"));H->BlockReleased();
+    Check(FMath::IsNearlyEqual(H->Health,GuardHealth-BreathDamage*10*IncomingDamageScale(true)*.75f,.01f)&&H->Stamina==100,TEXT("facing boss block absorbs only 25 percent without stamina"));H->BlockReleased();
     E->BeginIronAttack(2,H,this);const auto Warned=E->Iron.Meteors;
     H->SetActorLocation(DungeonView::Unproject({640,285}));E->TickIronMatriarch(1,H,this);
     Check(E->Iron.Meteors[0].Target.Equals(Warned[0].Target),TEXT("meteor target never tracks after warning"));

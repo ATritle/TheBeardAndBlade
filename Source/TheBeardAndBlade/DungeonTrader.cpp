@@ -19,6 +19,7 @@ bool ADungeonGameMode::SellTraderItem(ADungeonHero* H,int32 Index)
     if(!bTraderOpen||!H||!H->Inventory.IsValidIndex(Index))return false;
     const int64 Value=TraderSellPrice(H->Inventory[Index].Item);
     if(H->Coins>MAX_int64-Value)return false;
+    BalanceEvent(TEXT("sold"),float(Value),H->Inventory[Index].Item.CatalogId);
     H->Coins+=Value;H->Inventory.RemoveAt(Index);H->SelectedItem=INDEX_NONE;
     H->InventoryMessage.Empty();PlaySound(TEXT("Equip"),.5f);return true;
 }
@@ -31,8 +32,8 @@ TArray<FDungeonItem> ADungeonGameMode::CreateTraderStock(int32 Level)
         if(Definitions.Contains(ID))continue;
         Definitions.Add(ID);
         const float Roll=FMath::FRand();
-        const int Tier=Roll<.1f?4:Roll<.55f?3:2;
-        Stock.Add(RollItem(ID,Stock.IsEmpty()?FMath::Max(3,Tier):Tier,Level+2));
+        const int Tier=DungeonBalance::TraderRarity(Roll,Level,Stock.IsEmpty());
+        Stock.Add(RollItem(ID,Tier,FMath::Min(25,Level+1)));
     }
     return Stock;
 }
@@ -46,7 +47,8 @@ void ADungeonGameMode::OpenTrader()
     }
     if(bTraderOpen||bTraderVisited)return;
     bTraderOpen=bTraderVisited=true;TraderMessage.Empty();TraderStock.Empty();
-    TraderStock=CreateTraderStock(Room+1);
+    TraderStock=CreateTraderStock(LootLevel());
+    for(const auto& Item:TraderStock)BalanceEvent(TEXT("trader_offer"),Item.Rarity,Item.CatalogId);
     if(auto* PC=GetWorld()->GetFirstPlayerController())if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) {HUD->TraderSelection=INDEX_NONE;HUD->CancelInventoryGesture();}
     PlaySound(TEXT("UI"));
 }
@@ -71,7 +73,7 @@ bool ADungeonGameMode::BuyTraderItem(ADungeonHero* H,int32 Index)
     if(H->Coins<Price){TraderMessage=TEXT("Not enough coins.");return false;}
     // Insert before charging, so a full bag never spends coins or loses stock.
     if(!H->AddToInventory(Item)){TraderMessage=TEXT("Your satchel is full. Manage your inventory first.");return false;}
-    H->Coins-=Price;TraderStock[Index]=FDungeonItem();TraderMessage=TEXT("Purchased — added to your satchel.");PlaySound(TEXT("UI"));return true;
+    H->Coins-=Price;BalanceEvent(TEXT("purchased"),float(Price),Item.CatalogId);TraderStock[Index]=FDungeonItem();TraderMessage=TEXT("Purchased - added to your satchel.");PlaySound(TEXT("UI"));return true;
 }
 void ADungeonHUD::DrawTrader(ADungeonGameMode* G,ADungeonHero* H)
 {
@@ -215,9 +217,10 @@ void ADungeonGameMode::VerifyTrader()
     }
     Check(H->DiscardItem(0)&&H->Coins==0,TEXT("Discard drops item without coin credit"));
     Check(!H->DiscardItem(0)&&H->Coins==0,TEXT("No duplicate discard"));
-    for(int Chapter=0;Chapter<7;++Chapter) {
-        Room=Chapter*4+2;Wave=2;PendingSpawns=0;bLootRolled=true;bTraderVisited=false;NextRoom();
-        Check(IsTraderOpen()&&Room==Chapter*4+2&&TraderStock.Num()>=3&&TraderStock.Num()<=5,TEXT("Shop halfway through each theme"));
+    for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter) {
+        InitializeAtlasFloor(4201,Chapter);EnterAtlasRoom(1,-1);EnterAtlasRoom(6,-1);
+        Check(IsTraderOpen()&&TraderStock.Num()>=3&&TraderStock.Num()<=5,TEXT("Shop branch on each theme"));
+        if(TraderStock.IsEmpty())continue; // Report a failed fixture without crashing the verifier.
         const auto Stock=TraderStock;OpenTrader();Check(Stock[0].Stats()==TraderStock[0].Stats(),TEXT("Opening shop cannot reroll stock"));
         const auto Offer=TraderStock[0];const int64 Price=TraderPrice(Offer);Check(Price>Offer.CoinValue,TEXT("Positive shop markup"));
         H->Coins=Price-1;Check(!BuyTraderItem(H,0)&&H->Coins==Price-1,TEXT("Unaffordable purchase leaves balance intact"));
@@ -226,8 +229,9 @@ void ADungeonGameMode::VerifyTrader()
         H->Inventory.Empty();Check(BuyTraderItem(H,0)&&H->Coins==0&&H->Inventory.Num()==1&&H->Inventory[0].Item.Stats()==Offer.Stats(),TEXT("Purchase exact offer"));
         Check(!BuyTraderItem(H,0)&&H->Inventory.Num()==1,TEXT("Sold item cannot be bought twice"));
         H->Coins=777;H->ToggleInventory();Check(H->IsInventoryOpen(),TEXT("Manage gear while shopping"));H->ToggleInventory();
-        ContinueFromTrader();Check(Room==Chapter*4+3&&!IsTraderOpen()&&H->Coins==777,TEXT("Continue preserves wallet and advances once"));
-        ContinueFromTrader();Check(Room==Chapter*4+3,TEXT("Continue cannot advance twice"));
+        ContinueFromTrader();Check(AtlasCurrent==1&&!IsTraderOpen()&&H->Coins==777,TEXT("Continue preserves wallet and returns to parent room"));
+        ContinueFromTrader();Check(AtlasCurrent==1,TEXT("Continue cannot travel twice"));
+        TickAtlasTravel(1);
         PendingSpawns=0;
     }
     RestartRun();Check(H->Coins==0&&!IsTraderOpen(),TEXT("New run resets wallet and shop"));

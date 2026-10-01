@@ -65,6 +65,7 @@ void ADungeonEnemy::Tick(float Dt)
     if(!G||G->IsGameplayBlocked()||!H||H->IsInventoryOpen()||H->Health<=0) return;
     if(Species==IronMatriarch::Species&&Iron.DeathAge>=0){TickIronMatriarch(Dt,H,G);return;}
     if(Health<=0)return;
+    StaggerGuard=FMath::Max(0.f,StaggerGuard-Dt);
     const auto& S=DungeonRoster::Get(Species);
     HurtTime=FMath::Max(0.f,HurtTime-Dt); FreedomImmuneTime=FMath::Max(0.f,FreedomImmuneTime-Dt); bWalking=false;
     UpdateAilments(Dt); if(Health<=0||IsActorBeingDestroyed()) return;
@@ -126,9 +127,11 @@ void ADungeonEnemy::Tick(float Dt)
             AttackTarget=BossAttack==0?P:Target;
             ChargeAim=Delta.GetSafeNormal(); Windup=AttackWindup; return;
         }
-        AttackTarget=Target; ChargeAim=Delta.GetSafeNormal(); Windup=S.Windup*(bBoss&&Health<MaxHealth*.5f?.8f:1.f); return;
+        if(G->PermitEnemyAttack(this)){AttackTarget=Target; ChargeAim=Delta.GetSafeNormal(); Windup=S.Windup;return;}
     }
-    FVector2D Step=Delta.GetSafeNormal()*S.Speed*(bBoss&&Health<MaxHealth*.5f?1.25f:1.f)*MoveScale;
+    const bool Waiting=!bBoss&&Delta.Size()<S.Range;
+    const auto TravelAim=Waiting?FVector2D(-Delta.Y,Delta.X).GetSafeNormal()*(Species%2?1.f:-1.f):Delta.GetSafeNormal();
+    FVector2D Step=TravelAim*S.Speed*(Waiting?.4f:bBoss&&Health<MaxHealth*.5f?1.25f:1.f)*MoveScale;
     for(auto& Other:G->GetEnemies()) if(IsValid(Other)&&Other!=this)
     {
         FVector2D Apart=P-DungeonView::Project(Other->GetActorLocation());
@@ -301,9 +304,9 @@ void ADungeonGameMode::VerifyCampaign()
         }
         for(int N=0;N<100;++N) {
             const auto Stock=CreateTraderStock(10);TSet<int> IDs;
-            Check(Stock.Num()>=3&&Stock.Num()<=5&&Stock[0].Rarity>=3,TEXT("Trader has 3-5 items and a featured Epic"));
+            Check(Stock.Num()>=3&&Stock.Num()<=5&&Stock[0].Rarity>=2,TEXT("Trader has 3-5 items and a featured Rare or better"));
             for(const auto& Item:Stock) {
-                Check(Item.Rarity>=2&&Item.ItemLevel==12&&Item.CoinValue>0&&!IDs.Contains(Item.CatalogId),TEXT("Premium stock is Rare+ unique and two levels higher"));
+                Check(Item.Rarity>=1&&Item.ItemLevel==11&&Item.CoinValue>0&&!IDs.Contains(Item.CatalogId),TEXT("Trader stock is unique Uncommon+ and one level higher"));
                 Check(TraderPrice(Item)>Item.CoinValue,TEXT("Trader sells above discard value"));IDs.Add(Item.CatalogId);
             }
         }
@@ -362,7 +365,7 @@ void ADungeonGameMode::VerifyCampaign()
     bool SeenLoot[DungeonLootCatalog::Count]={false};
     for(int I=0;I<5000;++I) { const auto Item=RollChestLoot(false); SeenLoot[Item.CatalogId]=true; }
     for(bool Seen:SeenLoot) Check(Seen,TEXT("Mystery pool includes all equipment and rings"));
-    for(int I=0;I<30;++I) Check(RollChestLoot(true).Rarity==4,TEXT("Boss mystery loot remains legendary"));
+    for(int I=0;I<30;++I) Check(RollChestLoot(true).Rarity>=3,TEXT("Boss mystery loot guarantees Epic or better"));
     H->MoveRight(1); H->SprintPressed(); H->Tick(.1f); H->MoveRight(0); H->SprintReleased();
     Check(FMath::IsNearlyEqual(H->Stamina,98.2f),TEXT("Sprint drains stamina"));
     const float IdleStamina=H->Stamina; H->SprintPressed(); H->Tick(.1f); H->SprintReleased();
@@ -382,8 +385,8 @@ void ADungeonGameMode::VerifyCampaign()
     FDungeonPotion TestPotion; TestPotion.Position=DungeonView::Project(H->GetActorLocation()); Potions.Add(TestPotion);
     UpdatePotions(1); Check(Potions.Num()==1,TEXT("Full health preserves potion"));
     H->Health=50; UpdatePotions(.1f);
-    Check(Potions.IsEmpty()&&H->Health==102.5f,TEXT("Walk-over potion restores thirty-five percent"));
-    Potions.Add(TestPotion); UpdatePotions(1); Check(H->Health==150&&Potions.IsEmpty(),TEXT("Potion clamps to max health"));
+    Check(Potions.IsEmpty()&&H->Health==83.f,TEXT("Walk-over potion restores twenty-two percent"));
+    H->Health=140;Potions.Add(TestPotion); UpdatePotions(1); Check(H->Health==150&&Potions.IsEmpty(),TEXT("Potion clamps to max health"));
     H->Restart();
     H->MoveForward(1); auto P=DungeonView::Project(H->GetActorLocation()); H->Tick(.1f); H->MoveForward(0);
     Check(DungeonView::Project(H->GetActorLocation()).Y<P.Y,TEXT("W is screen-up"));

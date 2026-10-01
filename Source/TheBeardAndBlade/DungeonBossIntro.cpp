@@ -31,7 +31,7 @@ namespace
 
 void ADungeonGameMode::EndPlay(const EEndPlayReason::Type Reason)
 {
-    StopMusic();CancelBossIntro();Super::EndPlay(Reason);
+    EndBalanceRoom(TEXT("session_closed"));StopMusic();CancelBossIntro();Super::EndPlay(Reason);
 }
 
 void ADungeonHero::SkipIntro()

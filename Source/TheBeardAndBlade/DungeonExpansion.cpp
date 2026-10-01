@@ -31,7 +31,7 @@ void ADungeonEnemy::TickExpansion(float Dt,ADungeonHero* H,ADungeonGameMode* G)
     const auto Delta=Target-P;
     const bool Advancing=ExpansionAdvanceTime>0&&Delta.Size()>95.f;
     ExpansionAdvanceTime=Delta.Size()<=95.f?0.f:FMath::Max(0.f,ExpansionAdvanceTime-Dt);
-    if(!Advancing&&Delta.Size()<=Profile.Range){
+    if(!Advancing&&Delta.Size()<=Profile.Range&&G->PermitEnemyAttack(this)){
         if(!Delta.IsNearlyZero())Facing=RustbladeSquire::Direction(Delta);
         ExpansionAttackAge=0;bExpansionReleased=false;Windup=DungeonExpansion::Windup(Species);
         ChargeAim=RustbladeSquire::Aim(Facing);AttackTarget=Target;
@@ -40,7 +40,9 @@ void ADungeonEnemy::TickExpansion(float Dt,ADungeonHero* H,ADungeonGameMode* G)
             Species!=51&&(Species!=53||Delta.Size()>115.f);
         return;
     }
-    auto Velocity=Delta.GetSafeNormal()*Profile.Speed*(SlowTime>0?.65f:1.f);
+    const bool Waiting=!Advancing&&Delta.Size()<=Profile.Range;
+    const auto TravelAim=Waiting?FVector2D(-Delta.Y,Delta.X).GetSafeNormal()*(Species%2?1.f:-1.f):Delta.GetSafeNormal();
+    auto Velocity=TravelAim*Profile.Speed*(Waiting?.4f:1.f)*(SlowTime>0?.65f:1.f);
     for(const auto& Other:G->GetEnemies())if(IsValid(Other)&&Other!=this){
         const auto Apart=P-DungeonView::Project(Other->GetActorLocation());
         if(Apart.SizeSquared()>1&&Apart.SizeSquared()<1600)Velocity+=Apart.GetSafeNormal()*26;
@@ -230,6 +232,8 @@ void ADungeonGameMode::VerifyExpansion()
         for(int S=First;S<=Last;++S){
             auto* E=GetWorld()->SpawnActor<ADungeonEnemy>();E->Species=S;E->SpawnTime=0;E->Health=E->MaxHealth=100;Enemies.Add(E);
             for(int D=0;D<8;++D)for(float FPS:{30.f,60.f,120.f}){
+                // Independent simulated attacks do not advance the world's clock.
+                NextEnemyAttack=0;
                 H->Restart();H->Armor=H->DamageReduction=0;Shots.Empty();E->ExpansionAttackAge=E->ExpansionHurtAge=-1;E->Recovery=0;E->ExpansionAdvanceTime=0;
                 E->SetActorLocation(DungeonView::Unproject(P));H->SetActorLocation(DungeonView::Unproject(P+RustbladeSquire::Aim(D)*75));
                 E->TickExpansion(1/FPS,H,this);Check(H->Health==H->MaxHealth,TEXT("no contact damage"));
@@ -273,6 +277,7 @@ void ADungeonGameMode::VerifyExpansion()
                 Check(E->ExpansionAdvanceTime==3.f,TEXT("elite ranged recovery schedules pursuit"));
                 E->Recovery=0;E->TickExpansion(.5f,H,this);
                 Check(E->ExpansionAttackAge<0&&DungeonView::Project(E->GetActorLocation()).Y>335.f,TEXT("elite advances inside ranged distance instead of firing again"));
+                NextEnemyAttack=0;
                 E->SetActorLocation(DungeonView::Unproject({640,460}));E->TickExpansion(.016f,H,this);
                 Check(E->ExpansionAttackAge==0&&!E->bExpansionRanged&&E->ExpansionAdvanceTime==0,TEXT("elite close pursuit switches to melee"));
             }

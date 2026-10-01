@@ -27,7 +27,7 @@ void ADungeonGameMode::UpdatePotions(float Dt)
         // Leave full-health pickups available; ignore fresh drops briefly so they are visible.
         if(P.Age>.4f&&H->Health<H->MaxHealth&&FVector2D::Distance(P.Position,DungeonView::Project(H->GetActorLocation()))<34)
         {
-            H->Health=FMath::Min(H->MaxHealth,H->Health+H->MaxHealth*.35f);
+            H->RestoreHealth(H->MaxHealth*DungeonBalance::PotionFraction);
             PlaySound(TEXT("Equip"),.65f,1.3f); Potions.RemoveAt(I);
         }
     }
@@ -138,7 +138,7 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
     for(int I=0;I<6;++I){
         const FVector2D Tile=P(Centers[I]-77,465),Key=P(Centers[I]-40,626);
         const float S=154*K;
-        const bool Ready=I==0?H->CanUseFreedom():I==4?H->CanStrike():I==5?H->CanUseTea():false;
+        const bool Ready=I==0?H->CanUseFreedom():I==1?H->CanDrinkTea():I==4?H->CanStrike():I==5?H->CanUseTea():false;
         const auto Tint=Ready?FLinearColor::White:FLinearColor(.42f,.45f,.45f);
         if(I==0){
             const float Charge=FMath::Clamp(G->FreedomKills/15.f,0.f,1.f);
@@ -150,10 +150,17 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
             }
         }
         if(I==4)Sprite(TEXT("Hotbar_Attack"),Tile.X,Tile.Y,S,S,Tint);
+        if(I==1){
+            Sprite(TEXT("Hotbar_TeaSpirit"),Tile.X,Tile.Y,S,S,H->IsTeaEmpowered()?FLinearColor(1,.95f,.75f):Tint);
+            if(H->IsTeaEmpowered()){
+                Box(Tile.X,Tile.Y+S-3,S*H->GetTeaSpiritTime()/FDungeonTeaSpirit::Duration,3,Gold);
+                CardText(FString::Printf(TEXT("%.1f"),H->GetTeaSpiritTime()),Tile.X,Tile.Y+S*.35f,Pale,21,S,26,true);
+            }
+        }
         if(I==5)KeySprite(TEXT("TeaFX_0"),Tile.X+4,Tile.Y+4,S-8,S-8,Tint);
-        if(I>0&&I<4)Sprite(TEXT("AudioThumb"),Tile.X+S*.32f,Tile.Y+S*.3f,S*.36f,S*.4f,FLinearColor(.32f,.3f,.22f,.8f));
-        const float Cooldown=I==5?H->GetPowerCooldown():I==4&&H->IsAttacking()?(1-H->GetAttackProgress())*.48f/FMath::Max(.01f,H->AttackSpeed):0;
-        const float Fraction=I==0?FMath::Clamp(G->FreedomKills/15.f,0.f,1.f):I==4?H->IsAttacking()?H->GetAttackProgress():1.f:I==5?1-H->GetPowerCooldown()/10.f:0;
+        if(I>1&&I<4)Sprite(TEXT("AudioThumb"),Tile.X+S*.32f,Tile.Y+S*.3f,S*.36f,S*.4f,FLinearColor(.32f,.3f,.22f,.8f));
+        const float Cooldown=I==1?H->GetTeaSpiritCooldown():I==5?H->GetPowerCooldown():I==4&&H->IsAttacking()?(1-H->GetAttackProgress())*.48f/FMath::Max(.01f,H->AttackSpeed):0;
+        const float Fraction=I==1?1-H->GetTeaSpiritCooldown()/FDungeonTeaSpirit::Recharge:I==0?FMath::Clamp(G->FreedomKills/15.f,0.f,1.f):I==4?H->IsAttacking()?H->GetAttackProgress():1.f:I==5?1-H->GetPowerCooldown()/10.f:0;
         if(Cooldown>0){
             Box(Tile.X,Tile.Y,S,S*(1-Fraction),FLinearColor(0,0,0,.60f));
             CardText(FString::Printf(TEXT("%.1f"),Cooldown),Tile.X,Tile.Y+S*.35f,Pale,21,S,26,true);

@@ -60,8 +60,8 @@ void ADungeonGameMode::VerifyWeekend()
         Check(H->Health==BeforeHit,TEXT("Timed sideways dodge avoids tracked bullet at 10/30/60fps"));
     }
     H->Restart();H->UpdateStamina(1,true);Check(FMath::IsNearlyEqual(H->Stamina,82.f),TEXT("Sprint costs 18 per second"));
-    for(int RoomNumber:{1,2,10,20})Check(FMath::IsNearlyEqual(DungeonCombatBalance::SpawnHealth(50,RoomNumber,false),50*1.15f*1.25f*(1+(RoomNumber-1)*.035f)),TEXT("Regular health retains room scaling"));
-    Check(FMath::IsNearlyEqual(DungeonCombatBalance::SpawnHealth(760,3,true),760*1.15f*1.07f),TEXT("Boss health unchanged"));
+    for(int Floor=0;Floor<8;++Floor)Check(DungeonBalance::EnemyHealth(DungeonBalance::Role::Melee,Floor,8)>DungeonBalance::EnemyHealth(DungeonBalance::Role::Melee,Floor,1),TEXT("Health grows past third room at every floor"));
+    Check(DungeonBalance::EnemyHealth(DungeonBalance::Role::Boss,7,9)>DungeonBalance::EnemyHealth(DungeonBalance::Role::Boss,0,9),TEXT("Boss health grows across floors"));
     for(int I=0;I<8;++I){auto* T=LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/Finance_%d.Finance_%d"),I,I));Check(T&&T->Source.GetSizeX()==384&&T->Filter==TF_Nearest&&T->NeverStream,TEXT("Finance high-resolution point-filtered nonstreaming frames"));}
     for(int Species=25;Species<=27;++Species)for(int Frame=0;Frame<8;++Frame)
     {

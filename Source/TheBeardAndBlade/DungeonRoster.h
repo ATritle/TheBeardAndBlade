@@ -3,6 +3,7 @@
 #include "RustbladeSquire.h"
 #include "DungeonExpansion.h"
 #include "IronMatriarch.h"
+#include "DungeonBalance.h"
 struct FDungeonSpecies
 {
     const TCHAR* Name;
@@ -26,7 +27,7 @@ inline TArray<int32> KeepEncounter(int32 Depth,int32 Wave=1)
     if(Depth<=1)return {49,49,50,4};
     if(Depth==2)return {49,51,49,50,4};
     if(Depth==3)return {49,52,49,2,49,4};
-    return {49,53,49,50,4,49};
+    return {49,52,49,50,4,49};
 }
 // Theme-matched campaign encounters. Depth is graph distance, never visit count;
 // late specialists replace slots rather than inflating simultaneous enemy counts.
@@ -127,6 +128,16 @@ inline const FDungeonSpecies& Get(int32 I) {
         return Expanded[I-DungeonExpansionV2::First];
     }
     return Species[FMath::Clamp(I,0,int32(UE_ARRAY_COUNT(Species))-1)];
+}
+inline DungeonBalance::Role BalanceRole(int I,bool Boss=false) {
+    using DungeonBalance::Role;
+    if(Boss)return Role::Boss;
+    if(I==53||I==68||(DungeonExpansionV2::Is(I)&&DungeonExpansionV2::Get(I).Elite))return Role::Elite;
+    const auto& S=Get(I);
+    if(S.HP<=28)return Role::Nuisance;
+    if(S.AttackStyle==1||S.AttackStyle==3||S.AttackStyle==5||S.AttackStyle==6)return Role::Ranged;
+    if(S.HP>=90)return Role::Heavy;
+    return Role::Melee;
 }
 inline float RenderSize(int32 I)
 {

@@ -3,6 +3,14 @@ $projectRoot=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if(!$Destination) { $Destination=Join-Path $projectRoot 'Builds/v0.4.2' }
 if(Test-Path (Join-Path $Destination 'Windows')) { throw 'Choose a fresh archive destination to avoid shipping leftover files from older builds.' }
 $env:uebp_EngineSavedFolder=Join-Path $projectRoot 'Saved/Automation'
+# Use a writable temporary directory for UBT response files, SDK validation and
+# build-script locks. Default Windows TEMP was blocking unattended builds.
+$packageTemp=Join-Path $projectRoot 'Intermediate/PackagingTemp'
+New-Item -ItemType Directory -Force $packageTemp | Out-Null
+$env:TEMP=$packageTemp
+$env:TMP=$packageTemp
+$sdkTools='C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64'
+if(Test-Path (Join-Path $sdkTools 'mt.exe')) { $env:PATH="$sdkTools;$env:PATH" }
 # Cook and UnrealPak must use the same Zen store, including child processes.
 ${env:UE-LocalDataCachePath}=Join-Path $projectRoot 'Intermediate/DDC'
 # Build explicitly so UBA uses a writable project-local cache rather than ProgramData.
@@ -12,6 +20,37 @@ foreach($target in @(@('TheBeardAndBladeEditor','Development'),@('TheBeardAndBla
 }
 & "$Engine/Engine/Build/BatchFiles/RunUAT.bat" BuildCookRun "-project=$projectRoot/TheBeardAndBlade.uproject" -noP4 -platform=Win64 -clientconfig=Shipping -skipbuildeditor -nocompileeditor -nocompile -cook -stage -pak -iostore -archive "-archivedirectory=$Destination" "-AdditionalCookerOptions=-DDC=InstalledNoZenLocalFallback -DDC-ForceMemoryCache -LocalDataCachePath=$projectRoot/Intermediate/DDC -ShaderWorkingDir=$projectRoot/Intermediate/Shaders" -prereqs -nodebuginfo -utf8output -unattended
 if($LASTEXITCODE -ne 0) { throw "Unreal packaging failed: $LASTEXITCODE" }
+# Enemy textures load by generated names, so the cooker cannot discover them
+# through map references. Fail packaging if any imported animation is omitted.
+$enemySourceRoot=Join-Path $projectRoot 'Content/Art/EnemyExpansion'
+$enemyCookRoot=Join-Path $projectRoot 'Saved/Cooked/Windows/TheBeardAndBlade/Content/Art/EnemyExpansion'
+$missingEnemyAssets=@(Get-ChildItem -LiteralPath $enemySourceRoot -Recurse -Filter '*.uasset' | Where-Object {
+    $relativeEnemyAsset=$_.FullName.Substring($enemySourceRoot.Length+1)
+    !(Test-Path -LiteralPath (Join-Path $enemyCookRoot $relativeEnemyAsset))
+})
+if($missingEnemyAssets.Count) {
+    throw ("Cook omitted {0} enemy assets, including {1}" -f $missingEnemyAssets.Count,$missingEnemyAssets[0].FullName)
+}
+Write-Output 'Enemy animation cook coverage verified.'
+# Also inspect the final IoStore container, not just loose cooker output.
+$enemyContainer=Join-Path $Destination 'Windows/TheBeardAndBlade/Content/Paks/TheBeardAndBlade-Windows.utoc'
+$enemyContainerList=Join-Path $Destination 'enemy-container-audit.csv'
+& "$Engine/Engine/Binaries/Win64/UnrealPak.exe" "-ListContainer=$enemyContainer" "-Csv=$enemyContainerList"
+if($LASTEXITCODE -ne 0) { throw 'Cannot inspect packaged enemy assets.' }
+$enemyContainerContents=Get-Content -Raw -LiteralPath $enemyContainerList
+$missingPackagedEnemies=@(Get-ChildItem -LiteralPath $enemySourceRoot -Recurse -Filter '*.uasset' | Where-Object {
+    $relativeEnemyAsset=$_.FullName.Substring($enemySourceRoot.Length+1).Replace('\','/')
+    !$enemyContainerContents.Contains('/Content/Art/EnemyExpansion/'+$relativeEnemyAsset)
+})
+if($missingPackagedEnemies.Count) {
+    throw ("Final container omitted {0} enemy assets, including {1}" -f $missingPackagedEnemies.Count,$missingPackagedEnemies[0].FullName)
+}
+Write-Output 'Final packaged enemy animation coverage verified.'
+# These assets also load by name and must survive staging into the final container.
+foreach($requiredArt in @('/Content/Art/TeaSpirit/TeaSpirit_DrinkSheet.uasset','/Content/Art/UI/Hotbar/Hotbar_TeaSpirit.uasset')) {
+    if(!$enemyContainerContents.Contains($requiredArt)) { throw "Final container omitted $requiredArt" }
+}
+Write-Output 'Tea Spirit animation and HUD cook coverage verified.'
 $brandOutput=Join-Path $Destination 'Windows/Branding'
 New-Item -ItemType Directory -Force $brandOutput | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot 'Branding/Icon.png'),(Join-Path $projectRoot 'Branding/Logo.png'),(Join-Path $projectRoot 'Branding/PROMPTS.md') -Destination $brandOutput

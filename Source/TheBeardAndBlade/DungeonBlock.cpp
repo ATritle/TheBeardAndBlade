@@ -12,7 +12,7 @@ namespace
 }
 bool ADungeonHero::CanStrike() const
 {
-    return CombatAvailable(this)&&!IsBlocking()&&!IsRolling()&&!IsCasting()&&!IsAttacking();
+    return CombatAvailable(this)&&!IsBlocking()&&!IsRolling()&&!IsCasting()&&!IsAttacking()&&!IsDrinkingTea();
 }
 bool ADungeonHero::CanUseTea() const
 {
@@ -21,7 +21,7 @@ bool ADungeonHero::CanUseTea() const
 bool ADungeonHero::CanUseFreedom() const
 {
     const auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    return CombatAvailable(this)&&!IsBlocking()&&G&&G->IsFreedomReady();
+    return CombatAvailable(this)&&!IsBlocking()&&!IsDrinkingTea()&&G&&G->IsFreedomReady();
 }
 bool ADungeonHero::CanStartBlock() const
 {
@@ -46,7 +46,6 @@ bool ADungeonHero::TryBlockDamage(FVector2D ToSource)
 bool ADungeonHero::ReceiveMeleeHit(float Damage,FVector2D Attacker,bool BossAttack)
 {
     const bool Guarded=TryBlockDamage(Attacker-DungeonView::Project(GetActorLocation()));
-    if(Guarded&&!BossAttack)return true;
     ReceiveHit(Damage,false,Attacker,BossAttack);
     return Guarded;
 }

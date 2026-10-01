@@ -12,7 +12,9 @@ The separate `TheBeardAndBlade-StreamPixel-v0.4.2.zip` contains the same Pixel S
 
 ## Controls
 
-WASD move; Shift sprint; Space dodge; mouse aim; LMB attack; MMB tea; RMB block; 1 FREEDOM after 15 kills; E interact; I inventory; P pause; M Emerald Atlas.
+WASD move; Shift sprint; Space dodge; mouse aim; LMB attack; MMB throw tea; RMB block; 1 FREEDOM after 15 kills; 2 Tea Spirit; E interact; I inventory; P pause; M Emerald Atlas.
+
+Tea Spirit: drink a cup of tea for five seconds of invulnerability and 50% increased movement speed. The protected window includes the 1.2-second raise/sip/lower animation; movement resumes after drinking. A pulsing gold glow and outward-radiating aura mark the effect. Recharge takes 30 seconds after protection ends. The skill has its own HUD icon and does not replace the MMB tea attack.
 
 Block uses a five-second reserve that refills when released. Remaining reserve can be reused immediately. Face the incoming attack: regular attacks are blocked fully; boss attacks retain 75% damage.
 

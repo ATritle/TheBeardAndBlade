@@ -14,6 +14,7 @@
 void ADungeonGameMode::FinishRun(bool Victory)
 {
     if(HasEnding())return;
+    EndBalanceRoom(Victory?TEXT("victory"):TEXT("death"));
     EndState=Victory&&!IsDead()?2:1;EndTime=0;bEndingCleaned=false;
     bMenu=false;bShowControls=false;
     CancelBossIntro();DialogueLines.Empty();DialogueWait=BossGrace=0;

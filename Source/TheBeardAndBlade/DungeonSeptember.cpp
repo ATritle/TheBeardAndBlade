@@ -26,8 +26,9 @@ bool ADungeonGameMode::InteractReward(ADungeonHero* H)
         int Choice=INDEX_NONE; float Distance=100;
         for(int I=0;I<3;++I) { const float D=FVector2D::Distance(P,ChestPosition(I)); if(D<Distance) { Distance=D; Choice=I; } }
         if(Choice==INDEX_NONE) return false;
-        if(!ChestRolled[Choice]) { ChestLoot[Choice]=RollChestLoot(IsBossRoom(),Room); ChestRolled[Choice]=true; }
+        if(!ChestRolled[Choice]) { ChestLoot[Choice]=RollChestLoot(IsBossRoom(),LootLevel()); ChestRolled[Choice]=true; }
         Loot=ChestLoot[Choice]; bLootRolled=true;
+        BalanceEvent(TEXT("chest_offer"),Loot.Rarity,Loot.CatalogId);
         Reward.Choice=Choice; Reward.Phase=ERewardPhase::Opening; Reward.Age=0;
         // The reward area is clear of props and arches. Clamp in logical floor space.
         Reward.Landing=DungeonView::Clamp(ChestPosition(Choice)+FVector2D(0,92));
@@ -37,7 +38,7 @@ bool ADungeonGameMode::InteractReward(ADungeonHero* H)
     if(!H->AddToInventory(Loot)) { Reward.BagFull=true; LootTimer=8; H->InventoryMessage=TEXT("Bag full. Make space, then collect this item."); return false; }
     // All once-only grants live behind the successful insertion, never animation events.
     Reward.Phase=ERewardPhase::Collected; Reward.CollectedAge=0;Reward.BagFull=false;
-    H->Health=FMath::Min(H->MaxHealth,H->Health+35);
+    H->RestoreHealth(15);
     bChest=false; bLootClaimed=true; LootTimer=8; TransitionCooldown=.8f;
     UE_LOG(LogTemp,Display,TEXT("ROOM_FLOW room=%d item collected"),Room);
     PlaySound(TEXT("UI")); return true;
@@ -87,11 +88,11 @@ void ADungeonHUD::DrawReward(ADungeonGameMode* G,ADungeonHero* H)
 bool ADungeonHero::IsDamageImmune() const
 {
     const auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    return Health>0&&(Invulnerable>0||(G&&G->IsFreedomActive()));
+    return Health>0&&(IsTeaEmpowered()||Invulnerable>0||(G&&G->IsFreedomActive()));
 }
 void ADungeonHero::ApplyBurgerStatus()
 {
-    if(Health<=0) return;
+    if(Health<=0||IsTeaEmpowered()) return;
     StunTime=FMath::Max(StunTime,.75f); SlowTime=FMath::Max(SlowTime,3.f);
     AttackTime=PowerCastTime=RollTime=0; bWalking=false;
 }
