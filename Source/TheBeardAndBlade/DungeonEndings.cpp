@@ -16,7 +16,15 @@ void ADungeonGameMode::FinishRun(bool Victory)
     if(HasEnding())return;
     EndBalanceRoom(Victory?TEXT("victory"):TEXT("death"));
     EndState=Victory&&!IsDead()?2:1;EndTime=0;bEndingCleaned=false;
+    DeathReturnRoom=INDEX_NONE;
+    if(IsDeathSequence()&&bAtlasActive&&AtlasRooms.IsValidIndex(AtlasCurrent)){
+        SaveAtlasRoom();
+        if(AtlasRooms.IsValidIndex(AtlasPreviousSafe)&&AtlasRooms[AtlasPreviousSafe].Cleared&&
+            AtlasRooms[AtlasPreviousSafe].Type!=EAtlasRoom::Trader)DeathReturnRoom=AtlasPreviousSafe;
+        else if(AtlasRooms.IsValidIndex(0)&&AtlasRooms[0].Cleared)DeathReturnRoom=0;
+    }
     bMenu=false;bShowControls=false;
+    bAtlasMap=bTraderOpen=false;AtlasTravelTime=AtlasArrivalTime=0;
     CancelBossIntro();DialogueLines.Empty();DialogueWait=BossGrace=0;
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))
     {
@@ -32,10 +40,13 @@ void ADungeonGameMode::UpdateEnding(float Dt)
     if(!bEndingCleaned)
     {
         bEndingCleaned=true;PendingSpawns=0;SpawnTimer=0;
-        Shots.Empty();Splashes.Empty();Impacts.Empty();Potions.Empty();Blood.Empty();
+        Shots.Empty();Splashes.Empty();Impacts.Empty();
         FreedomTime=0;TransitionTime=TransitionCooldown=0;
-        bChest=bLootClaimed=bLootRolled=false;Reward=FRewardPresentation();LootTimer=0;
-        for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();
+        if(IsVictory()){
+            Potions.Empty();Blood.Empty();
+            bChest=bLootClaimed=bLootRolled=false;Reward=FRewardPresentation();LootTimer=0;
+            for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();
+        }
     }
     EndTime+=FMath::Max(0.f,Dt);
 }
@@ -43,7 +54,7 @@ void ADungeonGameMode::UpdateEnding(float Dt)
 void ADungeonGameMode::RestartFromEnding()
 {
     // Prevent the final attack click / held confirm from accidentally skipping art.
-    if(HasEnding()&&EndTime>=1.f)StartGame();
+    if(HasEnding()&&EndTime>=(IsDeathSequence()?DungeonRevival::ChoiceDelay:1.f))StartGame();
 }
 
 void ADungeonHUD::DrawEnding(ADungeonGameMode* G)
@@ -85,6 +96,12 @@ void ADungeonHUD::EndingClick()
     auto* PC=GetOwningPlayerController();float X=0,Y=0;
     if(!G||!G->HasEnding()||G->GetEndingTime()<1||!PC||!PC->GetMousePosition(X,Y)||Scale<=0)return;
     const FVector2D P=(FVector2D(X,Y)-Offset)/Scale;
+    if(G->IsDeathSequence()){
+        if(G->GetEndingTime()<DungeonRevival::ChoiceDelay||P.Y<701||P.Y>747)return;
+        if(P.X>=377&&P.X<=632)G->ReviveFromDeath();
+        else if(P.X>=648&&P.X<=903)G->RestartFromEnding();
+        return;
+    }
     if(P.Y<716||P.Y>764)return;
     if(P.X>=275&&P.X<=605)G->RestartFromEnding();
     else if(P.X>=675&&P.X<=1005)UKismetSystemLibrary::QuitGame(this,PC,EQuitPreference::Quit,false);
@@ -110,7 +127,7 @@ void ADungeonGameMode::RunEndingPreview()
         if(Stage==4&&Time>7.5f){Check(HasEnding()&&!IsVictory()&&IsGameplayBlocked());FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("Screenshots/ReleaseDeath.png"),false,false);++Stage;}
         if(Stage==5&&Time>9)
         {
-            Hero->Confirm();Check(!HasEnding()&&Hero->Health==Hero->MaxHealth&&Room==1);
+            RestartFromEnding();Check(!HasEnding()&&Hero->Health==Hero->MaxHealth&&Room==1);
             for(auto* N:{TEXT("EndingDeath"),TEXT("EndingVictory")})Check(LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/Endings/%s.%s"),N,N))!=nullptr);
             FFileHelper::SaveStringToFile(FString::Printf(TEXT("ENDING_SMOKE errors=%d; final boss kill; victory; death; fresh restarts\n"),Errors),*(FPaths::ProjectSavedDir()/TEXT("EndingSmokeTest.txt")));
             ++Stage;FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);
@@ -147,10 +164,11 @@ void ADungeonGameMode::VerifyEndings()
     Check(PendingSpawns==0&&Shots.IsEmpty()&&Enemies.IsEmpty(),TEXT("Death cleans combat safely"));
     RestartFromEnding();Check(HasEnding(),TEXT("Input guard prevents accidental restart"));
     ToggleMenu();Check(!bMenu&&HasEnding(),TEXT("Pause cannot hide ending"));
-    Tick(1);H->Confirm();Check(!HasEnding()&&H->Health==H->MaxHealth&&Room==1&&PendingSpawns>0,TEXT("Enter starts fresh run"));
+    Tick(3);H->Confirm();Check(HasEnding(),TEXT("Enter cannot restart an unfunded run"));
+    RestartFromEnding();Check(!HasEnding()&&H->Health==H->MaxHealth&&Room==1&&AreDoorsOpen(),TEXT("Explicit new descent starts in safe entrance"));
     for(int R:{4,24,28,32})
     {
-        StartPlaytestRoom(R);Tick(2.1f);DialogueWait=0;AdvanceBossDialogue(true);BossGrace=0;
+        StartPlaytestRoom(R);Tick(2.1f);CancelBossIntro();DialogueLines.Empty();DialogueWait=BossGrace=0;
         const auto Batch=Enemies;for(auto& E:Batch)if(IsValid(E)){E->SpawnTime=0;E->TakeDungeonDamage(100000);}
         for(auto& E:Batch)if(IsValid(E)&&E->Species==IronMatriarch::Species)E->TickIronMatriarch(2,H,this);
         if(R<DungeonProgression::CampaignRooms)Check(!HasEnding()&&bChest,TEXT("Earlier bosses still award chests"));

@@ -3,11 +3,13 @@ from pathlib import Path
 import zipfile,hashlib,argparse
 parser=argparse.ArgumentParser()
 parser.add_argument('--version',default='v0.4.2')
+parser.add_argument('--build-dir',type=Path,help='Fresh archive directory containing Windows, for same-version refreshes')
+parser.add_argument('--output-dir',type=Path,help='Separate output folder; existing archives are never overwritten')
 parser.add_argument('--streaming',action='store_true',help='Use StreamPixel Windows layout and hosting checklist')
 args=parser.parse_args()
 assert all(c.isalnum() or c in '.-_' for c in args.version)
 root=Path(__file__).resolve().parents[1]
-build=root/'Builds'/args.version/'Windows'
+build=(args.build_dir if args.build_dir else root/'Builds'/args.version)/'Windows'
 assert (build/'TheBeardAndBlade.exe').is_file()
 assert list(build.rglob('*.ucas'))
 assert not (build/'BeardAndBlade').exists(), 'Old project payload must not ship'
@@ -15,7 +17,9 @@ assert not (build/'BeardAndBlade.exe').exists(), 'Old launcher must not ship'
 assert (build/'Engine/Extras/Redist/en-us/vc_redist.x64.exe').is_file()
 prefix='TheBeardAndBlade-StreamPixel' if args.streaming else 'TheBeardAndBlade-Windows'
 archive_root=Path('Windows' if args.streaming else 'TheBeardAndBlade')
-out=root/'Builds'/f'{prefix}-{args.version}.zip'
+output_dir=args.output_dir if args.output_dir else root/'Builds'
+output_dir.mkdir(parents=True,exist_ok=True)
+out=output_dir/f'{prefix}-{args.version}.zip'
 assert not out.exists(), 'Choose a new version; preserve existing player archives'
 with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
     for file in sorted(build.rglob('*')):

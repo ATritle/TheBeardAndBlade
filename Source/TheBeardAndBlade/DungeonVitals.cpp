@@ -4,6 +4,19 @@
 #include "Engine/Texture2D.h"
 #include "Engine/Canvas.h"
 
+bool ADungeonHero::CanDrinkPotion() const
+{
+    return CanStrike()&&PotionCharges>0&&Health<MaxHealth;
+}
+void ADungeonHero::DrinkPotion()
+{
+    if(!CanDrinkPotion())return;
+    --PotionCharges;
+    PotionSip=PotionDrinkDuration;
+    RestoreHealth(MaxHealth*.25f);
+    if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this)))G->PlaySound(TEXT("Equip"),.4f,1.15f);
+}
+
 void ADungeonHero::SpendStamina(float Amount)
 {
     Stamina=FMath::Max(0.f,Stamina-Amount); StaminaDelay=.8f;
@@ -24,10 +37,10 @@ void ADungeonGameMode::UpdatePotions(float Dt)
     for(int32 I=Potions.Num()-1;I>=0;--I)
     {
         auto& P=Potions[I]; P.Age+=Dt;
-        // Leave full-health pickups available; ignore fresh drops briefly so they are visible.
-        if(P.Age>.4f&&H->Health<H->MaxHealth&&FVector2D::Distance(P.Position,DungeonView::Project(H->GetActorLocation()))<34)
+        // Potions are carried, even at full health. Excess stays on the floor.
+        if(P.Age>.4f&&H->PotionCharges<ADungeonHero::PotionCapacity&&FVector2D::Distance(P.Position,DungeonView::Project(H->GetActorLocation()))<34)
         {
-            H->RestoreHealth(H->MaxHealth*DungeonBalance::PotionFraction);
+            ++H->PotionCharges;
             PlaySound(TEXT("Equip"),.65f,1.3f); Potions.RemoveAt(I);
         }
     }
@@ -89,6 +102,29 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
     constexpr float K=.43f,BaseX=140,BaseY=458;
     auto P=[](float X,float Y){return FVector2D(BaseX+X*K,BaseY+Y*K);};
     if(auto* Chassis=Texture(TEXT("Hotbar_Chassis"))){
+        // Extend the original curved gold rail, using its actual hammered-metal
+        // pixels rather than flat box outlines. The ends tuck behind the dragon
+        // and lightning mount when the original chassis is drawn over them.
+        MeterArc(P(342,502),303*K,3.35f,1.47f,1,FLinearColor(.015f,.018f,.017f),49*K);
+        TArray<FCanvasUVTri> Rail;
+        constexpr int RailSteps=100;
+        for(int I=0;I<RailSteps;++I){
+            FVector2D V[4],UV[4];
+            for(int J=0;J<4;++J){
+                const float T=float(I+(J>=2))/RailSteps;
+                const bool Outer=J==1||J==2;
+                const float A=3.35f+1.47f*T,SourceA=3.47f+1.12f*T;
+                V[J]=Offset+P(342+FMath::Cos(A)*(Outer?334:314),502+FMath::Sin(A)*(Outer?334:314))*Scale;
+                UV[J]=FVector2D((342+FMath::Cos(SourceA)*(Outer?303:283))/1774.f,(502+FMath::Sin(SourceA)*(Outer?303:283))/887.f);
+            }
+            for(int J=0;J<2;++J){
+                FCanvasUVTri T;const int B=J?2:1,C=J?3:2;
+                T.V0_Pos=V[0];T.V1_Pos=V[B];T.V2_Pos=V[C];
+                T.V0_UV=UV[0];T.V1_UV=UV[B];T.V2_UV=UV[C];
+                T.V0_Color=T.V1_Color=T.V2_Color=FLinearColor::White;Rail.Add(T);
+            }
+        }
+        Canvas->K2_DrawTriangle(Chassis,MoveTemp(Rail));
         // Keep one shared transform, but omit the two baked mouse-key plaques.
         // A clean rail sample bridges their sockets; no opaque cover hides the world.
         auto RawRegion=[&](float X,float Y,float W,float Height,float U,float V,float UW,float VH){
@@ -130,11 +166,16 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
     // The gemstone fill stays inside the chassis' recessed gold rails. Its ends
     // stop under the dragon/medallion mounts, never across the ornamental rim.
     GemMeter(P(342,502),264*K,38*K,3.47f,1.21f,DisplayStamina,H->bExhausted?FLinearColor(.09f,.11f,.17f):Blue,6);
+    // Ruby inlay shares the chassis' continuous inner/outer rails, like stamina.
+    GemMeter(P(342,502),303*K,26*K,3.47f,1.21f,H->PotionCharges/4.f,FLinearColor(.82f,.035f,.055f),4);
+    const auto PotionKey=P(7,235);
+    CardText(DungeonKeys::Label(DungeonKeys::Potion),PotionKey.X-15,PotionKey.Y,Gold,18,54,24,true);
     const auto Lightning=P(359,166);
     Sprite(TEXT("Hotbar_Lightning"),Lightning.X,Lightning.Y,110*K,110*K);
 
     const float Centers[]={665,850,1035,1220,1405,1590};
-    const TCHAR* Keys[]={TEXT("1"),TEXT("2"),TEXT("3"),TEXT("4")};
+    const FString Keys[]={DungeonKeys::Label(DungeonKeys::Freedom),DungeonKeys::Label(DungeonKeys::Tea),TEXT("3"),TEXT("4")};
+    auto Binding=[&](FVector2D C,int Action){const auto K=DungeonKeys::Key(Action);if(K==EKeys::LeftMouseButton)Mouse(C,0);else if(K==EKeys::MiddleMouseButton)Mouse(C,1);else if(K==EKeys::RightMouseButton)Mouse(C,2);else CardText(DungeonKeys::Label(Action),C.X-38,C.Y-8,Gold,17,76,30,true);};
     for(int I=0;I<6;++I){
         const FVector2D Tile=P(Centers[I]-77,465),Key=P(Centers[I]-40,626);
         const float S=154*K;
@@ -167,8 +208,8 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
         }
         if(I>=4){Box(Tile.X+3,Tile.Y+S-4,S-6,2,Ink);Box(Tile.X+3,Tile.Y+S-4,(S-6)*Fraction,2,Ready?Green:Gold);}
         // Labels sit on the actual raised keycap artwork crossing the lower rail.
-        if(I<4)CardText(Keys[I],Key.X,Key.Y,Gold,19,80*K,42*K,true);
-        else Mouse(P(Centers[I],647),I==4?0:1);
+        if(I<4)CardText(Keys[I],Key.X-25*K,Key.Y,Gold,19,130*K,42*K,true);
+        else Binding(P(Centers[I],647),I==4?DungeonKeys::Attack:DungeonKeys::Throw);
     }
     const FVector2D BlockCenter(985,702);
     Disk(BlockCenter,43,Ink);
@@ -180,12 +221,12 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
         CardText(FString::Printf(TEXT("%.1f"),H->GetBlockCountdown()),967,702,Pale,18,36,23,true);
     }
     // Detached block medallion and utility map are deliberately outside chassis.
-    Mouse(FVector2D(985,766),2);
+    Binding(FVector2D(985,766),DungeonKeys::Block);
     CardText(TEXT("BLOCK"),946,786,Gold,12,78,14,true);
     if(H->IsBlocking()||H->GetBlockCooldown()>0)CardText(H->IsBlocking()?TEXT("GUARDING"):TEXT("REFILLING"),940,618,Gold,12,90,18,true);
-    else if(H->NeedsBlockRelease())CardText(TEXT("RELEASE RMB"),935,618,Gold,13,100,20,true);
+    else if(H->NeedsBlockRelease())CardText(TEXT("RELEASE ")+DungeonKeys::Label(DungeonKeys::Block),935,618,Gold,13,100,20,true);
     Sprite(TEXT("AtlasMapIcon"),1070,699,42,42);
-    CardText(TEXT("M MAP"),1053,751,Gold,13,76,20,true);
+    CardText(DungeonKeys::Label(DungeonKeys::Map)+TEXT(" MAP"),1053,751,Gold,13,76,20,true);
 }
 
 void ADungeonHUD::GemMeter(FVector2D C,float Radius,float Width,float Start,float Sweep,float Fraction,FLinearColor Tint,int Pieces)

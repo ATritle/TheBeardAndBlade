@@ -52,7 +52,7 @@ void ADungeonGameMode::StartBossIntro()
     const bool Muted=bEffectsMuted||(GetBossSpecies()!=IronMatriarch::Species&&bMusicMuted);
     // IronIntro already contains its 2.10s lead-in; start at zero exactly once.
     if(auto* Cue=LoadObject<USoundBase>(nullptr,CuePath))
-        IntroAudio=UGameplayStatics::SpawnSound2D(this,Cue,Muted?0:.42f*MasterVolume,1,0,nullptr,false,true);
+        IntroAudio=UGameplayStatics::SpawnSound2D(this,Cue,Muted?0:.42f*MasterVolume*VoiceVolume,1,0,nullptr,false,true);
     if(MusicComponent)MusicComponent->SetVolumeMultiplier(0);
 }
 void ADungeonGameMode::CancelBossIntro()
@@ -70,7 +70,7 @@ void ADungeonGameMode::FinishBossIntro()
 void ADungeonGameMode::UpdateBossIntro(float Dt)
 {
     if(IsDead()){CancelBossIntro();DialogueLines.Empty();return;}
-    if(IntroAudio){IntroAudio->SetPaused(bMenu);IntroAudio->SetVolumeMultiplier((bEffectsMuted||(GetBossSpecies()!=IronMatriarch::Species&&bMusicMuted))?0:.42f*MasterVolume);}
+    if(IntroAudio){IntroAudio->SetPaused(bMenu);IntroAudio->SetVolumeMultiplier((bEffectsMuted||(GetBossSpecies()!=IronMatriarch::Species&&bMusicMuted))?0:.42f*MasterVolume*VoiceVolume);}
     if(bMenu)return;
     if(MusicComponent)MusicComponent->SetVolumeMultiplier(0);
     BossIntroTime+=FMath::Max(0.f,Dt);DialogueWait=FMath::Max(0.f,DialogueWait-Dt);

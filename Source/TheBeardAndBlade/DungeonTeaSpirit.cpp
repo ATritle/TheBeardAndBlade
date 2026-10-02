@@ -17,7 +17,7 @@ bool ADungeonHero::CanDrinkTea() const
 void ADungeonHero::DrinkTea()
 {
     if(!CanDrinkTea()||!TeaSpirit.Start())return;
-    // Protection begins on press; the short sip is part of the five-second window.
+    // Protection begins on press; the short sip is part of the ten-second window.
     SlowTime=FlashBlindTime=HurtTime=0;
     if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this)))
         G->PlaySound(TEXT("Equip"),.45f);
@@ -43,12 +43,15 @@ void ADungeonGameMode::VerifyTeaSpirit()
     H->ReceiveFlashStab();H->ApplyBurgerStatus();
     Check(H->Health==HP&&H->StunTime==0&&H->SlowTime==0,TEXT("normal, boss, projectile and special immunity"));
     Check(!H->ApplyFlashBang(DungeonView::Project(H->GetActorLocation()),200,true)&&H->FlashBlindTime==0,TEXT("flash immunity"));
-    H->DrinkTea();Check(H->GetTeaSpiritTime()==5,TEXT("repeat cannot refresh"));
+    H->DrinkTea();Check(H->GetTeaSpiritTime()==10,TEXT("repeat cannot refresh"));
     H->Tick(FDungeonTeaSpirit::SipDuration);Check(!H->IsDrinkingTea()&&H->CanStrike(),TEXT("attack allowed after sip"));
     H->MoveRight(1);const auto Before=H->GetActorLocation();H->Tick(.1f);H->MoveRight(0);
     Check(FMath::IsNearlyEqual(float((DungeonView::Project(H->GetActorLocation())-DungeonView::Project(Before)).Size()),28.5f,.01f),TEXT("50 percent speed increase"));
-    H->Tick(FDungeonTeaSpirit::Duration-FDungeonTeaSpirit::SipDuration-.1f);H->Tick(.001f);
-    Check(!H->IsTeaEmpowered()&&H->GetTeaSpiritCooldown()>29.9f&&!H->CanDrinkTea(),TEXT("five second expiry and recharge"));
+    H->Tick(5-FDungeonTeaSpirit::SipDuration-.1f);
+    H->ReceiveHit(10000,true,{},true);
+    Check(H->IsTeaEmpowered()&&H->Health==HP&&H->GetTeaSpiritCooldown()==0,TEXT("protection continues after five seconds"));
+    H->Tick(5);H->Tick(.001f);
+    Check(!H->IsTeaEmpowered()&&H->GetTeaSpiritCooldown()>29.9f&&!H->CanDrinkTea(),TEXT("ten second expiry and recharge"));
     H->ReceiveHit(10,true,{},true);Check(H->Health<HP,TEXT("damage resumes"));
     H->Tick(30);Check(H->CanDrinkTea(),TEXT("recharge completes"));
     H->DrinkTea();H->Restart();Check(!H->IsTeaEmpowered()&&H->GetTeaSpiritCooldown()==0,TEXT("new run resets"));
@@ -102,7 +105,8 @@ void ADungeonHUD::DrawTeaSpiritAura(ADungeonHero* H,FVector2D Position,float Her
 void ADungeonGameMode::ReviewTeaSpirit(float Dt)
 {
 #if !UE_BUILD_SHIPPING
-    if(!FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritReview")))return;
+    const bool PotionReview=FParse::Param(FCommandLine::Get(),TEXT("PotionReview"));
+    if(!PotionReview&&!FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritReview")))return;
     static bool Started=false,Activated=false;
     static float Time=0;
     static int Frame=-1;
@@ -112,14 +116,16 @@ void ADungeonGameMode::ReviewTeaSpirit(float Dt)
         AtlasArrivalTime=AtlasTravelTime=0;bAtlasMap=bTraderOpen=false;PendingSpawns=0;
         for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();
         H->Restart();H->SetActorLocation(DungeonView::Unproject({540,500}));
+        if(PotionReview){H->PotionCharges=4;H->Health=50;}
     }
     Time+=Dt;
-    if(Time>=1&&!Activated){Activated=true;H->DrinkTea();}
+    if(Time>=1&&!Activated){Activated=true;if(PotionReview)H->DrinkPotion();else H->DrinkTea();}
+    if(PotionReview&&Time>3)H->PotionCharges=Time>6?0:2;
     const int N=int(Time*20);
     if(N!=Frame){
         Frame=N;
-        FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/TEXT("Saved/TeaSpiritReviewV2")/FString::Printf(TEXT("frame-%04d.png"),N),true,false);
+        FScreenshotRequest::RequestScreenshot(FPaths::ProjectDir()/(PotionReview?TEXT("Saved/PotionBorderReview"):TEXT("Saved/TeaSpiritReviewV2"))/FString::Printf(TEXT("frame-%04d.png"),N),true,false);
     }
-    if(Time>8)FPlatformMisc::RequestExit(false);
+    if(Time>(PotionReview?8:FDungeonTeaSpirit::Duration+3))FPlatformMisc::RequestExit(false);
 #endif
 }

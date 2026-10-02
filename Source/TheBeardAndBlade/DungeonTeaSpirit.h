@@ -5,7 +5,7 @@
 // Gameplay seconds only: menus, map, trader and transitions pause this clock.
 struct FDungeonTeaSpirit
 {
-    static constexpr float Duration=5.f, Recharge=30.f, Speed=1.5f, SipDuration=DungeonTeaDrink::Duration;
+    static constexpr float Duration=10.f, Recharge=30.f, Speed=1.5f, SipDuration=DungeonTeaDrink::Duration;
     float Active=0, Cooldown=0, Sip=0;
     bool Ready() const { return Active<=0&&Cooldown<=0; }
     bool Start()

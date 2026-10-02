@@ -108,18 +108,21 @@ void ADungeonHero::Restart()
     InputX=InputY=WalkDistance=FootstepDistance=MoveBlend=RunBlend=0;GaitTravel=FVector2D::ZeroVector; IdleBreathBlend=BreathPhase=0;bSprinting=bWalking=false; Aim=FVector2D(0,1); Facing=4;
     RollTime=RollCooldown=PowerCooldown=PowerCastTime=0; bTeaReleased=false;
     TeaSpirit={};
+    PotionCharges=0;PotionSip=0;
     StunTime=SlowTime=StatusClock=FlashBlindTime=0;
     SetActorLocation(DungeonView::Unproject(FVector2D(640,520)));
 }
 void ADungeonHero::Tick(float Dt)
 {
     Super::Tick(Dt);
+    if(PendingRebind)RebindInput();
     ScreenVelocity=FVector2D::ZeroVector;
     if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) {StopBlock();return;}
     if(bInventoryOpen) { StopBlock();bWalking=false; return; }
     if(Health<=0||StunTime>0)StopBlock();
     GearHealBudget=FMath::Min(MaxHealth*DungeonBalance::GearHealingPerSecond,GearHealBudget+Dt*MaxHealth*DungeonBalance::GearHealingPerSecond);
     TeaSpirit.Tick(Dt);
+    PotionSip=Health>0?FMath::Max(0.f,PotionSip-Dt):0.f;
     #if !UE_BUILD_SHIPPING
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritReview"))){
         InputX=IsTeaEmpowered()&&TeaSpirit.Active<3.4f&&TeaSpirit.Active>2.6f?1.f:0.f;
@@ -171,7 +174,7 @@ void ADungeonHero::Tick(float Dt)
     }
     FVector2D P=DungeonView::Project(GetActorLocation());
     FVector2D Move(InputX,InputY);
-    if(IsDrinkingTea())Move=FVector2D::ZeroVector; // Plant the feet for the brief sip.
+    if(IsDrinking())Move=FVector2D::ZeroVector; // Plant the feet for the brief sip.
     Move=Move.GetClampedToMaxSize(1);
     const bool Sprinting=bSprinting&&!bExhausted&&Stamina>0&&!Move.IsNearlyZero()&&
         !DungeonView::Clamp(P+Move).Equals(P,.001f);
@@ -239,29 +242,35 @@ int32 ADungeonHero::GetAnimationFrame() const
 }
 void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
 {
-    I->BindKey(EKeys::M,IE_Pressed,this,&ADungeonHero::ToggleAtlas);
-    I->BindAxis("MoveForward",this,&ADungeonHero::MoveForward);
-    I->BindAxis("MoveRight",this,&ADungeonHero::MoveRight);
-    I->BindAction("Attack",IE_Pressed,this,&ADungeonHero::Attack);
-    // Explicit bindings migrate old saved RMB/MMB mappings without duplicate actions.
-    I->BindKey(EKeys::MiddleMouseButton,IE_Pressed,this,&ADungeonHero::PowerMove);
-    I->BindKey(EKeys::RightMouseButton,IE_Pressed,this,&ADungeonHero::BlockPressed);
-    I->BindKey(EKeys::RightMouseButton,IE_Released,this,&ADungeonHero::BlockReleased);
+    using namespace DungeonKeys;
+    DungeonKeys::Load();
+    I->BindKey(EKeys::LeftMouseButton,IE_Pressed,this,&ADungeonHero::InputClick).bConsumeInput=false;
+    I->BindKey(EKeys::Escape,IE_Pressed,this,&ADungeonHero::Menu);
+    I->BindKey(EKeys::Enter,IE_Pressed,this,&ADungeonHero::Confirm);
+    for(int D=0;D<4;++D)for(int R=0;R<2;++R){
+        FInputKeyBinding B(FInputChord(Key(D)),R?IE_Released:IE_Pressed);
+        B.KeyDelegate.GetDelegateForManualSet().BindLambda([this,D,R](){MoveKey(D,R==0);});
+        I->KeyBindings.Add(MoveTemp(B));
+    }
+    I->BindKey(Key(Map),IE_Pressed,this,&ADungeonHero::ToggleAtlas);
+    I->BindKey(Key(DungeonKeys::Attack),IE_Pressed,this,&ADungeonHero::GameplayAttack).bConsumeInput=false;
+    I->BindKey(Key(Throw),IE_Pressed,this,&ADungeonHero::PowerMove);
+    I->BindKey(Key(DungeonKeys::Block),IE_Pressed,this,&ADungeonHero::BlockPressed);
+    I->BindKey(Key(DungeonKeys::Block),IE_Released,this,&ADungeonHero::BlockReleased);
     if(!FParse::Param(FCommandLine::Get(),TEXT("EliteTest"))&&!FParse::Param(FCommandLine::Get(),TEXT("RosterTest")))
     {
-        I->BindKey(EKeys::One,IE_Pressed,this,&ADungeonHero::Freedom);
-        I->BindKey(EKeys::Two,IE_Pressed,this,&ADungeonHero::DrinkTea);
+        I->BindKey(Key(DungeonKeys::Freedom),IE_Pressed,this,&ADungeonHero::Freedom);
+        I->BindKey(Key(Tea),IE_Pressed,this,&ADungeonHero::DrinkTea);
+        I->BindKey(Key(Potion),IE_Pressed,this,&ADungeonHero::DrinkPotion);
     }
     // Reserve M for the atlas even if an older user config still maps it to music.
-    I->BindKey(EKeys::F8,IE_Pressed,this,&ADungeonHero::ToggleMusic);
     // SFX mute is a visible menu control, not an accidental N press beside Map.
-    I->BindAction("Interact",IE_Pressed,this,&ADungeonHero::Interact);
-    I->BindAction("Inventory",IE_Pressed,this,&ADungeonHero::ToggleInventory);
-    I->BindAction("Dodge",IE_Pressed,this,&ADungeonHero::Dodge);
-    I->BindAction("Menu",IE_Pressed,this,&ADungeonHero::Menu);
-    I->BindAction("Confirm",IE_Pressed,this,&ADungeonHero::Confirm);
-    I->BindAction("Sprint",IE_Pressed,this,&ADungeonHero::SprintPressed);
-    I->BindAction("Sprint",IE_Released,this,&ADungeonHero::SprintReleased);
+    I->BindKey(Key(DungeonKeys::Interact),IE_Pressed,this,&ADungeonHero::Interact);
+    I->BindKey(Key(DungeonKeys::Inventory),IE_Pressed,this,&ADungeonHero::ToggleInventory);
+    I->BindKey(Key(DungeonKeys::Dodge),IE_Pressed,this,&ADungeonHero::Dodge);
+    I->BindKey(Key(Pause),IE_Pressed,this,&ADungeonHero::Menu);
+    I->BindKey(Key(Sprint),IE_Pressed,this,&ADungeonHero::SprintPressed);
+    I->BindKey(Key(Sprint),IE_Released,this,&ADungeonHero::SprintReleased);
 #if WITH_EDITOR
     if(!FParse::Param(FCommandLine::Get(),TEXT("EliteTest"))&&!FParse::Param(FCommandLine::Get(),TEXT("RosterTest"))){
     I->BindKey(EKeys::F1,IE_Pressed,this,&ADungeonHero::TestFinance);
@@ -292,7 +301,6 @@ void ADungeonHero::Attack()
         }
         return;
     }
-    if(StunTime>0) return;
     if(auto* G=Mode(this))
     {
         if(G->HasEnding()) { if(auto* PC=Cast<APlayerController>(GetController())) if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) HUD->EndingClick(); return; }
@@ -392,8 +400,9 @@ void ADungeonHero::ReceiveHit(float Damage,bool PerProjectile,TOptional<FVector2
 }
 void ADungeonHero::Dodge()
 {
+    if(UIClickFrame==GFrameCounter)return;
     if(auto* Intro=Mode(this))if(Intro->IsBossIntroActive()){SkipIntro();return;}
-    if(StunTime>0||IsDrinkingTea()) return;
+    if(StunTime>0||IsDrinking()) return;
     auto* G=Mode(this);
     if(!G||G->IsGameplayBlocked()||bInventoryOpen||Health<=0||RollCooldown>0||IsCasting()||bExhausted||Stamina<DungeonCombatBalance::DodgeCost) return;
     SpendStamina(DungeonCombatBalance::DodgeCost);
@@ -403,8 +412,8 @@ void ADungeonHero::Dodge()
     RollTime=.48f; RollCooldown=1.15f; Invulnerable=.34f; AttackTime=0; bAttackHit=true;
     G->PlaySound(TEXT("Roll"));
 }
-void ADungeonHero::Menu() { if(auto* G=Mode(this)) G->ToggleMenu(); }
-void ADungeonHero::Confirm() { if(auto* G=Mode(this)) {if(G->HasEnding()){G->RestartFromEnding();return;}if(G->IsBossIntroActive()&&!G->IsMenu()){SkipIntro();return;}if(G->IsMenu()) { if(G->HasRun()) G->ToggleMenu(); else G->StartGame(); }} }
+void ADungeonHero::Menu() { if(auto* PC=Cast<APlayerController>(GetController()))if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD()))if(HUD->CaptureBinding>=0&&!PC->WasInputKeyJustPressed(EKeys::Escape))return; if(auto* G=Mode(this)) G->ToggleMenu(); }
+void ADungeonHero::Confirm() { if(auto* G=Mode(this)) {if(G->HasEnding()){if(G->IsDeathSequence())G->ReviveFromDeath();else G->RestartFromEnding();return;}if(G->IsBossIntroActive()&&!G->IsMenu()){SkipIntro();return;}if(G->IsMenu()&&!G->bShowControls&&!G->bShowSettings&&!G->bConfirmQuit) { if(G->HasRun()) G->ToggleMenu(); else G->StartGame(); }} }
 void ADungeonHero::TransitionWalk(FVector2D From,FVector2D To,float Progress,float GaitScale)
 {
     SetActorLocation(DungeonView::Unproject(FMath::Lerp(From,To,Progress)));
@@ -468,9 +477,14 @@ void ADungeonGameMode::BeginPlay()
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteMusic"),bMusicMuted,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("DungeonAudio"),TEXT("Volume"),MasterVolume,GGameUserSettingsIni);
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
+    LoadAudioSettings();
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteEffects"),bEffectsMuted,GGameUserSettingsIni);
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("RevivalVerify"))) { VerifyRevival();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritVerify"))) { VerifyTeaSpirit();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("PotionVerify"))) { VerifyPotions();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("MenuVerify"))) { VerifyMenu();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("SettingsVerify"))) { VerifySettings();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("HotbarVerify"))) { VerifyHotbar();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaV4Verify"))) { VerifyTeaV4();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeVerify"))) { VerifyRustblade();return; }
@@ -500,6 +514,7 @@ void ADungeonGameMode::BeginPlay()
 }
 void ADungeonGameMode::Tick(float Dt)
 {
+    if(auto* PC=GetWorld()->GetFirstPlayerController())if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD()))HUD->SettingsTick();
     Super::Tick(Dt);
     #if !UE_BUILD_SHIPPING
     if(FParse::Param(FCommandLine::Get(),TEXT("HotbarReview"))||FParse::Param(FCommandLine::Get(),TEXT("BlockTest")))UpdateHotbarReview(Dt);
@@ -544,6 +559,7 @@ void ADungeonGameMode::Tick(float Dt)
     ReviewIronMatriarch(Dt);
     ReviewTeaV4(Dt);
     ReviewTeaSpirit(Dt);
+    ReviewRevival(Dt);
     #if WITH_EDITOR
     if(FParse::Param(FCommandLine::Get(),TEXT("RustbladeTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
     if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionTest"))&&!bHasRun&&GetWorld()->GetTimeSeconds()>.5f)StartGame();
@@ -575,6 +591,9 @@ void ADungeonGameMode::Tick(float Dt)
                 for(int I=0;I<6;++I){FDungeonBreakable B;B.Position=FVector2D(I<3?155:1125,310+(I%3)*125);B.Variant=I%3;Breakables.Add(B);}
             }
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonControlsPreview"))) bShowControls=true;
+            if(FParse::Param(FCommandLine::Get(),TEXT("DungeonSettingsPreview"))){bShowSettings=true;if(auto* PC=GetWorld()->GetFirstPlayerController())if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())){HUD->OpenSettings();int Tab=0;FParse::Value(FCommandLine::Get(),TEXT("SettingsPage="),Tab);HUD->SettingsTab=FMath::Clamp(Tab,0,2);}}
+            if(FParse::Param(FCommandLine::Get(),TEXT("SettingsHUDPreview"))){FString Error;DungeonKeys::Set(DungeonKeys::Potion,EKeys::K,Error,false);DungeonKeys::Set(DungeonKeys::Tea,EKeys::T,Error,false);DungeonKeys::Set(DungeonKeys::Block,EKeys::B,Error,false);DungeonKeys::Set(DungeonKeys::Map,EKeys::Tab,Error,false);DungeonKeys::Set(DungeonKeys::Attack,EKeys::J,Error,false);}
+            if(FParse::Param(FCommandLine::Get(),TEXT("DungeonPausePreview"))){StartGame();ToggleMenu();}
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonMenuHoverPreview")))
                 if(auto* PC=GetWorld()->GetFirstPlayerController())
                 {
@@ -697,6 +716,9 @@ void ADungeonGameMode::Tick(float Dt)
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonBreakablesPreview"))) Name=FString::Printf(TEXT("BreakablesReview%d"),GetBiome());
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonMenuPreview"))) Name=TEXT("MenuReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonControlsPreview"))) Name=TEXT("ControlsReview");
+            if(FParse::Param(FCommandLine::Get(),TEXT("DungeonSettingsPreview"))){int Tab=0;FParse::Value(FCommandLine::Get(),TEXT("SettingsPage="),Tab);Name=FString::Printf(TEXT("SettingsReview%d"),Tab);}
+            if(FParse::Param(FCommandLine::Get(),TEXT("SettingsHUDPreview")))Name=TEXT("SettingsHUDReview");
+            if(FParse::Param(FCommandLine::Get(),TEXT("DungeonPausePreview"))) Name=TEXT("PauseReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonHeroReviewPreview")))
             { int Group=0;FParse::Value(FCommandLine::Get(),TEXT("DungeonBiome="),Group);Name=FString::Printf(TEXT("AthleticHeroReview%d"),Group); }
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonMenuHoverPreview"))) Name=TEXT("MenuHoverReview");
@@ -924,7 +946,7 @@ void ADungeonGameMode::PlayerInteract(ADungeonHero* H)
 {
     if(!H) return;
     if(H->IsInventoryOpen()||IsGameplayBlocked()||H->IsRolling()) return;
-    if(IsDead()) { RestartRun(); return; }
+    if(IsDead()) { FinishRun(false); return; }
     if(bAtlasActive&&AtlasInteract(H))return;
     // Exits remain usable even while an uncollected reward is on the floor.
     if(!bAtlasActive&&AreDoorsOpen()&&TransitionCooldown<=0)
@@ -959,7 +981,7 @@ void ADungeonGameMode::RestartRun()
     EndBalanceRoom(TEXT("restart"));BalanceRun.Empty();
     DisableAtlas();
     bTraderOpen=bTraderVisited=false;TraderStock.Empty();TraderMessage.Empty();
-    EndState=0;EndTime=0;bEndingCleaned=false;
+    EndState=0;EndTime=0;bEndingCleaned=false;DeathReturnRoom=INDEX_NONE;
     CancelBossIntro();
     Reward=FRewardPresentation();
     Blood.Empty(); FreedomKills=0; FreedomTime=0; bFreedomResolved=false;
@@ -1047,13 +1069,13 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     }
     if(auto* G=Mode(this);G&&G->IsAtlasTravel())Opacity=G->AtlasHeroOpacity();
     if(Opacity<=0.f) return;
-    const float TeaPulse=H->IsTeaEmpowered()?.5f+.5f*FMath::Sin((5-H->GetTeaSpiritTime())*PI*4):0;
+    const float TeaPulse=H->IsTeaEmpowered()?.5f+.5f*FMath::Sin((FDungeonTeaSpirit::Duration-H->GetTeaSpiritTime())*PI*4):0;
     const FLinearColor Fade=H->IsTeaEmpowered()?FLinearColor(1.f,.82f+.18f*TeaPulse,.48f+.52f*TeaPulse,Opacity*(.58f+.42f*TeaPulse)):FLinearColor(1,1,1,Opacity);
     FVector2D P=DungeonView::Project(H->GetActorLocation());
     DrawTeaSpiritAura(H,P,HS,Opacity);
     if(H->IsTeaEmpowered()){
         for(int I=0;I<12;++I){
-            const float A=I*PI/6+(5-H->GetTeaSpiritTime())*.8f;
+            const float A=I*PI/6+(FDungeonTeaSpirit::Duration-H->GetTeaSpiritTime())*.8f;
             const FVector2D Q=P+FVector2D(FMath::Cos(A)*42*HS,(-60+FMath::Sin(A)*54)*HS);
             const FLinearColor Spark(1,.77f,.25f,Opacity*(.35f+.55f*TeaPulse));
             Box(Q.X-2,Q.Y-1,4,2,Spark);Box(Q.X-1,Q.Y-2,2,4,Spark);
@@ -1069,12 +1091,13 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
                 128*HS*Scale,128*HS*Scale,0,0,1,1,FLinearColor(4,2.8f,.8f,Opacity*(.14f+.16f*TeaPulse)),BLEND_Translucent);
         }
     };
-    if(H->IsDrinkingTea()){
-        const auto& R=DungeonTeaDrink::Regions[DungeonTeaDrink::Frame(H->GetTeaSipProgress()*DungeonTeaDrink::Duration)];
+    if(H->IsDrinking()){
+        const float Progress=H->IsDrinkingPotion()?1-H->PotionSip/ADungeonHero::PotionDrinkDuration:H->GetTeaSipProgress();
+        const auto& R=DungeonTeaDrink::Regions[DungeonTeaDrink::Frame(Progress*DungeonTeaDrink::Duration)];
         const float K=DungeonTeaDrink::PixelScale*HS;
         Shadow(P,28*DescentScale,Opacity);
-        if(auto* T=Texture(TEXT("TeaSpirit_DrinkSheet"))){
-            // Cup and right hand are authored together. No floating overlay cup,
+        if(auto* T=Texture(H->IsDrinkingPotion()?TEXT("Potion_DrinkSheet"):TEXT("TeaSpirit_DrinkSheet"))){
+            // Vessel and right hand are authored together. No floating overlay,
             // equipment weapon, or inherited attack pose during this animation.
             const FVector2D TL=P+FVector2D(R.X-R.FootX,R.Y-R.FootY)*K;
             DrawTexture(T,Offset.X+TL.X*Scale,Offset.Y+TL.Y*Scale,R.W*K*Scale,R.H*K*Scale,
@@ -1303,47 +1326,72 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
     }
     float MX=-100,MY=-100; if(auto* PC=GetOwningPlayerController()) PC->GetMousePosition(MX,MY);
     const FVector2D Mouse=(FVector2D(MX,MY)-Offset)/Scale;
+    if(G->bShowSettings){DrawSettings(G);return;}
+    const bool Settings=G->bShowSettings;
+    const float VolumeX=Settings?195.f:1070.f,VolumeWidth=Settings?258.f:142.f;
+    if(Settings||G->bConfirmQuit){
+        Box(115,345,440,350,FLinearColor(.008f,.014f,.012f,.88f));
+        Box(135,365,400,1,Gold);Box(135,673,400,1,Gold);
+        Sprite(TEXT("AudioThumb"),323,351,24,28);
+    }
     if(bVolumeDragging)
     {
         auto* PC=GetOwningPlayerController();
-        if(PC&&PC->IsInputKeyDown(EKeys::LeftMouseButton)) G->SetMasterVolume((Mouse.X-1070)/142.f,false);
+        if(PC&&PC->IsInputKeyDown(EKeys::LeftMouseButton)) G->SetMasterVolume((Mouse.X-VolumeX)/VolumeWidth,false);
         else { bVolumeDragging=false; G->SetMasterVolume(G->GetMasterVolume()); }
     }
-    auto AudioButton=[&](float X,const TCHAR* Art,const TCHAR* Tip,bool Muted)
+    auto AudioButton=[&](float X,float Y,const TCHAR* Art,const TCHAR* Tip,bool Muted)
     {
-        const bool Hover=Mouse.X>=X&&Mouse.X<X+54&&Mouse.Y>=716&&Mouse.Y<772;
-        Sprite(Art,X,716,54,54,Muted?FLinearColor(.42f,.42f,.42f,1):Hover?FLinearColor(1.2f,1.2f,1.2f,1):FLinearColor::White);
-        if(Muted) DrawLine(Offset.X+(X+7)*Scale,Offset.Y+763*Scale,Offset.X+(X+47)*Scale,Offset.Y+723*Scale,FLinearColor(.85f,.18f,.1f,1),3*Scale);
-        if(Hover) Label(FString(Tip)+(Muted?TEXT(" OFF"):TEXT(" ON")),X-5,694,Gold,.75f);
+        const bool Hover=Mouse.X>=X&&Mouse.X<X+54&&Mouse.Y>=Y&&Mouse.Y<Y+56;
+        Sprite(Art,X,Y,54,54,Muted?FLinearColor(.42f,.42f,.42f,1):Hover?FLinearColor(1.2f,1.2f,1.2f,1):FLinearColor::White);
+        if(Muted) DrawLine(Offset.X+(X+7)*Scale,Offset.Y+(Y+47)*Scale,Offset.X+(X+47)*Scale,Offset.Y+(Y+7)*Scale,FLinearColor(.85f,.18f,.1f,1),3*Scale);
+        if(Settings)CardText(FString(Tip)+(Muted?TEXT("   OFF"):TEXT("   ON")),X+70,Y+16,Pale,18,230);
+        else if(Hover) Label(FString(Tip)+(Muted?TEXT(" OFF"):TEXT(" ON")),X-5,Y-22,Gold,.75f);
     };
-    AudioButton(900,TEXT("AudioMusic"),TEXT("MUSIC"),G->IsMusicMuted());
-    AudioButton(974,TEXT("AudioEffects"),TEXT("SFX"),G->AreEffectsMuted());
-    Sprite(TEXT("AudioRail"),1040,722,204,48);
-    Sprite(TEXT("AudioThumb"),1058+142*G->GetMasterVolume(),734,24,24);
-    if(bVolumeDragging||(Mouse.X>=1040&&Mouse.X<=1244&&Mouse.Y>=722&&Mouse.Y<=770))
-        Label(FString::Printf(TEXT("VOLUME %d%%"),FMath::RoundToInt(G->GetMasterVolume()*100)),1080,701,Gold,.75f);
+    AudioButton(Settings?170:900,Settings?423:716,TEXT("AudioMusic"),TEXT("MUSIC"),G->IsMusicMuted());
+    AudioButton(Settings?170:974,Settings?483:716,TEXT("AudioEffects"),TEXT("SFX"),G->AreEffectsMuted());
+    Sprite(TEXT("AudioRail"),Settings?165:1040,Settings?565:722,Settings?320:204,48);
+    Sprite(TEXT("AudioThumb"),VolumeX-12+VolumeWidth*G->GetMasterVolume(),Settings?577:734,24,24);
+    if(Settings||bVolumeDragging||(Mouse.X>=1040&&Mouse.X<=1244&&Mouse.Y>=722&&Mouse.Y<=770))
+        CardText(FString::Printf(TEXT("VOLUME %d%%"),FMath::RoundToInt(G->GetMasterVolume()*100)),Settings?195:1080,Settings?544:701,Gold,Settings?16:13,250);
     FString CurrentHover;
     auto Button=[&](const TCHAR* Text,float Y)
     {
-        const float Shift=FString(Text)==TEXT("BACK")?75.f:0.f;
+        const float Shift=G->bShowControls?75.f:0.f;
         const bool Hover=Mouse.X>=150+Shift&&Mouse.X<=480+Shift&&Mouse.Y>=Y&&Mouse.Y<=Y+48;
         FString Art=FString(Text).Replace(TEXT(" "),TEXT("_"));
         float& Amount=MenuHoverAmounts.FindOrAdd(Art);
         Amount=FMath::FInterpTo(Amount,Hover?1.f:0.f,GetWorld()->GetDeltaSeconds(),14.f);
         const bool Pressed=Hover&&GetOwningPlayerController()->IsInputKeyDown(EKeys::LeftMouseButton);
         const float Lift=Pressed?2.f:-2.f*Amount;
-        // Stable hit targets, with a subtle lift, warm highlight and emerald selection gems.
-        Sprite(TEXT("Menu_")+Art,142+Shift-5*Amount,Y-8+Lift,346+10*Amount,64,FLinearColor(1+.18f*Amount,1+.14f*Amount,1+.06f*Amount,1));
+        // Quiet translucent ribbons, finely ruled gold, and live sharp lettering.
+        // No baked text or oversized wings compete with the title artwork.
+        for(int X=0;X<330;++X){
+            const float Edge=FMath::Clamp(FMath::Min(X,329-X)/45.f,0.f,1.f);
+            Box(150+Shift+X,Y+Lift,1,48,FLinearColor(.012f,.035f+.025f*Amount,.028f,.66f*Edge));
+            const FLinearColor Rule(.7f+.2f*Amount,.48f+.2f*Amount,.2f,Edge*(.55f+.35f*Amount));
+            Box(150+Shift+X,Y+Lift,1,1,Rule);Box(150+Shift+X,Y+47+Lift,1,1,Rule);
+        }
+        CardText(Text,168+Shift,Y+10+Lift,Hover?FLinearColor(1,.89f,.6f):FLinearColor(.9f,.8f,.59f),25,294,32,true);
         if(Amount>.01f)
         {
             const float Pulse=.85f+.15f*FMath::Sin(Time*4);
             const FLinearColor Tint(1,1,1,Amount*Pulse);
-            Sprite(TEXT("AudioThumb"),121+Shift-3*Amount,Y+15+Lift,18,20,Tint);
-            Sprite(TEXT("AudioThumb"),491+Shift+3*Amount,Y+15+Lift,18,20,Tint);
+            Sprite(TEXT("AudioThumb"),143+Shift-3*Amount,Y+15+Lift,16,18,Tint);
+            Sprite(TEXT("AudioThumb"),471+Shift+3*Amount,Y+15+Lift,16,18,Tint);
         }
         if(Hover) CurrentHover=Art;
     };
-    if(G->bShowControls)
+    if(G->bConfirmQuit){
+        CardText(TEXT("LEAVE THE DUNGEON?"),135,391,Gold,24,400,40,true);
+        CardText(G->HasRun()?TEXT("This run is not saved. Quit to desktop?"):TEXT("Quit to desktop?"),150,445,Pale,17,370,50,true);
+        Button(TEXT("QUIT"),516);Button(TEXT("BACK"),580);
+    }
+    else if(Settings){
+        CardText(TEXT("SETTINGS"),150,382,Gold,26,370,40,true);
+        Button(TEXT("BACK"),617);
+    }
+    else if(G->bShowControls)
     {
         // One continuous frame: no independently stretched atlas edges or corner seams.
         Box(100,335,580,438,FLinearColor(.006f,.009f,.006f,.82f));
@@ -1355,34 +1403,35 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
             Sprite(TEXT("AudioThumb"),X-12,Y-14,24,28);
         Sprite(TEXT("AudioThumb"),137,358,19,23);
         Label(TEXT("HOW TO PLAY"),171,360,Gold,1.25f);
-        auto Row=[&](const TCHAR* Key,const TCHAR* Action,float Y)
+        auto Row=[&](const FString& Key,const TCHAR* Action,float Y)
         {
             // Quiet, high-contrast keycaps: decoration never crosses the lettering.
             Box(140,Y-3,92,25,FLinearColor(.025f,.028f,.022f,1));
             Outline(140,Y-3,92,25,FLinearColor(.55f,.41f,.20f,1));
-            float TW=0,TH=0;GetTextSize(Key,TW,TH,GEngine->GetMediumFont(),1.05f);
-            Label(Key,186-TW/2,Y+9.5f-TH/2,FLinearColor(1,.90f,.64f,1),1.05f);
+            CardText(Key,144,Y+1,FLinearColor(1,.90f,.64f,1),15,84,23,true);
             Label(Action,260,Y+1,Pale,1.05f);
         };
-        Row(TEXT("W A S D"),TEXT("Move in any direction"),398);
-        Row(TEXT("SHIFT"),TEXT("Sprint at twice walking speed"),427);
-        Row(TEXT("SPACE"),TEXT("Dodge / roll"),456);
-        Row(TEXT("LMB"),TEXT("Strike with your weapon"),485);
-        Row(TEXT("RMB"),TEXT("Block incoming damage / face attack / up to 5s"),514);
-        Row(TEXT("MMB"),TEXT("Throw tea  -  10s cooldown"),543);
-        Row(TEXT("1"),TEXT("FREEDOM  -  charge with 15 kills"),572);
-        Row(TEXT("2"),TEXT("Drink tea: 5s immunity / +50% speed"),601);
-        Row(TEXT("E"),TEXT("Choose chest / enter gate"),628);
-        Row(TEXT("I"),TEXT("Inventory & equipment"),655);
-        Row(TEXT("P / M"),TEXT("Pause / Emerald Atlas"),682);
+        Row(DungeonKeys::Label(0)+TEXT(" ")+DungeonKeys::Label(2)+TEXT(" ")+DungeonKeys::Label(1)+TEXT(" ")+DungeonKeys::Label(3),TEXT("Move in any direction"),398);
+        Row(DungeonKeys::Label(DungeonKeys::Sprint),TEXT("Sprint at twice walking speed"),423);
+        Row(DungeonKeys::Label(DungeonKeys::Dodge),TEXT("Dodge / roll"),448);
+        Row(DungeonKeys::Label(DungeonKeys::Attack),TEXT("Strike with your weapon"),473);
+        Row(DungeonKeys::Label(DungeonKeys::Block),TEXT("Block incoming damage / face attack / up to 5s"),498);
+        Row(DungeonKeys::Label(DungeonKeys::Throw),TEXT("Throw tea  -  10s cooldown"),523);
+        Row(DungeonKeys::Label(DungeonKeys::Freedom),TEXT("FREEDOM  -  charge with 15 kills"),548);
+        Row(DungeonKeys::Label(DungeonKeys::Tea),TEXT("Golden tea: 10s immunity / +50% speed"),573);
+        Row(DungeonKeys::Label(DungeonKeys::Potion),TEXT("Health potion: restore 25% / carry four"),598);
+        Row(DungeonKeys::Label(DungeonKeys::Interact),TEXT("Choose chest / enter gate"),623);
+        Row(DungeonKeys::Label(DungeonKeys::Inventory),TEXT("Inventory & equipment"),648);
+        Row(DungeonKeys::Label(DungeonKeys::Pause)+TEXT(" / ")+DungeonKeys::Label(DungeonKeys::Map),TEXT("Pause / Emerald Atlas"),673);
         Button(TEXT("BACK"),705);
     }
     else
     {
-        Button(G->HasRun()?TEXT("RESUME DESCENT"):TEXT("BEGIN DESCENT"),396);
-        Button(TEXT("HOW TO PLAY"),460);
-        Button(G->HasRun()?TEXT("NEW RUN"):TEXT("EXIT"),524);
-        if(G->HasRun()) Button(TEXT("EXIT"),588);
+        CardText(G->HasRun()?TEXT("JOURNEY PAUSED"):TEXT("YOUR DESCENT AWAITS"),150,356,Gold,13,330,24,true);
+        Button(G->HasRun()?TEXT("RESUME"):TEXT("NEW GAME"),396);
+        Button(TEXT("SETTINGS"),460);
+        Button(TEXT("HOW TO PLAY"),524);
+        Button(TEXT("QUIT"),588);
     }
     if(CurrentHover!=HoveredMenuButton&&!CurrentHover.IsEmpty()) G->PlaySound(TEXT("UI"),.25f,1.15f);
     HoveredMenuButton=CurrentHover;
@@ -1406,14 +1455,23 @@ void ADungeonHUD::InventoryClick()
     auto In=[&](float L,float T,float W,float Height){return P.X>=L&&P.X<L+W&&P.Y>=T&&P.Y<T+Height;};
     if(auto* G=Mode(this)) if(G->IsMenu())
     {
+        if(G->bShowSettings){
+            SettingsClick(G,P);
+            return;
+        }
         if(In(900,716,54,56)) { G->ToggleMusic(); return; }
         if(In(974,716,54,56)) { G->ToggleEffects(); return; }
         if(In(1040,722,204,48)) { bVolumeDragging=true; G->SetMasterVolume((P.X-1070)/142.f); return; }
+        if(G->bConfirmQuit){
+            if(In(150,516,330,48))UKismetSystemLibrary::QuitGame(this,PC,EQuitPreference::Quit,false);
+            if(In(150,580,330,48))G->bConfirmQuit=false;
+            return;
+        }
         if(G->bShowControls) { if(In(225,705,330,48)) G->bShowControls=false; return; }
         if(In(150,396,330,48)) { if(G->HasRun()) G->ToggleMenu(); else G->StartGame(); }
-        if(In(150,460,330,48)) G->bShowControls=true;
-        if(In(150,524,330,48)) { if(G->HasRun()) G->StartGame(); else UKismetSystemLibrary::QuitGame(this,PC,EQuitPreference::Quit,false); }
-        if(G->HasRun()&&In(150,588,330,48)) UKismetSystemLibrary::QuitGame(this,PC,EQuitPreference::Quit,false);
+        if(In(150,460,330,48)){OpenSettings();G->bShowSettings=true;G->PlaySound(TEXT("UI"),.4f);}
+        if(In(150,524,330,48)){G->bShowControls=true;G->PlaySound(TEXT("UI"),.4f);}
+        if(In(150,588,330,48)){G->bConfirmQuit=true;G->PlaySound(TEXT("UI"),.4f);}
         return;
     }
     if(!H->IsInventoryOpen()) return;
@@ -1710,7 +1768,7 @@ void ADungeonHUD::DrawHUD()
     Scale=FMath::Min(Canvas->SizeX/1280.f,Canvas->SizeY/800.f);
     Offset=FVector2D((Canvas->SizeX-1280*Scale)/2,(Canvas->SizeY-800*Scale)/2);
     DrawRect(FLinearColor(.005f,.008f,.012f),0,0,Canvas->SizeX,Canvas->SizeY);
-    if(G->HasEnding()) { DrawEnding(G);return; }
+    if(G->IsVictory()) { DrawEnding(G);return; }
     if(G->IsMenu()) { DrawMenu(G); return; }
     if(G->IsTraderOpen()) {if(H->IsInventoryOpen())DrawInventory(H);else DrawTrader(G,H);return;}
     const FVector2D StableOffset=Offset;
@@ -1962,7 +2020,7 @@ void ADungeonHUD::DrawHUD()
     TArray<AActor*> Actors; Actors.Add(H);
     for(auto& E:G->GetEnemies()) if(IsValid(E)) Actors.Add(E);
     Actors.Sort([](const AActor& A,const AActor& B){return DungeonView::Project(A.GetActorLocation()).Y<DungeonView::Project(B.GetActorLocation()).Y;});
-    for(auto* A:Actors) { if(A==H) Hero(H); else Enemy(CastChecked<ADungeonEnemy>(A)); }
+    for(auto* A:Actors) { if(A==H){if(!G->IsDeathSequence())Hero(H);} else Enemy(CastChecked<ADungeonEnemy>(A)); }
     for(const auto& FX:G->GetSplashes())if(FX.TeaKind==2&&TeaV4::Alive(FX.Life)){
         const int F=TeaV4::Frame(TeaV4::EnemyDuration-FX.Life,4);const auto& M=TeaV4::Enemy[F];
         Sprite(FString::Printf(TEXT("TeaV4_Enemy_%d"),F),FX.Position.X-M.X,FX.Position.Y-M.Y,M.W,M.H);
@@ -2046,6 +2104,7 @@ void ADungeonHUD::DrawHUD()
     }
     DrawCombatFX(G,true);
     Offset=StableOffset; // Shake the dungeon, never the HUD or mouse-input mapping.
+    if(G->IsDeathSequence()){DrawDeathSequence(G,H);return;}
     if(!G->IsAtlasFloor())Label(FString::Printf(TEXT("%s / ROOM %02d"),DungeonRoster::Biome(G->GetBiome()),G->GetRoom()),900,28,Gold,.85f);
     for(int I=0;!G->IsAtlasFloor()&&I<3&&I<H->Equipment.Num();++I)
     {

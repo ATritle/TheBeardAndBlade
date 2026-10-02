@@ -51,7 +51,7 @@ void ADungeonGameMode::PlaySound(const FString& Name,float Volume,float Pitch)
     }
     auto& Sound=Sounds.FindOrAdd(AssetName);
     if(!Sound) Sound=LoadObject<USoundBase>(nullptr,*FString::Printf(TEXT("/Game/Audio/%s.%s"),*AssetName,*AssetName));
-    if(Sound) UGameplayStatics::PlaySound2D(this,Sound,.48f*Volume*MasterVolume,Pitch);
+    if(Sound) UGameplayStatics::PlaySound2D(this,Sound,.48f*Volume*MasterVolume*SoundCategoryGain(Name),Pitch);
 }
 void ADungeonGameMode::StopMusic()
 {
@@ -61,8 +61,8 @@ void ADungeonGameMode::StopMusic()
 void ADungeonGameMode::RefreshMusicVolume()
 {
     if(IsValid(MusicComponent)) {
-        MusicComponent->SetPaused(bMusicMuted||MasterVolume<=0);
-        MusicComponent->SetVolumeMultiplier(IsBossIntroActive()?0.f:MusicGain(MusicName)*MasterVolume);
+        MusicComponent->SetPaused(bMusicMuted||MasterVolume<=0||MusicVolume<=0);
+        MusicComponent->SetVolumeMultiplier(IsBossIntroActive()?0.f:MusicGain(MusicName)*MasterVolume*MusicVolume);
     }
 }
 void ADungeonGameMode::UpdateAudio()
@@ -72,7 +72,7 @@ void ADungeonGameMode::UpdateAudio()
     // Never abandon a paused/fading component: only one track may own playback.
     StopMusic();
     MusicName=Next;
-    if(bMusicMuted||MasterVolume<=0) return;
+    if(bMusicMuted||MasterVolume<=0||MusicVolume<=0) return;
     auto& Sound=Sounds.FindOrAdd(Next);
     if(!Sound) Sound=LoadObject<USoundBase>(nullptr,*FString::Printf(TEXT("/Game/Audio/%s.%s"),*Next,*Next));
     if(Sound)

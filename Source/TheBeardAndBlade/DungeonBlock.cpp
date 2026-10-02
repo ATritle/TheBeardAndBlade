@@ -7,12 +7,12 @@ namespace
     bool CombatAvailable(const ADungeonHero* H)
     {
         const auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(H));
-        return G&&!G->IsGameplayBlocked()&&!H->IsInventoryOpen()&&H->Health>0&&H->StunTime<=0;
+        return G&&H->UIClickFrame!=GFrameCounter&&!G->IsGameplayBlocked()&&!H->IsInventoryOpen()&&H->Health>0&&H->StunTime<=0;
     }
 }
 bool ADungeonHero::CanStrike() const
 {
-    return CombatAvailable(this)&&!IsBlocking()&&!IsRolling()&&!IsCasting()&&!IsAttacking()&&!IsDrinkingTea();
+    return CombatAvailable(this)&&!IsBlocking()&&!IsRolling()&&!IsCasting()&&!IsAttacking()&&!IsDrinking();
 }
 bool ADungeonHero::CanUseTea() const
 {
@@ -21,7 +21,7 @@ bool ADungeonHero::CanUseTea() const
 bool ADungeonHero::CanUseFreedom() const
 {
     const auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    return CombatAvailable(this)&&!IsBlocking()&&!IsDrinkingTea()&&G&&G->IsFreedomReady();
+    return CombatAvailable(this)&&!IsBlocking()&&!IsDrinking()&&G&&G->IsFreedomReady();
 }
 bool ADungeonHero::CanStartBlock() const
 {

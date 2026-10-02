@@ -1,8 +1,19 @@
 # v0.4.2 — Iron Aerie, expanded enemies and combat HUD
 
-## October 1 refresh — Tea Spirit, progression balance and packaging correction
+## October 1 latest refresh — revival, potions, menus and settings
 
-- Skill 2 is Tea Spirit: five seconds of invulnerability (including boss attacks), 50% increased movement speed, and a 30-second recharge after the effect ends.
+- Added spectral death and optional paid revival in the previous safe room. Below 2,500 gold the toll is the whole purse; otherwise half, rounded up. Zero gold means no revival. Failed encounters reset while equipment, exploration and unused potion charges are retained.
+- Added four carried health-potion charges, Q use for 25% maximum health, a dedicated red-bottle drinking animation and an integrated potion HUD arc.
+- Extended Golden Tea / Tea Spirit to ten seconds; the 1.2-second sip and 30-second post-effect recharge are unchanged.
+- Reworked title and pause buttons while preserving the menu background. Quit confirmation prevents accidental run loss. Campaign save/load is not included.
+- Added Audio, Display and Controls settings: five volume sliders, window modes, resolution, VSync, frame-rate limits, quality presets and keyboard/mouse remapping. HUD and help labels reflect the selected bindings. Preferences persist; unconfirmed display changes revert after 15 seconds.
+- Fixed key capture rejecting valid inputs, including remapping Golden Tea from 2 to G, by ignoring Unreal's synthetic AnyKey placeholder.
+
+The release remains v0.4.2. Download and extract the complete replacement archive into a fresh folder. Windows and StreamPixel packages are refreshed together; hosted StreamPixel deployments still require a separate upload and activation.
+
+## Earlier October 1 refresh — Tea Spirit, progression balance and packaging correction
+
+- Skill 2 is Tea Spirit: originally five seconds of invulnerability (now ten in the latest refresh, including boss attacks), 50% increased movement speed, and a 30-second recharge after the effect ends.
 - Eight dedicated, foot-aligned raise/sip/lower poses replace the temporary drinking animation. The 1.2-second drink is part of the protected window. Pulsing gold glow, soft outward-radiating waves and a distinct emerald-and-gold HUD icon provide feedback. MMB still throws tea.
 - Rebalanced enemy health and damage by role, floor and room depth, without scaling encounters to the player's equipped gear. Tougher enemies remain concentrated in later rooms.
 - Reduced runaway loot/affix growth, capped attack speed/critical chance and damage reduction, replaced flat armor subtraction with diminishing-return mitigation, and capped combined gear healing. Potions and trader stock were tuned alongside the new progression.

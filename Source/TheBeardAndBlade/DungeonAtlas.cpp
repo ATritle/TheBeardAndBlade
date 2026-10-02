@@ -31,7 +31,7 @@ bool ADungeonGameMode::AtlasHasDoor(int32 D) const
 }
 void ADungeonGameMode::DisableAtlas()
 {
-    bAtlasActive=bAtlasMap=bAtlasDescending=false;AtlasTravelTime=AtlasArrivalTime=0;AtlasRooms.Empty();AtlasCurrent=0;
+    bAtlasActive=bAtlasMap=bAtlasDescending=false;AtlasTravelTime=AtlasArrivalTime=0;AtlasRooms.Empty();AtlasCurrent=AtlasPreviousSafe=0;
 }
 void ADungeonGameMode::InitializeAtlasFloor(int32 Seed,int32 Chapter)
 {
@@ -64,6 +64,9 @@ void ADungeonGameMode::SaveAtlasRoom()
 void ADungeonGameMode::EnterAtlasRoom(int32 Index,int32 EntryDoor)
 {
     if(!AtlasRooms.IsValidIndex(Index))return;
+    if(Index!=AtlasCurrent&&AtlasRooms.IsValidIndex(AtlasCurrent)&&AtlasRooms[AtlasCurrent].Visited&&
+        AtlasRooms[AtlasCurrent].Cleared&&AtlasRooms[AtlasCurrent].Type!=EAtlasRoom::Trader)
+        AtlasPreviousSafe=AtlasCurrent;
     EndBalanceRoom(TEXT("left"));
     for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;
     FreedomTime=0;bFreedomResolved=false;
@@ -77,6 +80,11 @@ void ADungeonGameMode::EnterAtlasRoom(int32 Index,int32 EntryDoor)
     if(First){
         if(R.Type==EAtlasRoom::Combat||R.Type==EAtlasRoom::Boss)SpawnWave();
         else {R.Cleared=true;if(R.Type!=EAtlasRoom::Trader)SpawnBreakables();if(R.Type==EAtlasRoom::Reward){bChest=true;for(int I=0;I<3;++I){ChestRolled[I]=true;ChestLoot[I]=RollItem(FMath::RandRange(0,DungeonLootCatalog::Count-1),2,LootLevel());}}}
+    }
+    else if(R.RetryEncounter&&!R.Cleared){
+        // Retry combat at full strength, but never reroll crates or duplicate
+        // picked-up floor loot. SpawnWave normally creates fresh props.
+        R.RetryEncounter=false;SpawnWave();Breakables=R.Props;
     }
     if(R.Type==EAtlasRoom::Trader){
         if(!R.StockMade){R.Stock=CreateTraderStock(LootLevel());R.StockMade=true;for(const auto& Item:R.Stock)BalanceEvent(TEXT("trader_offer"),Item.Rarity,Item.CatalogId);}

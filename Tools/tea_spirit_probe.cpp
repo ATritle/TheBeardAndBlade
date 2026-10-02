@@ -6,19 +6,19 @@ int main()
 {
     FDungeonTeaSpirit T;
     assert(T.Ready()&&T.Start()&&!T.Ready()&&!T.Start());
-    T.Tick(FDungeonTeaSpirit::SipDuration);assert(T.Sip==0&&std::abs(T.Active-3.8f)<.001f&&T.Cooldown==0);
-    T.Tick(3.55f);assert(std::abs(T.Active-.25f)<.001f);
+    T.Tick(FDungeonTeaSpirit::SipDuration);assert(T.Sip==0&&std::abs(T.Active-8.8f)<.001f&&T.Cooldown==0);
+    T.Tick(8.55f);assert(std::abs(T.Active-.25f)<.001f);
     T.Tick(.5f);assert(T.Active==0&&T.Cooldown==29.75f&&!T.Start());
     T.Tick(29.75f);assert(T.Ready()&&T.Start());
     T.Tick(100);assert(T.Ready());
     for(int FPS:{30,60,120,240}){
         T={};T.Start();
-        for(int I=0;I<FPS*4;++I)T.Tick(1.f/FPS);
+        for(int I=0;I<FPS*9;++I)T.Tick(1.f/FPS);
         assert(std::abs(T.Active-1.f)<.001f&&T.Cooldown==0&&!T.Start());
         for(int I=0;I<FPS*2;++I)T.Tick(1.f/FPS);
         assert(T.Active==0&&std::abs(T.Cooldown-29.f)<.003f);
     }
-    T={};T.Start();T.Tick(-1);assert(T.Active==5&&T.Sip==FDungeonTeaSpirit::SipDuration);
+    T={};T.Start();T.Tick(-1);assert(T.Active==10&&T.Sip==FDungeonTeaSpirit::SipDuration);
     T={};assert(T.Ready()&&T.Active==0&&T.Sip==0);
     static_assert(FDungeonTeaSpirit::Speed==1.5f);
     for(int I=0;I<8;++I){

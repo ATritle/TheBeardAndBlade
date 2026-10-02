@@ -19,6 +19,7 @@ void ADungeonHero::CancelCombatActions()
     StopBlock();
     AttackTime=PowerCastTime=RollTime=0;
     TeaSpirit.Sip=0; // Interrupt the presentation, never refund the buff/recharge.
+    PotionSip=0; // Healing/charge is committed on press; interruption cannot duplicate it.
     bWalking=false; bAttackHit=true; bTeaReleased=true;
     QuipTime=QuipCooldown=0; AttackQuip.Empty();
     bInventoryOpen=false;

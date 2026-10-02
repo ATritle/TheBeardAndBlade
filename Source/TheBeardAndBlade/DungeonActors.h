@@ -9,6 +9,8 @@
 #include "DungeonBlock.h"
 #include "DungeonBalance.h"
 #include "DungeonTeaSpirit.h"
+#include "DungeonRevival.h"
+#include "DungeonSettings.h"
 #include "DungeonActors.generated.h"
 
 namespace DungeonLootCatalog { constexpr int32 Count=72,EquipmentSlots=8; }
@@ -21,6 +23,7 @@ class USoundBase;
 class ADungeonGameMode;
 class SBackgroundBlur;
 class SBorder;
+namespace Scalability { struct FQualityLevels; }
 
 // Shared virtual canvas: input, combat and rendering use one mapping.
 namespace DungeonView
@@ -76,7 +79,7 @@ struct FAtlasRoom
     EAtlasRoom Type=EAtlasRoom::Combat;
     int32 Links[4]={-1,-1,-1,-1}; // north, east, south, west
     int32 Depth=0;
-    bool Visited=false,Cleared=false,Chest=false,LootRolled=false,LootClaimed=false,StockMade=false;
+    bool Visited=false,Cleared=false,Chest=false,LootRolled=false,LootClaimed=false,StockMade=false,RetryEncounter=false;
     FRewardPresentation Reward;
     FDungeonItem Loot,ChestLoot[3];
     bool ChestRolled[3]={false,false,false};
@@ -128,17 +131,33 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float Dt) override;
     virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
+    void RebindInput();
+    bool PendingRebind=false;
+    uint64 UIClickFrame=MAX_uint64;
+    void InputClick();
+    void GameplayAttack();
+    bool HeldDirections[4]={false,false,false,false};
+    void MoveKey(int Direction,bool Held);
     void MoveForward(float V) { InputY=-V; }
     void MoveRight(float V) { InputX=V; }
     void SprintPressed() { bSprinting=true; }
     void SprintReleased() { bSprinting=false; }
     void Attack();
     void CancelCombatActions();
+    void RestoreAfterDeath();
     FString AttackQuip;
     float QuipTime=0,QuipCooldown=0;
     void PowerMove();
     void Freedom();
     void DrinkTea();
+    void DrinkPotion();
+    bool CanDrinkPotion() const;
+    static constexpr int32 PotionCapacity=4;
+    static constexpr float PotionDrinkDuration=.65f;
+    int32 PotionCharges=0;
+    float PotionSip=0;
+    bool IsDrinkingPotion() const { return PotionSip>0; }
+    bool IsDrinking() const { return IsDrinkingTea()||IsDrinkingPotion(); }
     bool CanDrinkTea() const;
     bool IsTeaEmpowered() const { return Health>0&&TeaSpirit.Active>0; }
     bool IsDrinkingTea() const { return TeaSpirit.Sip>0; }
@@ -337,6 +356,9 @@ public:
     void BeginBalanceRoom();
     void VerifyBalance();
     void VerifyTeaSpirit();
+    void VerifyPotions();
+    void VerifyMenu();
+    void VerifySettings();
     void ReviewTeaSpirit(float Dt);
     void EndBalanceRoom(const TCHAR* Outcome);
     void BalanceEvent(const TCHAR* Event,float Value=0,int Species=-1);
@@ -359,6 +381,10 @@ public:
     bool IsMusicMuted() const { return bMusicMuted; }
     float GetMasterVolume() const { return MasterVolume; }
     void SetMasterVolume(float Value,bool Save=true);
+    float MusicVolume=1,EffectsVolume=1,VoiceVolume=1,InterfaceVolume=1;
+    float SoundCategoryGain(const FString& Name) const;
+    void LoadAudioSettings();
+    void SaveAudioSettings();
     bool AreEffectsMuted() const { return bEffectsMuted; }
     void PlayerInteract(ADungeonHero* Hero);
     void EnemyDefeated(ADungeonEnemy* Enemy);
@@ -374,6 +400,11 @@ public:
     void FinishRun(bool Victory);
     void UpdateEnding(float Dt);
     void RestartFromEnding();
+    bool ReviveFromDeath();
+    bool CanReviveFromDeath() const;
+    int64 RevivalCost() const;
+    void VerifyRevival();
+    void ReviewRevival(float Dt);
     void VerifyEndings();
     void VerifyWeekend();
     void VerifyRustblade();
@@ -387,6 +418,7 @@ public:
     void RunEndingPreview();
     bool HasEnding() const { return EndState!=0; }
     bool IsVictory() const { return EndState==2; }
+    bool IsDeathSequence() const { return EndState==1; }
     float GetEndingTime() const { return EndTime; }
     void StartGame();
     void StartPlaytestRoom(int32 Number);
@@ -477,7 +509,7 @@ public:
     void AddBossFX(FVector2D P,int32 Art);
     void VerifySeptember();
     void RunSeptemberSmoke();
-    bool bShowControls=false;
+    bool bShowControls=false,bShowSettings=false,bConfirmQuit=false;
     const TArray<FDungeonShot>& GetShots() const { return Shots; }
     void AddImpact(FVector2D P,float Damage,bool bBoss=false);
     FString GetObjective() const;
@@ -501,6 +533,7 @@ private:
     bool bAtlasActive=false,bAtlasMap=false;
     TArray<FAtlasRoom> AtlasRooms;
     int32 AtlasCurrent=0,AtlasTravelDoor=0,AtlasChapter=0;
+    int32 AtlasPreviousSafe=0;
     float AtlasTravelTime=0,AtlasArrivalTime=0;
     bool bAtlasDescending=false;
     FVector2D AtlasTravelFrom,AtlasArrivalFrom,AtlasArrivalTo;
@@ -538,6 +571,7 @@ private:
     int32 EndState=0;
     float EndTime=0;
     bool bEndingCleaned=false;
+    int32 DeathReturnRoom=INDEX_NONE;
     float TransitionTime=0;
     int32 TransitionDoor=1;
     FVector2D TransitionFrom;
@@ -602,11 +636,31 @@ private:
     double LastClickTime=-1;
     FVector2D DragStart,DragGrab,DragMouse,LastClickPosition;
     void DrawMenu(ADungeonGameMode* G);
+public:
+    void DrawSettings(ADungeonGameMode* G);
+    void SettingsClick(ADungeonGameMode* G,FVector2D P);
+    void OpenSettings();
+    void CloseSettings();
+    void SettingsTick();
+    int SettingsTab=0,CaptureBinding=-1,AudioDragging=-1;
+    double CaptureReady=0,DisplayDeadline=0;
+    FString SettingsNotice;
+    TArray<FIntPoint> DisplaySizes;
+    int DraftResolution=0,DraftMode=1,DraftQuality=2,DraftFPS=0;
+    bool DraftVSync=false;
+    FIntPoint OldResolution;
+    int OldMode=1,OldQuality=2;
+    float OldFPS=0;
+    bool OldVSync=false;
+    TSharedPtr<Scalability::FQualityLevels> OldScalability;
+    void RevertDisplay();
+private:
     bool bVolumeDragging=false;
     TMap<FString,float> MenuHoverAmounts;
     FString HoveredMenuButton;
     void DrawSwordCursor();
     void DrawEnding(ADungeonGameMode* G);
+    void DrawDeathSequence(ADungeonGameMode* G,ADungeonHero* H);
     UTexture2D* Texture(const FString& Name);
     void Sprite(const FString& Name,float X,float Y,float W,float H,FLinearColor Tint=FLinearColor::White,float Rotation=0,FVector2D Pivot=FVector2D(.5,.5));
     void KeySprite(const FString& Name,float X,float Y,float W,float H,FLinearColor Tint,bool Flip=false,float Rotation=0);

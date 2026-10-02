@@ -11,7 +11,7 @@
 
 void ADungeonGameMode::StartGame()
 {
-    bMenu=false; bHasRun=true; bShowControls=false; RestartRun();
+    bMenu=false; bHasRun=true; bShowControls=bShowSettings=bConfirmQuit=false; RestartRun();
     PlaySound(TEXT("UI"));
 }
 void ADungeonHero::TestFinance() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(24)); }
@@ -40,11 +40,18 @@ void ADungeonGameMode::StartPlaytestRoom(int32 Number)
 }
 void ADungeonGameMode::ToggleMenu()
 {
+    if(bMenu&&(bShowControls||bShowSettings||bConfirmQuit)){
+        if(bShowSettings)if(auto* PC=GetWorld()->GetFirstPlayerController())if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())){
+            if(HUD->CaptureBinding>=0){HUD->CaptureBinding=-1;HUD->SettingsNotice=TEXT("Binding cancelled.");return;}
+            HUD->CloseSettings();
+        }
+        bShowControls=bShowSettings=bConfirmQuit=false;PlaySound(TEXT("UI"),.5f);return;
+    }
     if(bAtlasMap){bAtlasMap=false;return;}
     if(HasEnding()) return;
     if(IsTransitioning()||IsAtlasTravel()||IsTraderOpen()) return;
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) if(H->IsInventoryOpen()) H->ToggleInventory();
-    if(bMenu&&!bHasRun) { StartGame(); return; }
+    if(bMenu&&!bHasRun) return;
     bMenu=!bMenu; bShowControls=false;
     if(bMenu)if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0)))H->StopBlock();
     PlaySound(TEXT("UI"),.5f);
@@ -383,10 +390,10 @@ void ADungeonGameMode::VerifyCampaign()
     H->Restart(); H->Stamina=21; H->Dodge(); Check(!H->IsRolling()&&H->Stamina==21,TEXT("Insufficient dodge cost rejected"));
     H->Restart();
     FDungeonPotion TestPotion; TestPotion.Position=DungeonView::Project(H->GetActorLocation()); Potions.Add(TestPotion);
-    UpdatePotions(1); Check(Potions.Num()==1,TEXT("Full health preserves potion"));
-    H->Health=50; UpdatePotions(.1f);
-    Check(Potions.IsEmpty()&&H->Health==83.f,TEXT("Walk-over potion restores twenty-two percent"));
-    H->Health=140;Potions.Add(TestPotion); UpdatePotions(1); Check(H->Health==150&&Potions.IsEmpty(),TEXT("Potion clamps to max health"));
+    UpdatePotions(1); Check(Potions.IsEmpty()&&H->PotionCharges==1,TEXT("Full health stores potion"));
+    H->Health=50; H->DrinkPotion();
+    Check(H->PotionCharges==0&&H->Health==87.5f,TEXT("Potion restores quarter of maximum health"));
+    H->Tick(1);H->Health=140;Potions.Add(TestPotion); UpdatePotions(1);H->DrinkPotion(); Check(H->Health==150&&Potions.IsEmpty(),TEXT("Potion clamps to max health"));
     H->Restart();
     H->MoveForward(1); auto P=DungeonView::Project(H->GetActorLocation()); H->Tick(.1f); H->MoveForward(0);
     Check(DungeonView::Project(H->GetActorLocation()).Y<P.Y,TEXT("W is screen-up"));

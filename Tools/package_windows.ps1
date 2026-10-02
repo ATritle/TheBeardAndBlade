@@ -47,10 +47,10 @@ if($missingPackagedEnemies.Count) {
 }
 Write-Output 'Final packaged enemy animation coverage verified.'
 # These assets also load by name and must survive staging into the final container.
-foreach($requiredArt in @('/Content/Art/TeaSpirit/TeaSpirit_DrinkSheet.uasset','/Content/Art/UI/Hotbar/Hotbar_TeaSpirit.uasset')) {
+foreach($requiredArt in @('/Content/Art/TeaSpirit/TeaSpirit_DrinkSheet.uasset','/Content/Art/V2/Potion_DrinkSheet.uasset','/Content/Art/UI/Hotbar/Hotbar_TeaSpirit.uasset','/Content/Art/V2/M_DeathSpirit.uasset')) {
     if(!$enemyContainerContents.Contains($requiredArt)) { throw "Final container omitted $requiredArt" }
 }
-Write-Output 'Tea Spirit animation and HUD cook coverage verified.'
+Write-Output 'Tea Spirit, HUD and death-spirit material cook coverage verified.'
 $brandOutput=Join-Path $Destination 'Windows/Branding'
 New-Item -ItemType Directory -Force $brandOutput | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot 'Branding/Icon.png'),(Join-Path $projectRoot 'Branding/Logo.png'),(Join-Path $projectRoot 'Branding/PROMPTS.md') -Destination $brandOutput
