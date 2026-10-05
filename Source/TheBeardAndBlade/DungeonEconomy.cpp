@@ -34,7 +34,7 @@ void ADungeonGameMode::UpdateCoinDrops(float Dt)
         C.Position+=Delta.GetSafeNormal()*FMath::Min(Distance,Speed*FlightDt);
         if(FVector2D::Distance(C.Position,Target)<=8) {
             H->Coins+=C.Amount;C.Collected=true;C.CollectedAge=0;C.Position=Target;
-            PlaySound(TEXT("CoinPickup"),.65f);
+            PlaySound(TEXT("CoinPickup"),.20f);
         }
     }
 }

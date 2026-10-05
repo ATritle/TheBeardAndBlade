@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "CanvasItem.h"
+#include "GameFramework/PlayerController.h"
 
 // Cosmetic-only: never advance the gameplay random stream for particles.
 void ADungeonHUD::SoftEllipse(FVector2D Center,FVector2D Radius,FLinearColor Color)
@@ -31,18 +32,20 @@ void ADungeonHUD::DrawSwordTrail(ADungeonHero* H,FVector2D Hand,float Angle,floa
 {
     if(H->Equipment[0].IsEmpty()||!H->IsAttacking())return;
     const float T=H->GetAttackProgress();
-    if(T<=.25f||T>=.8f)return;
+    const bool Combo=H->IsComboSwing();
+    const float Begin=Combo?.52f:.25f,EndTime=Combo?.84f:.8f;
+    if(T<=Begin||T>=EndTime)return;
     const float End=FMath::DegreesToRadians(Angle-90);
     const float S=Length/65.f;
-    const float Fade=FMath::Min(1.f,FMath::Min((T-.25f)*15,(.8f-T)*12))*Opacity;
+    const float Fade=FMath::Min(1.f,FMath::Min((T-Begin)*20,(EndTime-T)*12))*Opacity;
     for(int I=0;I<24;++I)
     {
         const float Weight=1-I/24.f;
-        const float A=End-I*.035f,B=A-.04f;
+        const float A=End-I*(Combo?.068f:.035f),B=A-(Combo?.075f:.04f);
         const auto V=Hand+FVector2D(FMath::Cos(A),FMath::Sin(A))*Length;
         const auto W=Hand+FVector2D(FMath::Cos(B),FMath::Sin(B))*Length;
         DrawLine(Offset.X+V.X*Scale,Offset.Y+V.Y*Scale,Offset.X+W.X*Scale,Offset.Y+W.Y*Scale,
-            FLinearColor(1,.65f,.2f,.22f*Weight*Fade),(2+Weight*7)*S*Scale);
+            FLinearColor(1,Combo?.8f:.65f,.2f,.22f*Weight*Fade),(2+Weight*(Combo?11:7))*S*Scale);
         DrawLine(Offset.X+V.X*Scale,Offset.Y+V.Y*Scale,Offset.X+W.X*Scale,Offset.Y+W.Y*Scale,
             FLinearColor(1,.94f,.73f,.8f*Weight*Fade),(.6f+Weight*2)*S*Scale);
     }
@@ -50,6 +53,13 @@ void ADungeonHUD::DrawSwordTrail(ADungeonHero* H,FVector2D Hand,float Angle,floa
 
 void ADungeonHUD::DrawHitFeedback(ADungeonGameMode* G)
 {
+    if(auto* PC=GetOwningPlayerController())if(auto* H=Cast<ADungeonHero>(PC->GetPawn());H&&H->ComboPopupTime>0){
+        const float Age=1-H->ComboPopupTime;
+        const float Pop=Age<.12f?.65f+Age/.12f*.5f:1.f+.15f*FMath::Max(0.f,1-(Age-.12f)/.18f);
+        const float Alpha=FMath::Clamp(H->ComboPopupTime/.35f,0.f,1.f);
+        const auto P=H->ComboPopupPosition-FVector2D(0,155+Age*45);
+        Sprite(TEXT("Combat_Combo"),P.X-88*Pop,P.Y-44*Pop,176*Pop,88*Pop,FLinearColor(1,1,1,Alpha));
+    }
     for(const auto& I:G->GetImpacts())
     {
         const float Age=FMath::Max(0.f,1.05f-I.Life);

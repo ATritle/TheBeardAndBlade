@@ -29,7 +29,7 @@ void ADungeonHero::MoveKey(int D,bool Held){HeldDirections[D]=Held;InputX=int(He
 void ADungeonHero::RebindInput()
 {
     if(!InputComponent)return;
-    Block.Release();bSprinting=false;InputX=InputY=0;for(bool& B:HeldDirections)B=false;
+    ResetMeleeChain();Block.Release();bSprinting=false;InputX=InputY=0;for(bool& B:HeldDirections)B=false;
     InputComponent->ClearActionBindings();InputComponent->AxisBindings.Empty();InputComponent->AxisKeyBindings.Empty();InputComponent->KeyBindings.Empty();
     SetupPlayerInputComponent(InputComponent);PendingRebind=false;
 }
@@ -41,7 +41,8 @@ void ADungeonHero::InputClick()
 void ADungeonHero::GameplayAttack()
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
-    if(UIClickFrame!=GFrameCounter&&G&&!G->IsGameplayBlocked()&&!IsInventoryOpen())Attack();
+    if(UIClickFrame!=GFrameCounter&&G&&!G->IsGameplayBlocked()&&!IsInventoryOpen()&&Health>0&&StunTime<=0&&!IsBlocking()&&!IsRolling()&&!IsDrinking()&&!IsCasting())
+    {bAttackHeld=true;Attack();}
 }
 
 void ADungeonGameMode::LoadAudioSettings()

@@ -30,6 +30,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
+#include "Misc/App.h"
 #include "Misc/Parse.h"
 #include "HAL/PlatformMisc.h"
 #include "UnrealClient.h"
@@ -117,8 +118,13 @@ void ADungeonHero::Tick(float Dt)
     Super::Tick(Dt);
     if(PendingRebind)RebindInput();
     ScreenVelocity=FVector2D::ZeroVector;
-    if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) {StopBlock();return;}
-    if(bInventoryOpen) { StopBlock();bWalking=false; return; }
+    if(auto* G=Mode(this)) if(G->IsGameplayBlocked()) {ResetMeleeChain();StopBlock();return;}
+    if(bInventoryOpen) { ResetMeleeChain();StopBlock();bWalking=false; return; }
+    ComboPopupTime=FMath::Max(0.f,ComboPopupTime-Dt);
+    MeleeCombo.Tick(Dt,IsAttacking());
+    if(Health<=0||StunTime>0||IsRolling()||IsBlocking()||IsDrinking()||IsCasting())ResetMeleeChain();
+    if(bAttackHeld)if(auto* PC=Cast<APlayerController>(GetController()))if(!PC->IsInputKeyDown(DungeonKeys::Key(DungeonKeys::Attack)))bAttackHeld=false;
+    if(bAttackHeld&&FSlateApplication::IsInitialized()&&!FApp::IsUnattended()&&!FSlateApplication::Get().IsActive())ResetMeleeChain();
     if(Health<=0||StunTime>0)StopBlock();
     GearHealBudget=FMath::Min(MaxHealth*DungeonBalance::GearHealingPerSecond,GearHealBudget+Dt*MaxHealth*DungeonBalance::GearHealingPerSecond);
     TeaSpirit.Tick(Dt);
@@ -225,19 +231,21 @@ void ADungeonHero::Tick(float Dt)
     #endif
     if(AttackTime>0)
     {
-        AttackTime=FMath::Max(0.f,AttackTime-Dt*AttackSpeed);
+        const float RemainingAttack=FMath::Max(0.f,AttackTime-Dt*AttackSpeed);
         // Strike once on the impact pose, not during the wind-up.
-        if(!bAttackHit&&AttackTime<=.28f)
+        if(!bAttackHit&&1.f-RemainingAttack/MeleeCombo.Duration()>=MeleeCombo.Impact())
         {
             bAttackHit=true;
             if(auto* G=Mode(this)) G->PlayerAttack(this);
         }
+        AttackTime=RemainingAttack;
     }
+    if(bAttackHeld&&CanStrike())Attack();
 }
 int32 ADungeonHero::GetAnimationFrame() const
 {
     if(IsCasting()) return FMath::Clamp((int32)(GetCastProgress()*6),0,5);
-    if(IsAttacking()) return FMath::Clamp((int32)(GetAttackProgress()*6),0,5);
+    if(IsAttacking()) return IsComboSwing()?FDungeonMeleeCombo::Pose(GetAttackProgress()):FMath::Clamp((int32)(GetAttackProgress()*6),0,5);
     return GetLocomotionFrame();
 }
 void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
@@ -254,6 +262,7 @@ void ADungeonHero::SetupPlayerInputComponent(UInputComponent* I)
     }
     I->BindKey(Key(Map),IE_Pressed,this,&ADungeonHero::ToggleAtlas);
     I->BindKey(Key(DungeonKeys::Attack),IE_Pressed,this,&ADungeonHero::GameplayAttack).bConsumeInput=false;
+    I->BindKey(Key(DungeonKeys::Attack),IE_Released,this,&ADungeonHero::GameplayAttackReleased).bConsumeInput=false;
     I->BindKey(Key(Throw),IE_Pressed,this,&ADungeonHero::PowerMove);
     I->BindKey(Key(DungeonKeys::Block),IE_Pressed,this,&ADungeonHero::BlockPressed);
     I->BindKey(Key(DungeonKeys::Block),IE_Released,this,&ADungeonHero::BlockReleased);
@@ -316,12 +325,16 @@ void ADungeonHero::Attack()
         return;
     }
     if(!CanStrike()) return;
-    AttackTime=.48f; bAttackHit=false; AttackAim=Aim; AttackDirection=DungeonView::Direction(AttackAim);
+    MeleeCombo.Begin();AttackTime=MeleeCombo.Duration(); bAttackHit=false; AttackAim=Aim; AttackDirection=DungeonView::Direction(AttackAim);
     if(QuipCooldown<=0&&FMath::FRand()<.35f)
     {
         AttackQuip=TEXT("Take this you C*NT!"); QuipTime=1.5f; QuipCooldown=4.f;
     }
-    if(auto* G=Mode(this)) G->PlaySound(TEXT("Sword"),.7f,FMath::FRandRange(.97f,1.03f));
+    if(auto* G=Mode(this)) G->PlaySound(TEXT("Sword"),.7f,IsComboSwing()?.85f:FMath::FRandRange(.97f,1.03f));
+}
+void ADungeonHero::ResolveMeleeSwing(bool Hit)
+{
+    if(MeleeCombo.Resolve(Hit)){ComboPopupTime=1.f;ComboPopupPosition=DungeonView::Project(GetActorLocation());}
 }
 void ADungeonHero::Interact() { if(!bInventoryOpen) if(auto* G=Mode(this)) G->PlayerInteract(this); }
 void ADungeonHero::ToggleInventory()
@@ -330,7 +343,7 @@ void ADungeonHero::ToggleInventory()
     if(IsRolling()) return;
     if(Health<=0) return;
     bInventoryOpen=!bInventoryOpen; InventoryMessage.Empty();
-    if(bInventoryOpen)StopBlock();
+    if(bInventoryOpen){StopBlock();ResetMeleeChain();}
     if(auto* PC=Cast<APlayerController>(GetController())) if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) HUD->CancelInventoryGesture();
     if(auto* G=Mode(this)) G->PlaySound(bInventoryOpen?TEXT("InventoryOpen"):TEXT("InventoryClose"),.4f);
 }
@@ -483,6 +496,7 @@ void ADungeonGameMode::BeginPlay()
     if(FParse::Param(FCommandLine::Get(),TEXT("RevivalVerify"))) { VerifyRevival();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritVerify"))) { VerifyTeaSpirit();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("PotionVerify"))) { VerifyPotions();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("ComboVerify"))) { VerifyCombo();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("PolishVerify"))) { VerifyPolish();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("MenuVerify"))) { VerifyMenu();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("SettingsVerify"))) { VerifySettings();return; }
@@ -733,7 +747,7 @@ void ADungeonGameMode::Tick(float Dt)
             if(FParse::Param(FCommandLine::Get(),TEXT("SettingsHUDPreview")))Name=TEXT("SettingsHUDReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonPausePreview"))) Name=TEXT("PauseReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonHeroReviewPreview")))
-            { int Group=0;FParse::Value(FCommandLine::Get(),TEXT("DungeonBiome="),Group);Name=FString::Printf(TEXT("AthleticHeroReview%d"),Group); }
+            { int Group=0;FParse::Value(FCommandLine::Get(),TEXT("DungeonBiome="),Group);Name=FParse::Param(FCommandLine::Get(),TEXT("ComboPreview"))?FString::Printf(TEXT("CombatCombo/RuntimeReview%d"),Group):FString::Printf(TEXT("AthleticHeroReview%d"),Group); }
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonMenuHoverPreview"))) Name=TEXT("MenuHoverReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonWeekendPreview"))) Name=TEXT("WeekendReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonBossClarityPreview"))) Name=TEXT("BossClarityReview");
@@ -879,13 +893,15 @@ void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
         if(DungeonCombatBalance::MeleeHits(V,H->GetAim(),DungeonRoster::RenderSize(E->Species),E->bBoss)) Hits.Add(E);
     }
     ++H->StrikeCount;
+    bool Landed=false;
     for(auto& E:Hits) if(IsValid(E)&&E->Health>0)
     {
         const bool Crit=FMath::FRand()<H->CritChance;
-        float Damage=H->AttackPower*FMath::FRandRange(.9f,1.1f)*(Crit?H->CritMultiplier:1.f);
+        float Damage=H->AttackPower*FMath::FRandRange(.9f,1.1f)*(Crit?H->CritMultiplier:1.f)*H->MeleeDamageScale();
         if(H->HasEffect(8)&&E->Health<E->MaxHealth*.3f) Damage*=1.35f;
         if(H->HasEffect(9)&&H->Health<H->MaxHealth*.4f) Damage*=1.3f;
         const float Dealt=FMath::Min(E->Health,Damage);
+        Landed|=Dealt>0;
         if(FMath::FRand()<H->BleedChance) { E->BleedTime=4;E->BleedDPS=Damage*.2f; }
         if(FMath::FRand()<H->PoisonChance) { E->PoisonTime=6;E->PoisonDPS=Damage*.14f; }
         if(H->HasEffect(3)) E->SlowTime=3;
@@ -894,6 +910,7 @@ void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
         if(H->HasEffect(4)) H->RestoreHealth(Dealt*DungeonBalance::SignatureLeech,true);
         if(Crit&&H->HasEffect(6)) H->Stamina=FMath::Min(H->MaxStamina,H->Stamina+6);
     }
+    H->ResolveMeleeSwing(Landed);
     if(!Hits.IsEmpty()&&H->HasEffect(7)&&H->StrikeCount%3==0)
     {
         const auto Targets=Enemies; AddImpact(P,0,true);
@@ -1142,6 +1159,13 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     const float FacingX=D==0||D==4?0:D<4?1.f:-1.f;
     auto Pose=[&](FVector2D Q){
         Q=HeroBreathing::Map(Q,H->BreathPhase,BreathWeight,FacingX);
+        if(H->IsComboSwing()){
+            const float T=H->GetAttackProgress();
+            const float Weight=FMath::Clamp((116.f-float(Q.Y))/84.f,0.f,1.f);
+            const float Coil=T<.52f?-FMath::Sin(T/.52f*PI)*2.5f:FMath::Sin((T-.52f)/.48f*PI)*4.f;
+            Q.X+=H->GetVisualFacing().X*Coil*Weight;
+            Q.Y+=Weight*(T<.52f?1.5f:3.f)*FMath::Sin(T*PI);
+        }
         if(Guard){
             const float Brace=H->GetGuardBlend()*(.028f+.004f*FMath::Sin(H->BreathPhase))+.035f*H->GetBlockImpact()/.18f;
             const float Weight=FMath::Clamp((116.f-float(Q.Y))/76.f,0.f,1.f);
@@ -1419,7 +1443,7 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
         Row(DungeonKeys::Label(0)+TEXT(" ")+DungeonKeys::Label(2)+TEXT(" ")+DungeonKeys::Label(1)+TEXT(" ")+DungeonKeys::Label(3),TEXT("Move in any direction"),398);
         Row(DungeonKeys::Label(DungeonKeys::Sprint),TEXT("Sprint at twice walking speed"),423);
         Row(DungeonKeys::Label(DungeonKeys::Dodge),TEXT("Dodge / roll"),448);
-        Row(DungeonKeys::Label(DungeonKeys::Attack),TEXT("Strike with your weapon"),473);
+        Row(DungeonKeys::Label(DungeonKeys::Attack),TEXT("Hold to attack / third landed hit: combo"),473);
         Row(DungeonKeys::Label(DungeonKeys::Block),TEXT("Block incoming damage / face attack / up to 5s"),498);
         Row(DungeonKeys::Label(DungeonKeys::Throw),TEXT("Throw tea  -  10s cooldown"),523);
         Row(DungeonKeys::Label(DungeonKeys::Freedom),TEXT("FREEDOM  -  charge with 15 kills"),548);
@@ -1844,10 +1868,12 @@ void ADungeonHUD::DrawHUD()
         {
             const int D=(Group%2)*4+R;
             H->SetActorLocation(DungeonView::Unproject(FVector2D(90+F*Gap,195+R*193)));
-            if(Group>=2)H->SetWalkReviewPose(D,F);else H->SetReviewPose(D,F);
+            if(FParse::Param(FCommandLine::Get(),TEXT("ComboPreview"))){const float Times[]={.05f,.16f,.35f,.58f,.72f,.95f};H->SetComboReviewPose(D,Times[F]);}
+            else if(Group>=2)H->SetWalkReviewPose(D,F);else H->SetReviewPose(D,F);
             if(Group>=2&&FParse::Param(FCommandLine::Get(),TEXT("SprintReview")))H->SetSprintReviewPose();
             Hero(H,1.1f);Label(FString::Printf(TEXT("D%d / F%d"),D,F),55+F*Gap,198+R*193,Pale,.75f);
         }
+        if(FParse::Param(FCommandLine::Get(),TEXT("ComboPreview")))Sprite(TEXT("Combat_Combo"),1030,0,176,88);
         H->SetActorLocation(Position);return;
     }
     if(FParse::Param(FCommandLine::Get(),TEXT("DungeonHealthBarsPreview"))&&!G->GetEnemies().IsEmpty())

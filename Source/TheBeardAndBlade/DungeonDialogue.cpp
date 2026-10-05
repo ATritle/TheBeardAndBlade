@@ -16,6 +16,7 @@ namespace
 
 void ADungeonHero::CancelCombatActions()
 {
+    ResetMeleeChain();ComboPopupTime=0;
     StopBlock();
     AttackTime=PowerCastTime=RollTime=0;
     TeaSpirit.Sip=0; // Interrupt the presentation, never refund the buff/recharge.

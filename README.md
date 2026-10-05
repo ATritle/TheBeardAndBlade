@@ -4,15 +4,17 @@ A pixel-art dungeon crawler starring a bearded adventurer armed with steel, stub
 
 Explore eight themed dungeon floors with branching rooms, four-way doors, persistent backtracking, hidden bosses, trader branches and the Emerald Atlas map. Tougher enemies appear deeper into each floor. Build your character with eight equipment slots, rare loot, coin drops and trader buying/selling.
 
-## Play v0.4.2
+## Play v0.4.3
 
-Download `TheBeardAndBlade-Windows-v0.4.2.zip` from [Releases](https://github.com/ATritle/TheBeardAndBlade/releases/tag/v0.4.2). Extract the entire archive and launch `TheBeardAndBlade/TheBeardAndBlade.exe`. Unreal Editor is not required. GitHub's automatic source ZIP is not playable.
+Download `TheBeardAndBlade-Windows-Vagon-v0.4.3.zip` from [Releases](https://github.com/ATritle/TheBeardAndBlade/releases/tag/v0.4.3). Extract the entire archive and launch `TheBeardAndBlade.exe` at its root. Unreal Editor is not required. GitHub's automatic source ZIP is not playable. The October 5 refresh replaces the same-version download with quieter coins and hold-to-attack combos; extract it into a fresh folder.
 
-The separate `TheBeardAndBlade-StreamPixel-v0.4.2.zip` contains the same Pixel Streaming-enabled Shipping runtime in the hosting upload layout.
+For Vagon Streams, upload the complete ZIP and select `TheBeardAndBlade/Binaries/Win64/TheBeardAndBlade-Win64-Shipping.exe`. Preserve all folders and dependencies. Hosted upload and activation remain separate steps.
 
 ## Controls
 
 Default bindings: WASD move; Shift sprint; Space dodge; mouse aim; LMB attack; MMB throw tea; RMB block; 1 FREEDOM after 15 kills; 2 Tea Spirit; Q health potion; E interact; I inventory; P/Escape pause; M Emerald Atlas. Settings supports keyboard/mouse remapping, with matching HUD and help labels.
+
+Hold LMB (or the rebound attack key) for repeated swings. The third consecutive landed melee swing is a heavy finisher with 50% bonus damage and an illustrated COMBO popup. Misses, interruptions, or a 1.4-second pause between attacks reset the chain. A cleave counts as one swing, regardless of how many enemies it hits.
 
 Tea Spirit: drink a cup of tea for ten seconds of invulnerability and 50% increased movement speed. The protected window includes the 1.2-second raise/sip/lower animation; movement resumes after drinking. A pulsing gold glow and outward-radiating aura mark the effect. Recharge takes 30 seconds after protection ends. The skill has its own HUD icon and does not replace the MMB tea attack.
 

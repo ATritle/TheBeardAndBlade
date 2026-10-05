@@ -1,6 +1,78 @@
 #include "DungeonActors.h"
 #include "Kismet/GameplayStatics.h"
 #include "HAL/PlatformMisc.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerInput.h"
+#include "Engine/Texture2D.h"
+#include "Engine/World.h"
+#include "InputKeyEventArgs.h"
+
+void ADungeonGameMode::VerifyCombo()
+{
+#if WITH_EDITOR
+    int Checks=0,Errors=0;
+    auto Check=[&](bool OK,const TCHAR* Why){++Checks;if(!OK){++Errors;UE_LOG(LogTemp,Error,TEXT("COMBO: %s"),Why);}};
+    FDungeonMeleeCombo C;
+    for(int Cycle=0;Cycle<5;++Cycle){
+        C.Begin();Check(!C.Finisher&&C.DamageScale()==1,TEXT("first hit normal"));Check(!C.Resolve(true),TEXT("first hit not combo"));
+        C.Begin();Check(!C.Finisher,TEXT("second hit normal"));C.Resolve(true);
+        C.Begin();Check(C.Finisher&&C.DamageScale()==1.5f,TEXT("third hit bonus"));Check(C.Resolve(true)&&C.Landed==0,TEXT("combo resets after third hit"));
+    }
+    C.Begin();C.Resolve(true);C.Begin();C.Resolve(false);C.Begin();Check(!C.Finisher&&C.Landed==0,TEXT("miss resets"));
+    C.Resolve(true);C.Begin();C.Resolve(true);C.Tick(1.5f,false);C.Begin();Check(!C.Finisher,TEXT("long pause resets"));
+    C.Resolve(true);C.Tick(5,true);Check(C.Landed==1,TEXT("slow swing cannot expire mid-animation"));C.Reset();
+    Check(C.Landed==0&&!C.Finisher,TEXT("interrupt resets"));
+    Check(FDungeonMeleeCombo::Pose(.35f)==1&&FDungeonMeleeCombo::Pose(.56f)==3&&FDungeonMeleeCombo::Pose(.7f)==2,TEXT("dedicated windup/strike/follow-through timeline"));
+    StartGame();InitializeAtlasFloor(12);
+    auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
+    if(!H){FPlatformMisc::RequestExitWithStatus(false,1);return;}
+    for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;
+    H->SetActorLocation(DungeonView::Unproject(FVector2D(640,460)));H->SetFlashReviewAim(FVector2D(0,1));
+    H->CritChance=H->BleedChance=H->PoisonChance=H->Leech=0;H->AttackPower=100;H->AttackSpeed=1;
+    for(auto& Gear:H->Equipment)Gear=FDungeonItem();
+    auto* E=GetWorld()->SpawnActor<ADungeonEnemy>();E->Species=0;E->SpawnTime=0;E->Health=E->MaxHealth=10000;
+    E->SetActorLocation(DungeonView::Unproject(FVector2D(640,520)));Enemies.Add(E);
+    for(int I=0;I<3;++I){
+        H->Attack();Check(H->IsComboSwing()==(I==2),TEXT("hero third swing selects finisher"));
+        const float Before=E->Health;H->Tick(I==2?.38f:.21f);
+        const float Damage=Before-E->Health;
+        Check(Damage>(I==2?134:89)&&Damage<(I==2?166:111),TEXT("actual damage multiplier only on third swing"));
+        H->Tick(.5f);Check(FMath::IsNearlyEqual(E->Health,Before-Damage),TEXT("one damage event per swing"));
+    }
+    Check(H->ComboPopupTime>0,TEXT("landed finisher raises graphic event"));
+    auto* Extra=GetWorld()->SpawnActor<ADungeonEnemy>();Extra->Species=0;Extra->SpawnTime=0;Extra->Health=Extra->MaxHealth=10000;
+    Extra->SetActorLocation(E->GetActorLocation());Enemies.Add(Extra);
+    H->ResetMeleeChain();H->Attack();H->Tick(.5f);H->Attack();Check(!H->IsComboSwing(),TEXT("two targets in one cleave count as one landed swing"));H->Tick(.5f);
+    H->Attack();Check(H->IsComboSwing(),TEXT("two cleaves arm exactly one finisher"));H->Tick(.7f);
+    H->ResetMeleeChain();
+    if(auto* PC=Cast<APlayerController>(H->GetController());PC&&PC->PlayerInput){
+        const FKey Original=DungeonKeys::Key(DungeonKeys::Attack);
+        FString Error;const bool Changed=DungeonKeys::Set(DungeonKeys::Attack,EKeys::F12,Error,false);
+        Check(Changed,TEXT("test temporary rebound attack"));H->RebindInput();
+        PC->PlayerInput->InputKey(FInputKeyEventArgs(nullptr,INPUTDEVICEID_NONE,DungeonKeys::Key(DungeonKeys::Attack),IE_Pressed,0));
+        auto& Key=*PC->PlayerInput->GetKeyState(DungeonKeys::Key(DungeonKeys::Attack));Key.bDown=true;
+        const int Before=H->StrikeCount;H->GameplayAttack();
+        for(int I=0;I<180;++I)H->Tick(1.f/60);
+        Check(H->StrikeCount>=Before+4,TEXT("held rebound attack repeats without further clicks"));
+        Key.bDown=false;H->GameplayAttackReleased();H->Tick(1);const int Released=H->StrikeCount;H->Tick(1);
+        Check(!H->IsAttacking()&&H->StrikeCount==Released,TEXT("release stops repeat after current swing"));
+        Key.bDown=true;H->GameplayAttack();H->ToggleInventory();H->ToggleInventory();H->Tick(1);
+        Check(!H->IsAttacking(),TEXT("holding through inventory requires a fresh press"));
+        Key.bDown=false;DungeonKeys::Set(DungeonKeys::Attack,Original,Error,false);H->RebindInput();
+    }else Check(false,TEXT("input controller available"));
+    H->ResetMeleeChain();H->Attack();H->Tick(.01f);H->ToggleInventory();Check(!H->IsAttacking(),TEXT("inventory cancels ongoing swing"));H->ToggleInventory();
+    H->GameplayAttack();H->GameplayAttackReleased();H->Tick(1);Check(!H->IsAttacking(),TEXT("released attack never auto-repeats"));
+    H->CancelCombatActions();H->Health=0;H->GameplayAttack();Check(!H->IsAttacking(),TEXT("dead hero cannot auto-attack"));H->Health=150;
+    Check(LoadObject<UTexture2D>(nullptr,TEXT("/Game/Art/V2/Combat_Combo.Combat_Combo"))!=nullptr,TEXT("dedicated combo artwork imported"));
+    LastSoundTime.Remove(TEXT("CoinPickup"));bEffectsMuted=false;PlaySound(TEXT("CoinPickup"),0);
+    const double First=LastSoundTime.FindRef(TEXT("CoinPickup"));PlaySound(TEXT("CoinPickup"),0);
+    Check(LastSoundTime.FindRef(TEXT("CoinPickup"))==First,TEXT("cluster coin cue throttled"));
+    LastSoundTime.Add(TEXT("CoinPickup"),First-.1);PlaySound(TEXT("CoinPickup"),0);
+    Check(LastSoundTime.FindRef(TEXT("CoinPickup"))==First-.1,TEXT("coin cue suppressed within 220ms"));
+    UE_LOG(LogTemp,Display,TEXT("COMBO_VERIFY: %d checks, %d errors"),Checks,Errors);
+    FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);
+#endif
+}
 
 void ADungeonGameMode::VerifyPolish()
 {

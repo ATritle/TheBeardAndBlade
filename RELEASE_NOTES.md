@@ -1,3 +1,17 @@
+# v0.4.3 — Room scrolling, gold vacuum and combat polish
+
+## October 5 same-version refresh — held attacks and combos
+
+- Hold the weapon attack binding (LMB by default) to repeat swings. Release stops repeating after the current swing. Menus, interruptions and death cancel held attacks.
+- Three consecutive landed melee swings trigger a 1.5x-damage third-hit finisher. Misses and a 1.4-second idle gap reset the chain; multi-target cleaves count once.
+- Added a separate heavy-finisher animation sequence using validated right-handed poses, a stronger sword trail, and a generated gold-and-emerald COMBO popup that rises and fades. Existing sprite textures are unchanged.
+- Coin pickup sound is approximately 10 dB quieter and limited to one cue every 220ms. Coin values and collection timing are unchanged.
+- Includes the earlier v0.4.3 automatic gold vacuum, persistent directional room scrolling, hit sparks, damage/healing numbers, torch flicker, embers, mist, movement dust and shadows.
+
+Download the replacement `TheBeardAndBlade-Windows-Vagon-v0.4.3.zip` and extract into a fresh folder. For local play run the root `TheBeardAndBlade.exe`; for Vagon select `TheBeardAndBlade/Binaries/Win64/TheBeardAndBlade-Win64-Shipping.exe`. Upload the whole ZIP, not an EXE alone. No Unreal Editor is required. Unsigned Windows builds may still trigger reputation warnings. Vagon deployment is separate.
+
+Verified: 52 combo checks; economy, HUD, settings, potion, Tea Spirit, atlas and polish regressions; eight-direction rendered finisher reviews; complete cooked-asset coverage; standalone Shipping coin-collection smoke test.
+
 # v0.4.2 — Iron Aerie, expanded enemies and combat HUD
 
 ## October 1 latest refresh — revival, potions, menus and settings

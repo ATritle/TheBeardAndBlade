@@ -11,6 +11,7 @@
 #include "DungeonTeaSpirit.h"
 #include "DungeonRevival.h"
 #include "DungeonSettings.h"
+#include "DungeonMeleeCombo.h"
 #include "DungeonActors.generated.h"
 
 namespace DungeonLootCatalog { constexpr int32 Count=72,EquipmentSlots=8; }
@@ -136,6 +137,13 @@ public:
     uint64 UIClickFrame=MAX_uint64;
     void InputClick();
     void GameplayAttack();
+    void GameplayAttackReleased(){bAttackHeld=false;}
+    void ResetMeleeChain(){bAttackHeld=false;MeleeCombo.Reset();AttackTime=0;bAttackHit=true;}
+    void ResolveMeleeSwing(bool Hit);
+    float MeleeDamageScale()const{return MeleeCombo.DamageScale();}
+    bool IsComboSwing()const{return IsAttacking()&&MeleeCombo.Finisher;}
+    float ComboPopupTime=0;
+    FVector2D ComboPopupPosition=FVector2D::ZeroVector;
     bool HeldDirections[4]={false,false,false,false};
     void MoveKey(int Direction,bool Held);
     void MoveForward(float V) { InputY=-V; }
@@ -224,6 +232,7 @@ public:
     float BleedChance=0,PoisonChance=0,Leech=0,DamageReduction=0;
     int32 StrikeCount=0;
 #if !UE_BUILD_SHIPPING
+    void SetComboReviewPose(int32 D,float T){MeleeCombo.Reset();MeleeCombo.Landed=2;MeleeCombo.Remaining=1;MeleeCombo.Begin();Facing=AttackDirection=D;AttackTime=MeleeCombo.Duration()*(1-T);bAttackHit=true;}
     void SetReviewPose(int32 D,int32 F) { Facing=AttackDirection=D; AttackTime=.48f*(1.f-(F+.01f)/6.f); bAttackHit=true; }
     void SetWalkReviewPose(int32 D,int32 F) { Facing=D;AttackTime=PowerCastTime=RollTime=0;bWalking=true;WalkDistance=(F+.01f)*18;IdleBreathBlend=0;MoveBlend=1;RunBlend=0;GaitTravel=FVector2D(FMath::Sin(D*PI/4),-FMath::Cos(D*PI/4)); }
     void SetSprintReviewPose() { RunBlend=1; }
@@ -254,7 +263,7 @@ public:
     int32 GetLocomotionFrame() const { return bWalking?FMath::FloorToInt(WalkDistance/18.f)%8:2; }
     bool IsRunAnimation() const { return bWalking&&RunBlend>.5f; }
     FVector2D GetVisualFacing() const { const float A=GetFacingDirection()*PI/4;return FVector2D(FMath::Sin(A),-FMath::Cos(A)); }
-    float GetAttackProgress() const { return 1.f-AttackTime/.48f; }
+    float GetAttackProgress() const { return 1.f-AttackTime/MeleeCombo.Duration(); }
     FVector2D GetAim() const { return IsCasting()?PowerAim:IsAttacking()?AttackAim:Aim; }
     float Health=150,MaxHealth=150,AttackPower=24,Armor=8,HurtTime=0;
     float StunTime=0,SlowTime=0,StatusClock=0;
@@ -267,6 +276,8 @@ public:
     TArray<FDungeonItem> Equipment;
     UPROPERTY(VisibleAnywhere) UCameraComponent* Camera;
 private:
+    FDungeonMeleeCombo MeleeCombo;
+    bool bAttackHeld=false;
     FDungeonBlock Block;
     float GuardBlend=0;
     float InputX=0,InputY=0,WalkDistance=0,AttackTime=0,Invulnerable=0;
@@ -553,6 +564,7 @@ private:
     void NextRoom();
     void VerifyGameplay();
     void VerifyPolish();
+    void VerifyCombo();
     void VerifyCampaign();
     UPROPERTY() TArray<TObjectPtr<ADungeonEnemy>> Enemies;
     UPROPERTY() TMap<FString,TObjectPtr<USoundBase>> Sounds;
