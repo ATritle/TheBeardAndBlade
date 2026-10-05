@@ -20,7 +20,7 @@ https://creativecommons.org/publicdomain/zero/1.0/
 
 RPG Sound Pack — artisticdude
 https://opengameart.org/content/rpg-sound-pack
-Used for doors/chests, UI, rolls, throwing, magic/teleport and impacts.
+Used for doors/chests, UI, rolls, throwing, magic/teleport, impacts and coin pickup (inventory/coin.wav).
 
 Different steps on wood, stone, leaves, gravel and mud — TinyWorlds
 https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud

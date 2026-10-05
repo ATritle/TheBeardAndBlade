@@ -169,6 +169,15 @@ void ADungeonGameMode::RunPackagedSmokeTest()
         UE_LOG(LogTemp,Display,TEXT("LOCOMOTION_VERIFY errors=%d; 128 authored frames; eight movement-facing directions; speed modifiers; 60/120Hz; idle; walls; doorway walk"),Errors);
         FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);return;
     }
+    if(FParse::Param(FCommandLine::Get(),TEXT("CoinVacuumReview"))) {
+        static int Stage=0;static float Start=0;const float T=GetWorld()->GetTimeSeconds();
+        auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));if(!H)return;
+        if(Stage==0&&T>2){StartGame();InitializeAtlasFloor(12);H->Coins=0;H->SetActorLocation(DungeonView::Unproject(FVector2D(640,470)));CoinDrops.Empty();
+            for(int I=0;I<8;++I){FDungeonCoinDrop C;C.Position=FVector2D(160+(I%4)*320,220+(I/4)*400);C.Amount=10;CoinDrops.Add(C);}Start=T;++Stage;}
+        if(Stage>=1&&Stage<=3&&T-Start>.15f+(Stage-1)*.3f){FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/FString::Printf(TEXT("Screenshots/CoinVacuum%d.png"),Stage),false,false);++Stage;}
+        if(Stage==4&&T-Start>2.5f){const bool OK=H->Coins==80&&CoinDrops.IsEmpty();FFileHelper::SaveStringToFile(OK?TEXT("COIN_VACUUM_SMOKE PASS: 8 drops, 80 gold, no duplicate credits"):TEXT("COIN_VACUUM_SMOKE FAIL"),*(FPaths::ProjectSavedDir()/TEXT("CoinVacuumSmoke.txt")));++Stage;FPlatformMisc::RequestExitWithStatus(false,OK?0:1);}
+        return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("EconomyReview"))) {
         static int Stage=0;const float T=GetWorld()->GetTimeSeconds();
         auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));if(!H)return;

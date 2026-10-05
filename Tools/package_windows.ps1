@@ -1,6 +1,6 @@
 param([string]$Engine='C:/Program Files/Epic Games/UE_5.8',[string]$Destination='')
 $projectRoot=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-if(!$Destination) { $Destination=Join-Path $projectRoot 'Builds/v0.4.2' }
+if(!$Destination) { $Destination=Join-Path $projectRoot 'Builds/v0.4.3' }
 if(Test-Path (Join-Path $Destination 'Windows')) { throw 'Choose a fresh archive destination to avoid shipping leftover files from older builds.' }
 $env:uebp_EngineSavedFolder=Join-Path $projectRoot 'Saved/Automation'
 # Use a writable temporary directory for UBT response files, SDK validation and
@@ -47,7 +47,7 @@ if($missingPackagedEnemies.Count) {
 }
 Write-Output 'Final packaged enemy animation coverage verified.'
 # These assets also load by name and must survive staging into the final container.
-foreach($requiredArt in @('/Content/Art/TeaSpirit/TeaSpirit_DrinkSheet.uasset','/Content/Art/V2/Potion_DrinkSheet.uasset','/Content/Art/UI/Hotbar/Hotbar_TeaSpirit.uasset','/Content/Art/V2/M_DeathSpirit.uasset')) {
+foreach($requiredArt in @('/Content/Audio/CoinPickup.uasset','/Content/Art/TeaSpirit/TeaSpirit_DrinkSheet.uasset','/Content/Art/V2/Potion_DrinkSheet.uasset','/Content/Art/UI/Hotbar/Hotbar_TeaSpirit.uasset','/Content/Art/V2/M_DeathSpirit.uasset')) {
     if(!$enemyContainerContents.Contains($requiredArt)) { throw "Final container omitted $requiredArt" }
 }
 Write-Output 'Tea Spirit, HUD and death-spirit material cook coverage verified.'

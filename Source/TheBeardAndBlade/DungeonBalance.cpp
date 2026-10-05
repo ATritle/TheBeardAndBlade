@@ -1,3 +1,4 @@
+#include "DungeonBalance.h"
 #include "DungeonActors.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -59,7 +60,10 @@ void ADungeonHero::RestoreHealth(float Amount,bool FromGear)
     if(FromGear)GearHealBudget=FMath::Max(0.f,GearHealBudget-Restored);
     Health+=Restored;
     if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this)))
+    {
         if(G->Balance.Active)G->Balance.Healing+=Restored;
+        if(Restored>0)G->AddImpact(DungeonView::Project(GetActorLocation()),-Restored);
+    }
 }
 void ADungeonGameMode::BeginBalanceRoom()
 {

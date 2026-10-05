@@ -31,7 +31,7 @@ bool ADungeonGameMode::AtlasHasDoor(int32 D) const
 }
 void ADungeonGameMode::DisableAtlas()
 {
-    bAtlasActive=bAtlasMap=bAtlasDescending=false;AtlasTravelTime=AtlasArrivalTime=0;AtlasRooms.Empty();AtlasCurrent=AtlasPreviousSafe=0;
+    bAtlasActive=bAtlasMap=bAtlasDescending=bAtlasScroll=false;AtlasScrollSource=-1;AtlasTravelTime=AtlasArrivalTime=0;AtlasRooms.Empty();AtlasCurrent=AtlasPreviousSafe=0;
 }
 void ADungeonGameMode::InitializeAtlasFloor(int32 Seed,int32 Chapter)
 {
@@ -115,23 +115,50 @@ void ADungeonGameMode::StartAtlasTravel(int32 D)
 {
     if(!AtlasHasDoor(D)||!AreDoorsOpen()||IsGameplayBlocked()||!Enemies.IsEmpty()||PendingSpawns>0)return;
     SaveAtlasRoom();bAtlasDescending=AtlasIsDescentDoor(D);AtlasTravelDoor=D;
+    const int Destination=AtlasRooms[AtlasCurrent].Links[D];
+    bAtlasScroll=!bAtlasDescending&&Destination>=0&&AtlasRooms[Destination].Type!=EAtlasRoom::Trader;
+    AtlasScrollSource=-1;
     AtlasTravelTime=bAtlasDescending?DungeonDescent::Duration:TravelDuration;
     if(auto* H=AtlasHero(this)){H->CancelCombatActions();AtlasTravelFrom=DungeonView::Project(H->GetActorLocation());}
     Shots.Empty();Splashes.Empty();PlaySound(TEXT("Door"),.65f);
 }
 float ADungeonGameMode::AtlasHeroOpacity() const
 {
+    if(bAtlasScroll)return 1;
     if(AtlasTravelTime>0){float T=1-AtlasTravelTime/(bAtlasDescending?DungeonDescent::Duration:TravelDuration);return 1-DungeonDescent::Ease(T,.28f,.76f);}
     return AtlasArrivalTime>0?DungeonDescent::Ease(1-AtlasArrivalTime/ArrivalDuration,0,.8f):1;
 }
 float ADungeonGameMode::AtlasBlackout() const
 {
+    if(bAtlasScroll)return 0;
     if(AtlasTravelTime>0)return DungeonDescent::Ease(1-AtlasTravelTime/(bAtlasDescending?DungeonDescent::Duration:TravelDuration),.80f,1);
     return AtlasArrivalTime>0?1-DungeonDescent::Ease(1-AtlasArrivalTime/ArrivalDuration,0,.55f):0;
 }
 void ADungeonGameMode::TickAtlasTravel(float Dt)
 {
     auto* H=AtlasHero(this);
+    if(bAtlasScroll&&AtlasTravelTime>0)
+    {
+        AtlasTravelTime=FMath::Max(0.f,AtlasTravelTime-Dt);
+        const float T=1-AtlasTravelTime/TravelDuration;
+        if(T<.25f){if(H)H->TransitionWalk(AtlasTravelFrom,AtlasDoor(AtlasTravelDoor),T/.25f);return;}
+        if(AtlasScrollSource<0)
+        {
+            const int Source=AtlasCurrent,Next=AtlasRooms[Source].Links[AtlasTravelDoor];
+            EnterAtlasRoom(Next,(AtlasTravelDoor+2)%4);
+            AtlasScrollSource=Source;AtlasArrivalTime=0;
+        }
+        const auto Span=AtlasDirection(AtlasTravelDoor)*FVector2D(1280,800);
+        const auto From=AtlasDoor(AtlasTravelDoor)-Span;
+        const auto To=AtlasDoor((AtlasTravelDoor+2)%4);
+        if(H)H->TransitionWalk(From,To,AtlasScrollProgress());
+        if(AtlasTravelTime<=0)
+        {
+            AtlasArrivalFrom=To;AtlasArrivalTo=To+AtlasDirection(AtlasTravelDoor)*75;
+            AtlasArrivalTime=ArrivalDuration;AtlasScrollSource=-1;
+        }
+        return;
+    }
     if(AtlasTravelTime>0){
         AtlasTravelTime=FMath::Max(0.f,AtlasTravelTime-Dt);
         float T=1-AtlasTravelTime/(bAtlasDescending?DungeonDescent::Duration:TravelDuration);
@@ -145,7 +172,13 @@ void ADungeonGameMode::TickAtlasTravel(float Dt)
                 if(H)H->TransitionWalk(AtlasArrivalFrom,AtlasArrivalTo,0);
             }else {const int Next=AtlasRooms[AtlasCurrent].Links[AtlasTravelDoor];EnterAtlasRoom(Next,(AtlasTravelDoor+2)%4);}
         }
-    }else if(AtlasArrivalTime>0){AtlasArrivalTime=FMath::Max(0.f,AtlasArrivalTime-Dt);if(H)H->TransitionWalk(AtlasArrivalFrom,AtlasArrivalTo,1-AtlasArrivalTime/ArrivalDuration);}
+    }else if(AtlasArrivalTime>0){AtlasArrivalTime=FMath::Max(0.f,AtlasArrivalTime-Dt);if(H)H->TransitionWalk(AtlasArrivalFrom,AtlasArrivalTo,1-AtlasArrivalTime/ArrivalDuration);if(AtlasArrivalTime<=0)bAtlasScroll=false;}
+}
+
+float ADungeonGameMode::AtlasScrollProgress() const
+{
+    const float T=FMath::Clamp((1-AtlasTravelTime/TravelDuration-.25f)/.75f,0.f,1.f);
+    return T*T*(3-2*T);
 }
 
 void ADungeonHUD::DrawAtlas(ADungeonGameMode* G,ADungeonHero* H)
@@ -193,6 +226,7 @@ void ADungeonHUD::DrawAtlasDoors(ADungeonGameMode* G,ADungeonHero* H)
     const FLinearColor Gold(.94f,.69f,.30f),Emerald(.16f,.82f,.62f);
     auto P=DungeonView::Project(H->GetActorLocation());
     for(int D=0;D<4;++D){const auto Door=G->AtlasDoor(D);bool Exists=G->AtlasHasDoor(D);bool Open=Exists&&G->AreDoorsOpen();
+        if(G->bAtlasScroll&&G->IsAtlasTravel()&&Exists&&(G->AtlasCurrent==G->AtlasScrollSource||D==(G->AtlasTravelDoor+2)%4))Open=true;
         const float W=D%2?78:104,HH=D%2?90:104;
         const FVector2D Centers[]={{640,75},{1235,392},{640,740},{45,392}};
         const FVector2D Center=Centers[D];
@@ -311,7 +345,7 @@ void ADungeonGameMode::VerifyAtlas()
         EnterAtlasRoom(Source,-1);for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;AtlasRooms[Source].Cleared=true;
         int Dest=AtlasRooms[Source].Links[D];H->SetActorLocation(DungeonView::Unproject(AtlasDoor(D)-AtlasDirection(D)*60));
         StartAtlasTravel(D);Check(IsAtlasTravel()&&AtlasHeroOpacity()==1,TEXT("Begin doorway fully visible"));
-        TickAtlasTravel(TravelDuration*.5f);Check(AtlasHeroOpacity()>0&&AtlasHeroOpacity()<1,TEXT("Gradual fade through doorway"));
+        TickAtlasTravel(TravelDuration*.5f);Check(AtlasHeroOpacity()==1&&AtlasBlackout()==0&&IsAtlasScrolling(),TEXT("Visible directional scroll without blackout"));
         Check(H->GetFacingDirection()==D*2,TEXT("Hero faces chosen exit"));
         TickAtlasTravel(TravelDuration);Check(AtlasCurrent==Dest&&AtlasArrivalTime>0,TEXT("Adjacent room with arrival fade"));
         TickAtlasTravel(ArrivalDuration);Check(AtlasHeroOpacity()==1,TEXT("Arrival restores opacity"));
@@ -416,7 +450,7 @@ void ADungeonGameMode::RunAtlasReview()
         for(int I:{0,1,2,3,6,7}){AtlasRooms[I].Visited=true;AtlasRooms[I].Cleared=true;}
         AtlasRooms[7].Chest=true;
         EnterAtlasRoom(3,-1);PendingSpawns=0;AtlasRooms[3].Cleared=true;
-        if(ReviewDoor>=0&&ReviewDoor<4){for(int I=0;I<AtlasRooms.Num();++I)if(AtlasRooms[I].Links[ReviewDoor]>=0){AtlasRooms[I].Visited=AtlasRooms[I].Cleared=true;EnterAtlasRoom(I,-1);PendingSpawns=0;break;}}
+        if(ReviewDoor>=0&&ReviewDoor<4){for(int I=0;I<AtlasRooms.Num();++I)if(AtlasRooms[I].Type!=EAtlasRoom::Trader&&AtlasRooms[I].Links[ReviewDoor]>=0&&AtlasRooms[AtlasRooms[I].Links[ReviewDoor]].Type!=EAtlasRoom::Trader){AtlasRooms[I].Visited=AtlasRooms[I].Cleared=true;EnterAtlasRoom(I,-1);PendingSpawns=0;break;}}
         H->SetActorLocation(DungeonView::Unproject(FVector2D(640,540)));
         if(FParse::Param(FCommandLine::Get(),TEXT("AtlasMapReview")))ToggleAtlasMap();
         ++Step;

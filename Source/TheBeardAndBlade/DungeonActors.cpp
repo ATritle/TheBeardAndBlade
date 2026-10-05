@@ -483,6 +483,7 @@ void ADungeonGameMode::BeginPlay()
     if(FParse::Param(FCommandLine::Get(),TEXT("RevivalVerify"))) { VerifyRevival();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritVerify"))) { VerifyTeaSpirit();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("PotionVerify"))) { VerifyPotions();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("PolishVerify"))) { VerifyPolish();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("MenuVerify"))) { VerifyMenu();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("SettingsVerify"))) { VerifySettings();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("HotbarVerify"))) { VerifyHotbar();return; }
@@ -579,6 +580,7 @@ void ADungeonGameMode::Tick(float Dt)
         if(!Prepared&&Time>2.f)
         {
             Prepared=true;
+            if(FParse::Param(FCommandLine::Get(),TEXT("PolishPreview")))StartGame();
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonTraderPreview"))) {
                 for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;Room=2;bLootRolled=true;
                 if(auto* H=Player(this)){H->Coins=1200;H->AddToInventory(RollItem(24,2,3));}
@@ -707,10 +709,21 @@ void ADungeonGameMode::Tick(float Dt)
         }
         if(FParse::Param(FCommandLine::Get(),TEXT("DungeonBreakablesPreview"))&&Time>4.1f)
             for(int I=3;I<Breakables.Num();++I)if(Breakables[I].BrokenAge<0){Breakables[I].BrokenAge=I==5?2.f:0.f;Breakables[I].Loot=RollChestLoot(false,Room);}
+        if(FParse::Param(FCommandLine::Get(),TEXT("PolishPreview"))&&Time>4.35f)
+        {
+            if(auto* H=Player(this))
+            {
+                H->SetActorLocation(DungeonView::Unproject(FVector2D(630,440)));H->SetReviewPose(2,3);
+                Impacts.Empty();AddImpact(FVector2D(710,440),42);Impacts.Last().Life=.97f;
+                AddImpact(FVector2D(630,440),-37.5f);Impacts.Last().Life=.72f;
+                AddImpact(FVector2D(550,420),18,true);Impacts.Last().Life=.48f;
+            }
+        }
         if(!Captured&&Time>4.5f)
         {
             Captured=true;
             FString Name=FParse::Param(FCommandLine::Get(),TEXT("DungeonRewardPreview"))?TEXT("RewardReview"):Room==2?TEXT("BossReview"):TEXT("ArenaReview");
+            if(FParse::Param(FCommandLine::Get(),TEXT("PolishPreview")))Name=TEXT("CombatPolishReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonInventoryPreview"))) Name=TEXT("InventoryReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonTraderPreview"))) Name=TEXT("TraderReview");
             if(FParse::Param(FCommandLine::Get(),TEXT("DungeonBreakablesPreview"))) Name=FString::Printf(TEXT("BreakablesReview%d"),GetBiome());
@@ -748,9 +761,9 @@ void ADungeonGameMode::Tick(float Dt)
         if(Prepared&&FParse::Param(FCommandLine::Get(),TEXT("DungeonDrakePreview"))) return;
     }
 #endif
-    if(IsBossIntroActive()) { UpdateBossIntro(Dt);return; }
     if(bMenu||bTraderOpen||bAtlasMap) return;
     if(IsAtlasTravel()){TickAtlasTravel(Dt);return;}
+    if(IsBossIntroActive()) { UpdateBossIntro(Dt);return; }
     if(IsBossDialogueActive()) { DialogueWait=FMath::Max(0.f,DialogueWait-Dt); return; }
     if(BossGrace>0) { BossGrace=FMath::Max(0.f,BossGrace-Dt); return; }
     if(auto* H=Player(this))
@@ -917,6 +930,11 @@ void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
 }
 void ADungeonGameMode::AddImpact(FVector2D P,float Damage,bool Boss)
 {
+    // Group rapid leech ticks; preserve the exact restored amount without flooding the screen.
+    if(Damage<0)for(auto& Existing:Impacts)
+        if(Existing.Damage<0&&Existing.Life>.9f&&FVector2D::Distance(Existing.Position,P)<32)
+        {Existing.Damage+=Damage;return;}
+    if(Impacts.Num()>=128)Impacts.RemoveAt(0);
     if(Damage>0)
     {
         if(Blood.Num()>=96) Blood.RemoveAt(0);
@@ -1053,11 +1071,7 @@ void ADungeonHUD::Ring(FVector2D C,float R,FLinearColor Color,float Width)
 }
 void ADungeonHUD::Shadow(FVector2D Center,float Radius,float Opacity)
 {
-    for(int32 Y=-6;Y<=6;++Y)
-    {
-        const float Half=Radius*FMath::Sqrt(FMath::Max(0.f,1.f-Y*Y/49.f));
-        Box(Center.X-Half,Center.Y+Y*1.5f,Half*2,1.5f,FLinearColor(0,0,0,.28f*Opacity));
-    }
+    SoftEllipse(Center,FVector2D(Radius*1.2f,Radius*.4f),FLinearColor(0,0,0,.48f*Opacity));
 }
 void ADungeonHUD::Hero(ADungeonHero* H,float HS)
 {
@@ -1183,6 +1197,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
 #if !UE_BUILD_SHIPPING
         if(FParse::Param(FCommandLine::Get(),TEXT("DungeonWeaponOriginal"))) WeaponSize=96*HS;
 #endif
+        DrawSwordTrail(H,Hand,Angle,WeaponSize*Pivot.Y*.85f,Opacity);
         Sprite(H->Equipment[0].Art(),Hand.X-Pivot.X*WeaponSize,Hand.Y-Pivot.Y*WeaponSize,
             WeaponSize,WeaponSize,Fade,Angle,Pivot);
         // The right arm is on the far side in left/rear-left views. Never draw
@@ -1198,16 +1213,6 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     }
     if(Behind&&H->Equipment[0].IsEmpty()) DrawBody();
     DrawGuard(H);
-    if(!H->Equipment[0].IsEmpty()&&H->IsAttacking()&&H->GetAttackProgress()>.25f&&H->GetAttackProgress()<.8f)
-    {
-        float Base=FMath::Atan2(A.Y,A.X);
-        float End=Base-1.3f+H->GetAttackProgress()*3.2f;
-        for(int I=0;I<12;++I)
-        {
-            float T=End-I*.065f; FVector2D Q=P+FVector2D(FMath::Cos(T)*76,FMath::Sin(T)*56-30);
-            Box(Q.X,Q.Y,4,3,FLinearColor(1,.82f,.4f,1.f-I/12.f));
-        }
-    }
 }
 void ADungeonHUD::Enemy(ADungeonEnemy* E)
 {
@@ -1771,6 +1776,7 @@ void ADungeonHUD::DrawHUD()
     if(G->IsVictory()) { DrawEnding(G);return; }
     if(G->IsMenu()) { DrawMenu(G); return; }
     if(G->IsTraderOpen()) {if(H->IsInventoryOpen())DrawInventory(H);else DrawTrader(G,H);return;}
+    if(G->IsAtlasScrolling()){DrawAtlasScroll(G,H);DrawVitals(H);return;}
     const FVector2D StableOffset=Offset;
     if(G->IsFreedomActive())
     {
@@ -1778,7 +1784,7 @@ void ADungeonHUD::DrawHUD()
         Offset+=FVector2D(FMath::Sin(T*71)*5,FMath::Cos(T*57)*4)*Scale;
     }
     Sprite(G->IsAtlasFloor()?(G->GetBiome()==0?FString(TEXT("AtlasChamber")):FString::Printf(TEXT("AtlasChamber%d"),G->GetBiome())):G->GetBiome()==0?FString(TEXT("Arena")):FString::Printf(TEXT("Arena%d"),G->GetBiome()),0,0,1280,800);
-    if(G->IsBossIntroActive()){DrawBossIntro(G);return;}
+    if(G->IsBossIntroActive()&&!G->IsAtlasTravel()){DrawBossIntro(G);return;}
 #if !UE_BUILD_SHIPPING
     if(FParse::Param(FCommandLine::Get(),TEXT("ExpansionReview"))){
         int32 Species=50;float Age=GetWorld()->GetTimeSeconds();FParse::Value(FCommandLine::Get(),TEXT("ExpansionSpecies="),Species);FParse::Value(FCommandLine::Get(),TEXT("ExpansionAge="),Age);
@@ -1932,6 +1938,7 @@ void ADungeonHUD::DrawHUD()
         return;
     }
 #endif
+    DrawPolishAtmosphere(G,H);
     if(G->IsAtlasFloor())DrawAtlasDoors(G,H);
     for(int I=0;!G->IsAtlasFloor()&&I<3;++I)
     {
@@ -2091,17 +2098,8 @@ void ADungeonHUD::DrawHUD()
         const float Size=Shot.Art==1||Shot.Art==2?46:Shot.Art==3?42:Shot.bFriendly?42:48;
         KeySprite(FString::Printf(TEXT("TeaFX_%d"),Shot.Art),P.X-Size*.5f,P.Y-Size*.5f,Size,Size,FLinearColor::White,false,Angle);
     }
-    for(const auto& I:G->GetImpacts())
-    {
-        float Age=.65f-I.Life; FLinearColor C=I.bBoss?FLinearColor(1,.23f,.07f):Gold; C.A=I.Life/.65f;
-        if(Age<.25f) for(int J=0;J<9;++J)
-        {
-            float A=J*2*PI/9; FVector2D Q=I.Position+FVector2D(FMath::Cos(A),FMath::Sin(A))*(12+Age*160)-FVector2D(0,35);
-            Box(Q.X,Q.Y,4,4,C);
-        }
-        if(I.Damage>0) Label(FString::Printf(TEXT("%.0f"),I.Damage),I.Position.X-8,I.Position.Y-75-Age*42,C,1.4f);
-        else Ring(I.Position,30+Age*150,C,5);
-    }
+    DrawCoinDrops(G,true);
+    DrawHitFeedback(G);
     DrawCombatFX(G,true);
     Offset=StableOffset; // Shake the dungeon, never the HUD or mouse-input mapping.
     if(G->IsDeathSequence()){DrawDeathSequence(G,H);return;}

@@ -52,7 +52,7 @@ struct FDungeonItem
 };
 struct FDungeonBagEntry { FDungeonItem Item; FIntPoint Cell; };
 struct FDungeonPotion { FVector2D Position; float Age=0; };
-struct FDungeonCoinDrop { FVector2D Position; int32 Amount=0; float Age=0; };
+struct FDungeonCoinDrop { FVector2D Position; int32 Amount=0; float Age=0,CollectedAge=0; bool Collected=false; };
 struct FDungeonBreakable
 {
     FVector2D Position;
@@ -91,7 +91,7 @@ struct FAtlasRoom
 struct FDungeonImpact
 {
     FVector2D Position;
-    float Life=.65f, Damage=0;
+    float Life=1.05f, Damage=0;
     bool bBoss=false;
 };
 struct FDungeonShot
@@ -440,6 +440,8 @@ public:
     bool IsAtlasFloor() const { return bAtlasActive; }
     bool IsAtlasMapOpen() const { return bAtlasMap; }
     bool IsAtlasTravel() const { return AtlasTravelTime>0||AtlasArrivalTime>0; }
+    bool IsAtlasScrolling() const { return bAtlasScroll&&AtlasTravelTime>0&&AtlasScrollSource>=0; }
+    float AtlasScrollProgress() const;
     const TArray<FAtlasRoom>& GetAtlasRooms() const { return AtlasRooms; }
     int32 GetAtlasRoom() const { return AtlasCurrent; }
     void InitializeAtlasFloor(int32 Seed,int32 Chapter=0);
@@ -533,6 +535,9 @@ private:
     bool bAtlasActive=false,bAtlasMap=false;
     TArray<FAtlasRoom> AtlasRooms;
     int32 AtlasCurrent=0,AtlasTravelDoor=0,AtlasChapter=0;
+    friend class ADungeonHUD;
+    bool bAtlasScroll=false;
+    int32 AtlasScrollSource=-1;
     int32 AtlasPreviousSafe=0;
     float AtlasTravelTime=0,AtlasArrivalTime=0;
     bool bAtlasDescending=false;
@@ -547,6 +552,7 @@ private:
     void SpawnOneEnemy();
     void NextRoom();
     void VerifyGameplay();
+    void VerifyPolish();
     void VerifyCampaign();
     UPROPERTY() TArray<TObjectPtr<ADungeonEnemy>> Enemies;
     UPROPERTY() TMap<FString,TObjectPtr<USoundBase>> Sounds;
@@ -594,6 +600,7 @@ public:
     void DrawTrader(ADungeonGameMode* G,ADungeonHero* H);
     void DrawAtlas(ADungeonGameMode* G,ADungeonHero* H);
     void DrawAtlasDoors(ADungeonGameMode* G,ADungeonHero* H);
+    void DrawAtlasScroll(ADungeonGameMode* G,ADungeonHero* H);
     int32 TraderSelection=INDEX_NONE;
     void CancelInventoryGesture();
     int32 VerifyInventoryGestures(ADungeonHero* H);
@@ -602,6 +609,16 @@ public:
     void PreloadBossIntro(int32 Species);
 private:
     void UpdateFlashScreen();
+    void SoftEllipse(FVector2D Center,FVector2D Radius,FLinearColor Color);
+    void DrawPolishAtmosphere(ADungeonGameMode* G,ADungeonHero* H);
+    void DrawHitFeedback(ADungeonGameMode* G);
+    void DrawSwordTrail(ADungeonHero* H,FVector2D Hand,float Angle,float Length,float Opacity);
+    UPROPERTY() UTexture2D* PolishSoftTexture=nullptr;
+    struct FMovementDust { FVector2D Position; float Age=0; };
+    TArray<FMovementDust> MovementDust;
+    FVector2D LastDustPosition=FVector2D::ZeroVector;
+    float AtmosphereClock=0,DustDistance=0;
+    int32 AtmosphereRoom=-1;
     TSharedPtr<SBackgroundBlur> FlashBlur;
     TSharedPtr<SBorder> FlashWhite;
     void DrawDialogue(ADungeonGameMode* G,ADungeonHero* H);
@@ -621,7 +638,7 @@ private:
     void GemMeter(FVector2D Center,float Radius,float Width,float Start,float Sweep,float Fraction,FLinearColor Tint,int Pieces);
     float DisplayHealth=-1,DisplayStamina=-1;
     void DrawPotions(ADungeonGameMode* G);
-    void DrawCoinDrops(ADungeonGameMode* G);
+    void DrawCoinDrops(ADungeonGameMode* G,bool Foreground=false);
     void Orb(FVector2D Center,float Fraction,FLinearColor Color);
     void DrawInventory(ADungeonHero* H);
     void UpdateInventoryDrag(ADungeonHero* H);
