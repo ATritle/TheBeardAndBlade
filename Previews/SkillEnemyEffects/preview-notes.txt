@@ -1,0 +1,38 @@
+Skill and regular-enemy Niagara pass — 2026-10-06
+
+Extends the approved arrow/combat renderer, without changing gameplay stats.
+TEA: cup remains its original size and baked tumble; independent faint wake;
+Niagara ballistic liquid jets, droplets and ceramic glints replace ground and
+enemy impact sheets. Ground .6s, enemy .4s; no steam, puddle or lingering hold.
+Potion: rising green healing motes on the actual drink/heal event.
+Golden Tea: outward golden Niagara pulses and motes complement existing body
+glow and soft aura. Ten-second protection and cooldown unchanged.
+FREEDOM: animated eagle retained, old Ornate_2 streaks replaced with fading wind.
+Dodge: small dissipating floor dust. Existing melee/combo/block pass retained.
+
+Regular enemies (including expansion elites): release-timed melee crescents;
+distance-sampled stationary projectile wakes; distinct fire petals, ice shards,
+poison puff, storm arcs and rifle sparks; spawn convergence and death motes;
+charge dust and restrained poison/bleed/slow cues. Physical projectile cores,
+telegraphs, corpse animation, collision and damage calculations retained.
+Boss-specific attack, spawn/death and projectile effects excluded by provenance.
+Existing player attacks can still display their own effects when hitting bosses.
+No gameplay random numbers are consumed by the effects.
+
+Rendering: real Niagara components with per-instance procedural animated sprite
+materials in the game's private orthographic effects plane, composited into the
+existing canvas renderer. This is not a conversion to a 3D lighting/physics scene.
+Foreground/background each capped at 160 components. Cosmetic lifetimes pause
+with inventory/gameplay pause and clear through menus and room transitions.
+
+Editor and Win64 Shipping targets compile successfully.
+Verification: TEA 83, Golden Tea 13, potion 15, expansion 35982, HUD/block 291,
+bow 176, combo 52, Iron Matriarch 110, new FX safety checks 141: zero failures.
+Iron test requires audio enabled; -nosound intentionally prevents its intro
+component from being created and makes its audio-component assertion fail.
+
+Preview: -SkillFXReview -FullBodyTest -UseFixedTimeStep -FPS=30.
+39 seconds of real engine output, scripted inputs and staged enemy roster.
+Player health is replenished during the enemy showcase; not a balance test.
+Preview recording is silent. Video crops only; effects are rendered by UE.
+GitHub upload is media-only on a preview branch; no game release replacement.
