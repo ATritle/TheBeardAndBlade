@@ -11,6 +11,7 @@
 		}
 	],
 	"Plugins": [
+		{"Name": "Niagara", "Enabled": true},
 		{
 			"Name": "AndroidFileServer",
 			"Enabled": false

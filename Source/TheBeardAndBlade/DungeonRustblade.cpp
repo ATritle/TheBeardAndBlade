@@ -9,6 +9,7 @@
 #include "Misc/Parse.h"
 #include "HAL/PlatformMisc.h"
 
+#include "DungeonSkillFX.h"
 void ADungeonEnemy::TickRustblade(float Dt,ADungeonHero* H,ADungeonGameMode* G)
 {
     using namespace RustbladeSquire;
@@ -26,6 +27,7 @@ void ADungeonEnemy::TickRustblade(float Dt,ADungeonHero* H,ADungeonGameMode* G)
         RustAttackAge+=Dt;
         Windup=FMath::Max(0.f,StrikeTime-RustAttackAge);
         if(!bRustStrikeFired&&CrossedStrike(Before,RustAttackAge)) {
+            DungeonSkillFX::Melee(this);
             bRustStrikeFired=true;
             G->PlaySound(TEXT("Sword"),.42f);
             // Facing/aim are locked for the whole swing. ReceiveHit owns dodge,

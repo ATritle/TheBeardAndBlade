@@ -1,0 +1,69 @@
+<div id="arrow-wake-study">
+  <div class="viz-controls">
+    <button class="btn btn-primary" type="button" data-play="power">Play 1.5s power shot</button>
+    <button class="btn" type="button" data-play="quick">Play quick shot</button>
+    <label class="form-label">Arrow <select class="form-select" data-color><option value="0">Gold</option><option value="1">Fire</option><option value="2" selected>Frost</option><option value="3">Poison</option><option value="4">Arcane</option></select></label>
+  </div>
+  <canvas role="img" aria-label="Arrow motion study: draw, automatic power release, stationary fading air wisps and dissipating impact" style="display:block;width:100%;height:280px"></canvas>
+  <div class="viz-row"><span data-phase aria-live="polite">Motion study — not a Niagara capture</span><span class="text-small text-muted" data-time></span></div>
+</div>
+<script>
+(()=>{
+ const root=document.getElementById('arrow-wake-study'), canvas=root.querySelector('canvas'), ctx=canvas.getContext('2d');
+ const phase=root.querySelector('[data-phase]'), time=root.querySelector('[data-time]'), select=root.querySelector('[data-color]');
+ const hero=new Image(), arrow=new Image();hero.src='__HERO__';arrow.src='__ARROW__';
+ let width=736,start=0,playing=false,mode='power',current=1.5,raf=0;
+ const vars=()=>getComputedStyle(root);
+ function color(){const names=['--yellow','--orange','--blue','--green','--purple'];return vars().getPropertyValue(names[+select.value]).trim()||vars().getPropertyValue('--foreground').trim();}
+ function line(points,stroke,alpha,size){ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=stroke;ctx.lineWidth=size;ctx.lineCap='round';ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();}
+ function glow(x,y,r,c,a){ctx.save();ctx.globalAlpha=a;let g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,c);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);ctx.restore();}
+ function render(t){
+  const css=vars(), fg=css.getPropertyValue('--foreground').trim(), bg=css.getPropertyValue('--background').trim(), c=color();
+  ctx.clearRect(0,0,width,280);ctx.fillStyle=bg;ctx.fillRect(0,0,width,280);
+  const release=mode==='power'?1.5:.12, age=t-release, x0=Math.min(186,width*.37), end=width-32, y=125, flight=(end-x0)/1520;
+  const shot=age>=0&&age<flight, size=mode==='power'?1.3:.85;
+  line([[16,224],[width-16,224]],fg,.12,1);
+  let f=t<release?Math.min(3,Math.floor(t/.12)):Math.min(7,4+Math.floor(age/.09));
+  if(!playing&&t===1.5)f=3;
+  if(hero.complete&&hero.naturalWidth){ctx.drawImage(hero,(f%4)*128,Math.floor(f/4)*128,128,128,x0-158,24,220,220);}
+  if(t<release){
+   const charge=t/release;glow(x0,y,15+charge*13,c,.14+charge*.25);
+   for(let j=0;j<3;j++){const r=24*(1-charge)+8, a=t*6+j*2.094;glow(x0+Math.cos(a)*r,y+Math.sin(a)*r,3,c,.65);}
+   line([[x0-98,244],[x0-30,244]],fg,.14,4);line([[x0-98,244],[x0-98+68*charge,244]],c,.9,4);
+  }
+  if(age>=0){
+   // Each wisp retains its birth position. It drifts outward and expires
+   // independently; nothing is rigidly attached to the arrow shaft.
+   const count=Math.ceil((end-x0)/11);
+   for(let i=0;i<=count;i++){
+    const birth=i*11/1520, a=age-birth, life=.34+(i%4)*.055;
+    if(a<0||a>life||birth>flight)continue;
+    const fade=Math.pow(1-a/life,1.8), x=x0+i*11-a*19;
+    for(let side of [-1,1]){
+     const spread=side*(3+a*30)*size, points=[];
+     for(let k=0;k<9;k++){const u=k/8;points.push([x-17*u*size,y+spread+side*Math.sin(u*Math.PI)*6*size]);}
+     line(points,c,fade*.10,7*size);line(points,c,fade*.48,1.4*size);
+    }
+    glow(x,y,13*size,c,fade*.07);
+   }
+   if(age<.15){glow(x0,y,32*size,c,(1-age/.15)*.48);}
+   if(shot){const x=x0+age*1520;glow(x,y,12*size,c,.42);if(arrow.complete&&arrow.naturalWidth)ctx.drawImage(arrow,x-43,y-24,48,48);}
+   const impact=age-flight;
+   if(impact>=0&&impact<.48){const a=impact/.48;
+    glow(end,y,14+a*36,c,(1-a)*.4);
+    for(let j=0;j<12;j++){const theta=j*Math.PI/6,r=5+impact*95,px=end+Math.cos(theta)*r*.5,py=y+Math.sin(theta)*r;
+     line([[px,py],[px-Math.cos(theta)*6,py-Math.sin(theta)*6]],c,Math.pow(1-a,2)*.7,1.3);}
+   }
+  }
+  const stage=t<release?'Drawing':age<flight?'Automatic release / flight':age<flight+.48?'Air wake and impact fading':'Release LMB, then press to draw again';
+  if(playing){phase.textContent=stage;time.textContent=t.toFixed(2)+' s';}
+ }
+ function frame(now){if(!playing)return;current=(now-start)/1000;render(current);if(current<3.1)raf=requestAnimationFrame(frame);else{playing=false;phase.textContent='Finished — release and press required to rearm';}}
+ function play(value){cancelAnimationFrame(raf);mode=value;current=0;playing=true;start=performance.now();raf=requestAnimationFrame(frame);}
+ root.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',()=>play(b.dataset.play)));
+ select.addEventListener('change',()=>{render(current);});
+ new ResizeObserver(()=>{width=root.clientWidth;const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=width*dpr;canvas.height=280*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);render(current);}).observe(root);
+ hero.onload=()=>render(current);arrow.onload=()=>render(current);
+ render(current);
+})();
+</script>

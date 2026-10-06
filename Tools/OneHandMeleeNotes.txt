@@ -1,0 +1,54 @@
+ONE-HANDED MELEE - 2026-10-06
+
+Implementation:
+- HeroMeleeRig.h supplies authored angles, corrected right-hand registration,
+  per-pose cape/body depth and intrinsic off-axis handle corrections.
+- DungeonFullBody.cpp follows the fist exactly while interpolating blade angle.
+  Does not position-smooth the sword away from the hand. Fingers overlay handle.
+- New southwest idle/block atlases; originals preserved. Source and prompts:
+  ArtSource/HeroMeleeRigV1/ART_NOTES.txt.
+- Normal non-bow hero rendering now uses the full-body renderer. The supplied
+  playtest launcher retains -FullBodyTest for the previously approved bow and
+  other full-body animations as well. Bow sprites were not edited in this pass.
+- Tea release-origin selection follows the active full-body renderer.
+- Attack events, combo multiplier and blocking rules unchanged.
+
+Verification:
+Editor Development and Win64 Shipping compiled successfully.
+ComboVerify: 1166 checks, 0 errors (includes new grip/angle/atlas checks).
+HotbarVerify: 291 checks, 0 errors.
+BowVerify: 176 checks, 0 errors.
+TeaV4Verify: 83 checks, 0 errors.
+Total: 1716 checks, 0 errors.
+Standalone Shipping DungeonSmokeTest: errors=0; menu-to-game, tea and audio.
+154 full-body/corrected atlases found in final IoStore container.
+git diff --check passed (line-ending warnings only).
+
+Visual review:
+33 seconds captured directly from Unreal, eight directions, idle/walk/run,
+forehand/backhand/combo/guard plus all 24 melee weapon catalog entries.
+Review revealed detached north/SW overhead grips, SE/SW combo overhead grips,
+west walking hand swaps and a hidden NW idle blade; corrected and re-rendered.
+Saved/Previews/one-handed-melee.mp4 (1280x800, H.264, silent, 33 seconds).
+This is a scripted animation review, not live player-controlled combat footage.
+
+Standalone local test:
+Builds/OneHand-Melee-20261006/Play-One-Handed-Melee.cmd
+Keep its complete Windows folder. UE Editor is not required.
+Includes current local effects and doorway artwork. No GitHub push or release
+replacement was performed. Existing builds and original full-body sheets kept.
+
+SIZE / BLADE-FACING FOLLOW-UP - 2026-10-06
+All equipped melee weapons now render at 2/3 previous width and height.
+Inventory icons, bows, damage, player scale and combat reach are unchanged.
+Blade 5/6/15 texture-right edges and blade 17 texture-left edge are mirrored
+according to facing, consistently through each animation; reflected grip X and
+handle lean keep the handle attached to the same anatomical right hand.
+Sprite UV mirroring is rendering-only; source textures remain unchanged.
+Review captured four weapons x eight directions x seven states, 28 seconds:
+Saved/Previews/one-handed-melee-size-fix.mp4.
+ComboVerify (including scale/edge/pivot checks): 1414 checks, 0 errors.
+Editor and Shipping compile; fresh Windows packaging and hero-container audit
+passed. New local launcher:
+Builds/OneHand-Melee-SizeFix-20261006/Play-Smaller-Weapons.cmd.
+This revision has not been uploaded to GitHub.

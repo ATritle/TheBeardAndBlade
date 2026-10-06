@@ -6,12 +6,46 @@
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "InputKeyEventArgs.h"
+#include "HeroMeleeRig.h"
+#include "HeroSockets.h"
 
 void ADungeonGameMode::VerifyCombo()
 {
 #if WITH_EDITOR
     int Checks=0,Errors=0;
     auto Check=[&](bool OK,const TCHAR* Why){++Checks;if(!OK){++Errors;UE_LOG(LogTemp,Error,TEXT("COMBO: %s"),Why);}};
+    for(int Clip=0;Clip<=FullBodyArt::Block;++Clip)for(int D=0;D<8;++D)for(int F=0;F<8;++F){
+        const auto P=HeroMeleeRig::Get(Clip,D,F);
+        Check(FMath::IsFinite(P.X)&&FMath::IsFinite(P.Y)&&P.X>=4&&P.X<=252&&P.Y>=4&&P.Y<=252,TEXT("registered right hand stays within source frame"));
+        Check(FMath::IsFinite(P.Angle),TEXT("authored weapon angle finite"));
+        if(Clip<=FullBodyArt::Run){
+            const auto Next=HeroMeleeRig::Get(Clip,D,(F+1)%8);
+            Check(FMath::Abs(FMath::FindDeltaAngleDegrees(P.Angle,Next.Angle))<12,TEXT("carry cycle has no landmark angle flips"));
+        }
+    }
+    for(int Id=0;Id<24;++Id){
+        const auto Grip=HeroSockets::CatalogGrip(Id);
+        Check(Grip.X>0&&Grip.X<1&&Grip.Y>0&&Grip.Y<1,TEXT("weapon catalog has valid handle pivot"));
+        const float Previous[]={.90f,.82f,.90f,.68f,.82f,.85f,.80f,.78f,.67f,.90f,.86f,.80f,.86f,.80f,.94f,.83f,.90f,.72f,.84f,.82f,.80f,.86f,.66f,.94f};
+        FDungeonItem Item;Item.CatalogId=Id;
+        Check(FMath::IsNearlyEqual(Item.EquippedScale(),Previous[Id]*2.f/3.f,1.e-6f),TEXT("every melee weapon reduced by one third"));
+        for(int D=0;D<8;++D){
+            const bool Mirror=HeroSockets::MirrorBlade(Id,D);
+            if(Id==5||Id==6||Id==15||Id==17){
+                const float A=FMath::DegreesToRadians(HeroMeleeRig::Get(FullBodyArt::Idle,D,0).Angle);
+                const float Facing=D*PI/4;
+                const float Edge=(Id==17?-1.f:1.f)*(Mirror?-1.f:1.f);
+                const float Dot=Edge*(FMath::Cos(A)*FMath::Sin(Facing)-FMath::Sin(A)*FMath::Cos(Facing));
+                Check(Dot>=-KINDA_SMALL_NUMBER,TEXT("single blade cutting edge faces forward in carry pose"));
+                const double MirroredGrip=Mirror?1-Grip.X:Grip.X;
+                Check(FMath::IsNearlyEqual(Mirror?1-MirroredGrip:MirroredGrip,Grip.X),TEXT("UV mirror preserves exact source handle anchor"));
+            }else Check(!Mirror,TEXT("unrequested weapon textures retain original handedness"));
+        }
+    }
+    for(const TCHAR* Name:{TEXT("MeleeIdle_SW"),TEXT("MeleeBlock_SW")}){
+        const auto* T=LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/%s.%s"),Name,Name));
+        Check(T&&T->Source.GetSizeX()==1024&&T->Source.GetSizeY()==512,TEXT("corrected southwest atlas imported at expected resolution"));
+    }
     FDungeonMeleeCombo C;
     for(int Cycle=0;Cycle<5;++Cycle){
         C.Begin();Check(!C.Finisher&&C.DamageScale()==1,TEXT("first hit normal"));Check(!C.Resolve(true),TEXT("first hit not combo"));

@@ -1,0 +1,14 @@
+Grease campaign exclusion (next build)
+
+Grease is temporarily disabled in normal campaign progression. The Forgotten
+Keep now descends directly into the military bunker. Remaining bosses retain
+their relative order, ending with Iron Matriarch. Visible floor numbers and
+balance/loot tiers are consecutive across the seven active floors.
+
+All Grease artwork, enemies, boss, audio, authored IDs and editor test entry
+points are retained. No content was deleted. Assets may still be cooked;
+this is a gameplay exclusion, not a package-size optimization.
+
+Restore by setting DungeonProgression::IncludeGrease to true and updating
+the explicit active-route regression expectations in VerifyAtlas.
+This source change does not alter previously packaged or published builds.

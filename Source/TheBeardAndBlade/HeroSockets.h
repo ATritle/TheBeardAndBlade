@@ -4,6 +4,17 @@
 // These are the visible gripping fist, not a point inferred from mouse aim.
 namespace HeroSockets
 {
+inline constexpr float MeleeSizeMultiplier=2.f/3.f;
+// Single-edged source art: sabre, cleaver and reaper lead on texture-right;
+// Moonhook's convex cutting edge leads on texture-left. Keep this handedness
+// fixed for a facing throughout a swing, rather than flipping mid-animation.
+inline bool MirrorBlade(int32 Id,int32 Direction)
+{
+    if(Id!=5&&Id!=6&&Id!=15&&Id!=17)return false;
+    constexpr bool RightEdgeMirror[]={true,false,false,false,true,true,true,true};
+    const bool Right=RightEdgeMirror[FMath::Clamp(Direction,0,7)];
+    return Id==17?!Right:Right;
+}
 inline const FVector2D Walk[8][6]={
  {{90,81},{87,67},{85,65},{88,81},{86,65},{87,64}},
  {{92,79},{91,76},{89,82},{96,70},{92,72},{90,77}},

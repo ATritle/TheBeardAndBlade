@@ -1,0 +1,26 @@
+Niagara effects pass 1 — 2026-10-06
+
+Implemented: hand-aligned melee crescents with brief independent decay; stronger
+combo styling; damage-event impact sparks; directional successful-block contact
+flash; replacement of the old flat block semicircle/icon; animated wall-torch
+flames/embers; existing warm/cold flickering light halos; low-density drifting
+perimeter mist. Atmosphere composites before actors and combat effects after them.
+Shared Niagara sprite material has separate procedural phases for these effects.
+Its particle ceiling is 8 seconds; per-instance cosmetic lifetimes are shorter and
+explicitly culled (arrow unchanged at .55s, melee .18/.26s, block .32s, fire .85s,
+mist 3.8s). Each of foreground/background queues is capped at 160 components.
+
+No changes to damage, collision, cooldown, block mitigation or gameplay timing.
+Lighting is a 2D composited treatment, not dynamic lighting of 3D dungeon geometry.
+Enemy/boss-specific attacks, other skill effects and a per-theme art review are
+not finished in this first pass. Existing skill/projectile artwork remains intact.
+
+Capture flag: -CombatFXReview -FullBodyTest -UseFixedTimeStep -FPS=30
+Scripted in-engine demonstration against a stationary test target, including
+damage injected through the normal melee receive/block path during the guard
+section. No illustrative/composited-outside-engine replacement effects.
+18-second MP4: first 12 seconds cropped combat, last 6 seconds full room.
+Saved/CombatFXPreview/combat-and-dungeon-effects.mp4
+
+Regression tests: bow 176, combo 52, feedback 9, guard/HUD 291; all zero errors.
+Preview-only GitHub media upload. Main, game tags and release packages unchanged.

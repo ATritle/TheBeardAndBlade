@@ -1,4 +1,6 @@
 #include "DungeonActors.h"
+#include "DungeonArrowFX.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Engine/Texture2D.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -36,19 +38,12 @@ void ADungeonHUD::DrawSwordTrail(ADungeonHero* H,FVector2D Hand,float Angle,floa
     const float Begin=Combo?.52f:.25f,EndTime=Combo?.84f:.8f;
     if(T<=Begin||T>=EndTime)return;
     const float End=FMath::DegreesToRadians(Angle-90);
-    const float S=Length/65.f;
     const float Fade=FMath::Min(1.f,FMath::Min((T-Begin)*20,(EndTime-T)*12))*Opacity;
-    for(int I=0;I<24;++I)
-    {
-        const float Weight=1-I/24.f;
-        const float A=End-I*(Combo?.068f:.035f),B=A-(Combo?.075f:.04f);
-        const auto V=Hand+FVector2D(FMath::Cos(A),FMath::Sin(A))*Length;
-        const auto W=Hand+FVector2D(FMath::Cos(B),FMath::Sin(B))*Length;
-        DrawLine(Offset.X+V.X*Scale,Offset.Y+V.Y*Scale,Offset.X+W.X*Scale,Offset.Y+W.Y*Scale,
-            FLinearColor(1,Combo?.8f:.65f,.2f,.22f*Weight*Fade),(2+Weight*(Combo?11:7))*S*Scale);
-        DrawLine(Offset.X+V.X*Scale,Offset.Y+V.Y*Scale,Offset.X+W.X*Scale,Offset.Y+W.Y*Scale,
-            FLinearColor(1,.94f,.73f,.8f*Weight*Fade),(.6f+Weight*2)*S*Scale);
-    }
+    const float Now=GetWorld()->GetTimeSeconds();
+    if(H->IsInventoryOpen()||Now-SwordFXClock<.055f)return;
+    SwordFXClock=Now;
+    if(auto* FX=ADungeonArrowFX::Find(GetWorld(),true))FX->EmitStyled(Hand,{FMath::Cos(End),FMath::Sin(End)},
+        Combo?FLinearColor(1,.65f,.20f):FLinearColor(.7f,.83f,1),Length*2.6f,Combo?.26f:.18f,3,Fade*(Combo?1.2f:.75f));
 }
 
 void ADungeonHUD::DrawHitFeedback(ADungeonGameMode* G)
@@ -64,23 +59,6 @@ void ADungeonHUD::DrawHitFeedback(ADungeonGameMode* G)
     {
         const float Age=FMath::Max(0.f,1.05f-I.Life);
         const bool Heal=I.Damage<0;
-        if(!Heal&&Age<.28f)
-        {
-            const float Fade=1-Age/.28f;
-            const auto Origin=I.Position-FVector2D(0,I.Damage>0?38:0);
-            SoftEllipse(Origin,FVector2D(22,17),FLinearColor(1,.76f,.3f,.32f*FMath::Max(0.f,1-Age/.1f)));
-            for(int J=0;J<9;++J)
-            {
-                const float Angle=J*2*PI/9+I.Position.X*.013f;
-                const FVector2D Direction(FMath::Cos(Angle),FMath::Sin(Angle));
-                const auto P=Origin+Direction*(5+Age*(105+J*11))+FVector2D(0,Age*Age*160);
-                const auto Q=P-Direction*(3+Fade*7);
-                DrawLine(Offset.X+P.X*Scale,Offset.Y+P.Y*Scale,Offset.X+Q.X*Scale,Offset.Y+Q.Y*Scale,
-                    FLinearColor(1,.65f,.18f,Fade),2.5f*Scale);
-                DrawLine(Offset.X+P.X*Scale,Offset.Y+P.Y*Scale,Offset.X+Q.X*Scale,Offset.Y+Q.Y*Scale,
-                    FLinearColor(1,.96f,.78f,Fade),Scale);
-            }
-        }
         if(I.Damage==0){Ring(I.Position,30+Age*150,FLinearColor(1,.65f,.2f,FMath::Max(0.f,1-Age/.65f)),3);continue;}
         FLinearColor C=Heal?FLinearColor(.4f,1,.62f):I.bBoss?FLinearColor(1,.32f,.22f):FLinearColor(1,.92f,.68f);
         C.A=FMath::Clamp(I.Life/.4f,0.f,1.f);
@@ -119,18 +97,20 @@ void ADungeonHUD::DrawPolishAtmosphere(ADungeonGameMode* G,ADungeonHero* H)
     const FVector2D Lights[]={{469,53},{813,53},{44,266},{1236,266},{44,497},{1236,497},{469,715},{813,715}};
     const bool Bunker=G->GetBiome()==5;
     const bool Cold=G->GetBiome()==2||G->GetBiome()==4;
+    auto* FX=ADungeonArrowFX::Find(GetWorld(),true,true);
+    const bool FlameDue=Dt>0&&AtmosphereClock-FlameFXClock>=.20f;
+    const bool MistDue=Dt>0&&AtmosphereClock-MistFXClock>=1.2f;
+    if(FlameDue)FlameFXClock=AtmosphereClock;
+    if(MistDue)MistFXClock=AtmosphereClock;
     for(int I=0;I<8;++I)
     {
         const float T=AtmosphereClock+I*1.71f;
         const float Flicker=1+.09f*FMath::Sin(T*7)+.06f*FMath::Sin(T*13.7f);
         const FLinearColor Warm=Bunker?FLinearColor(.45f,1,.65f,.08f*Flicker):Cold?FLinearColor(.2f,.65f,1,.12f*Flicker):FLinearColor(1,.52f,.12f,.16f*Flicker);
         SoftEllipse(Lights[I],FVector2D(51,65)*Flicker,Warm);
-        if(!Bunker&&!Cold&&G->GetBiome()!=7)for(int J=0;J<3;++J)
+        if(FX&&FlameDue&&!Bunker&&G->GetBiome()!=7)
         {
-            const float A=FMath::Fmod(T*.62f+J/3.f,1.f);
-            const auto Ember=Lights[I]+FVector2D(FMath::Sin(T*2+J)*8,-A*42);
-            SoftEllipse(Ember,FVector2D(2,3),FLinearColor(1,.55f,.15f,(1-A)*.65f));
-            SoftEllipse(Lights[I]+FVector2D(FMath::Sin(T+J)*9,-8-A*43),FVector2D(5+A*8,9+A*9),FLinearColor(.3f,.31f,.32f,.045f*FMath::Sin(A*PI)));
+            FX->EmitStyled(Lights[I]-FVector2D(0,5),{1,0},Cold?FLinearColor(.13f,.48f,.9f):FLinearColor(1,.30f,.035f),70,.85f,5,.6f);
         }
     }
     // Thin moving haze at the perimeter, underneath characters and attack telegraphs.
@@ -138,6 +118,10 @@ void ADungeonHUD::DrawPolishAtmosphere(ADungeonGameMode* G,ADungeonHero* H)
     {
         const float T=AtmosphereClock*.15f+I*2.4f;
         const FVector2D Center(200+I%3*420+FMath::Sin(T)*58,I<3?190:646);
-        SoftEllipse(Center,FVector2D(220,30+FMath::Sin(T)*6),FLinearColor(.65f,.73f,.76f,.065f));
+        if(FX&&MistDue)FX->EmitStyled(Center,{1,0},Cold?FLinearColor(.35f,.56f,.75f):Bunker?FLinearColor(.35f,.42f,.37f):FLinearColor(.46f,.52f,.56f),430,3.8f,6,.55f);
+    }
+    if(FX)if(auto* RT=FX->Capture()){
+        FCanvasTileItem Tile(Offset,RT->GetResource(),FVector2D(1280,800)*Scale,FLinearColor::White);
+        Tile.BlendMode=SE_BLEND_Additive;Canvas->DrawItem(Tile);
     }
 }

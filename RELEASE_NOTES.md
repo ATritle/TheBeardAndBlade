@@ -1,3 +1,16 @@
+# v0.4.4 — Adventurer animation, enchanted bows and Niagara effects
+
+- Full-body adventurer animations enabled by default, including bow movement, draw/fire, melee, blocking, dodging, throwing and drinking. Inventory portrait remains unchanged.
+- Fantasy bows across rarities with enchantment-colored arrow flight and impacts. Quick click/release fires a normal arrow; holding for 1.5 seconds automatically fires one power shot. Release before charging again. Arrow flight speed is doubled from the initial bow test.
+- Independently fading Niagara arrow wakes, melee trails, impact sparks, blocks, skill effects, regular-enemy effects, torch flames/embers and restrained atmospheric mist. Boss-specific effects remain for a later refinement pass.
+- Right-hand melee registration, carry/guard angles and animation depth refined. Equipped melee weapons are one-third smaller; blade facing corrected for weapons 5, 6, 15 and 17. Gameplay reach/damage and inventory icon size are unchanged.
+- Direction-specific chained doorway gates integrated with dungeon entrances, including corrected west-door placement.
+- Trader multi-select batch selling and purchasable health potions.
+- Grease / Big Mack temporarily skipped. The first floor now leads directly to the military bunker. Seven active floors retain the remaining boss order, with consecutive floor numbers and balance tiers. All Grease source and assets remain available for rework.
+- Retains room scrolling, gold vacuum, quieter coin audio, held melee attacks and third-hit combos from v0.4.3.
+
+Windows / Vagon: extract the complete `TheBeardAndBlade-Windows-Vagon-v0.4.4.zip` into a fresh folder. Run root `TheBeardAndBlade.exe` locally. For Vagon choose `TheBeardAndBlade/Binaries/Win64/TheBeardAndBlade-Win64-Shipping.exe` and upload the entire ZIP. No Unreal Editor required. Unsigned Windows builds may trigger reputation warnings. Hosting upload/activation is separate.
+
 # v0.4.3 — Room scrolling, gold vacuum and combat polish
 
 ## October 5 same-version refresh — held attacks and combos

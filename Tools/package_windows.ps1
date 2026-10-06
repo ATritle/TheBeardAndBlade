@@ -1,6 +1,6 @@
 param([string]$Engine='C:/Program Files/Epic Games/UE_5.8',[string]$Destination='')
 $projectRoot=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-if(!$Destination) { $Destination=Join-Path $projectRoot 'Builds/v0.4.3' }
+if(!$Destination) { $Destination=Join-Path $projectRoot 'Builds/v0.4.4' }
 if(Test-Path (Join-Path $Destination 'Windows')) { throw 'Choose a fresh archive destination to avoid shipping leftover files from older builds.' }
 $env:uebp_EngineSavedFolder=Join-Path $projectRoot 'Saved/Automation'
 # Use a writable temporary directory for UBT response files, SDK validation and
@@ -46,6 +46,27 @@ if($missingPackagedEnemies.Count) {
     throw ("Final container omitted {0} enemy assets, including {1}" -f $missingPackagedEnemies.Count,$missingPackagedEnemies[0].FullName)
 }
 Write-Output 'Final packaged enemy animation coverage verified.'
+$groundedNames=@(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Content/Art/V2') -Filter 'Grounded*.uasset' | ForEach-Object { $_.BaseName })
+if($groundedNames.Count -ne 1072) { throw 'Grounded hero import is incomplete.' }
+foreach($groundedName in $groundedNames) {
+    if(!$enemyContainerContents.Contains('/Content/Art/V2/'+$groundedName+'.uasset')) { throw "Final container omitted $groundedName" }
+}
+Write-Output 'All 1072 grounded hero animation layers verified in the final container.'
+$bowNames=Get-Content -Raw (Join-Path $projectRoot 'ArtSource/BowsV2/manifest.json') | ConvertFrom-Json
+if($bowNames.Count -ne 126) { throw 'Bow artwork manifest is incomplete.' }
+foreach($bowName in $bowNames) {
+    if(!$enemyContainerContents.Contains('/Content/Art/V2/'+$bowName+'.uasset')) { throw "Final container omitted $bowName" }
+}
+Write-Output 'All 126 bow animation, loot and effect textures verified in the final container.'
+$fullBodyNames=Get-Content -Raw (Join-Path $projectRoot 'ArtSource/HeroFullBodyV1/runtime-test/manifest.json') | ConvertFrom-Json
+if($fullBodyNames.Count -ne 152) { throw 'Full-body adventurer manifest is incomplete.' }
+foreach($heroName in @($fullBodyNames)+@('MeleeIdle_SW','MeleeBlock_SW')) {
+    if(!$enemyContainerContents.Contains('/Content/Art/V2/'+$heroName+'.uasset')) { throw "Final container omitted hero animation $heroName" }
+}
+Write-Output 'All 152 full-body atlases and both one-handed corrections verified in the final container.'
+foreach($arrowFX in @('NS_ArrowWisp','M_ArrowWisp')) {
+    if(!$enemyContainerContents.Contains('/Content/Effects/Arrows/'+$arrowFX+'.uasset')) { throw "Final container omitted Niagara arrow effect $arrowFX" }
+}
 # These assets also load by name and must survive staging into the final container.
 foreach($requiredArt in @('/Content/Art/V2/Combat_Combo.uasset','/Content/Audio/CoinPickup.uasset','/Content/Art/TeaSpirit/TeaSpirit_DrinkSheet.uasset','/Content/Art/V2/Potion_DrinkSheet.uasset','/Content/Art/UI/Hotbar/Hotbar_TeaSpirit.uasset','/Content/Art/V2/M_DeathSpirit.uasset')) {
     if(!$enemyContainerContents.Contains($requiredArt)) { throw "Final container omitted $requiredArt" }

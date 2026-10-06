@@ -2,11 +2,11 @@
 
 A pixel-art dungeon crawler starring a bearded adventurer armed with steel, stubbornness, and an explosive cup of tea.
 
-Explore eight themed dungeon floors with branching rooms, four-way doors, persistent backtracking, hidden bosses, trader branches and the Emerald Atlas map. Tougher enemies appear deeper into each floor. Build your character with eight equipment slots, rare loot, coin drops and trader buying/selling.
+Explore seven active themed dungeon floors with branching rooms, four-way doors, persistent backtracking, hidden bosses, trader branches and the Emerald Atlas map. Grease is temporarily excluded for rework; its assets are retained. Tougher enemies appear deeper into each floor. Build your character with eight equipment slots, rare loot, coin drops and trader buying/selling.
 
-## Play v0.4.3
+## Play v0.4.4
 
-Download `TheBeardAndBlade-Windows-Vagon-v0.4.3.zip` from [Releases](https://github.com/ATritle/TheBeardAndBlade/releases/tag/v0.4.3). Extract the entire archive and launch `TheBeardAndBlade.exe` at its root. Unreal Editor is not required. GitHub's automatic source ZIP is not playable. The October 5 refresh replaces the same-version download with quieter coins and hold-to-attack combos; extract it into a fresh folder.
+Download `TheBeardAndBlade-Windows-Vagon-v0.4.4.zip` from [Releases](https://github.com/ATritle/TheBeardAndBlade/releases/tag/v0.4.4). Extract the entire archive into a fresh folder and launch `TheBeardAndBlade.exe` at its root. Unreal Editor is not required. GitHub's automatic source ZIP is not playable. This release includes full-body adventurer animations, enchanted bows, Niagara effects, integrated doorway chains and refined one-handed weapon grips.
 
 For Vagon Streams, upload the complete ZIP and select `TheBeardAndBlade/Binaries/Win64/TheBeardAndBlade-Win64-Shipping.exe`. Preserve all folders and dependencies. Hosted upload and activation remain separate steps.
 
@@ -30,7 +30,7 @@ Inspect gear in inventory. Drag or double-click to equip/unequip. Drag horizonta
 
 ## Campaign
 
-Boss order: Finance Guy, Big Mack, Flash Bang Guy, Webroot, Rime, Cinder, Twister, then Iron Matriarch in the Iron Aerie. The new five-headed mechanical dragon uses flying slams, sustained flames and meteor rain.
+Boss order: Finance Guy, Flash Bang Guy, Webroot, Rime, Cinder, Twister, then Iron Matriarch in the Iron Aerie. Grease / Big Mack is parked for future rework. Floor numbers and balance tiers remain consecutive.
 
 ## Develop
 

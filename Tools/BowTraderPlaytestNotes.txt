@@ -1,0 +1,45 @@
+OCTOBER 6, 2026 - BOW / GRIPS / TRADER PLAYTEST
+
+Build: Builds/BowTrader-Playtest-20261006
+Launcher: Play-Bow-and-Trader-Test.cmd; -FullBodyTest enables the new sprite set.
+No existing builds, original sprite sources or GitHub releases replaced.
+
+Delivered:
+- Southwest bow sheet repaired; all 8 measured poses face left, no mirrored grip.
+- Arrow speed 1520, lifetime .7 (same maximum range); swept collision preserved.
+- Enchantment-colored double-wave trail; stronger trail on power arrow.
+- Bow press draws; release fires once; >=3 seconds gives 2x damage. Undercharged
+  release fires a normal arrow. No auto-repeat. Melee hold/combo remains separate.
+- Charge meter and full-charge pulse. Gameplay interruptions cancel charge.
+- Melee handles centered within finger landmarks instead of on the wrist;
+  grip axes follow the fingers, with upright carry/guard angles.
+- Trader inventory click toggles green selection. Batch sale validates all
+  indices and wallet overflow before removing anything, deduplicates selection,
+  removes descending indices, and credits the existing reduced sale value.
+- Potion purchases cost 250 gold, replenish one charge, cap at four, reject
+  unaffordable/full-belt purchases without charging. No permanent perks yet.
+
+Verification:
+- Editor and Win64 Shipping compilation/packaging succeeded.
+- Bow suite: 173 checks, zero errors.
+- Trader transaction suite: zero errors, including bulk-sale/potion edge cases.
+- Trader UI click smoke: zero errors, including toggling marks, batch sale,
+  repeat sale protection and potion button purchase/full-belt rejection.
+- Walk/run grip captures and trader layout visually inspected in-engine.
+- Arrow wave trail visually inspected in gameplay replay.
+- All 152 FullBody_* atlases present in final IoStore container.
+- Standalone Shipping EXE booted headlessly; only that test process was stopped.
+
+Image-generation mode: built-in image_gen, transparent background.
+Saved repaired source:
+C:/Users/tritl/Documents/Codex/2026-09-20/ok-i-am-wanting-to-build/outputs/TheBeardAndBlade/ArtSource/HeroFullBodyV1/production/BowDrawFire_5_r2.png
+Exact final prompt and input roles:
+C:/Users/tritl/Documents/Codex/2026-09-20/ok-i-am-wanting-to-build/outputs/TheBeardAndBlade/ArtSource/HeroFullBodyV1/production-prompts/BowDrawFire_5_r2.txt
+Measured crops: ArtSource/HeroFullBodyV1/crops/BowDrawFire_5/
+Runtime atlas: ArtSource/HeroFullBodyV1/runtime-test/FullBody_BowDrawFire_5.png
+Runtime texture: Content/Art/V2/FullBody_BowDrawFire_5.uasset
+
+Remaining scope from prior test: general animation polish and dedicated moving
+attack/block gaits remain iterative. The source pack is not recertified as fully
+polished by these feature tests. Existing stow/recovery-transition limitations
+are unchanged. Inventory portrait artwork remains unchanged.

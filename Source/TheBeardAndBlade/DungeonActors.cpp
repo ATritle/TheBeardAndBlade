@@ -2,6 +2,8 @@
 #include "RustbladeSquire.h"
 #include "HeroLocomotion.h"
 #include "HeroLocomotionSockets.h"
+#include "HeroGroundedSockets.h"
+#include "BowArtMetrics.h"
 #include "DungeonEnemyAudio.h"
 #include "DungeonInventoryLayout.h"
 #include "InventoryGlyphMetrics.h"
@@ -123,7 +125,11 @@ void ADungeonHero::Tick(float Dt)
     ComboPopupTime=FMath::Max(0.f,ComboPopupTime-Dt);
     MeleeCombo.Tick(Dt,IsAttacking());
     if(Health<=0||StunTime>0||IsRolling()||IsBlocking()||IsDrinking()||IsCasting())ResetMeleeChain();
-    if(bAttackHeld)if(auto* PC=Cast<APlayerController>(GetController()))if(!PC->IsInputKeyDown(DungeonKeys::Key(DungeonKeys::Attack)))bAttackHeld=false;
+    if(bAttackHeld)if(auto* PC=Cast<APlayerController>(GetController()))if(!PC->IsInputKeyDown(DungeonKeys::Key(DungeonKeys::Attack))){bAttackHeld=false;bBowDrawing=false;BowDrawTime=0;bBowNeedsRelease=false;}
+    if(bBowDrawing&&IsBowEquipped()){
+        BowDrawTime=FMath::Min(DungeonBow::ChargeTime,BowDrawTime+Dt);
+        if(BowDrawTime>=DungeonBow::ChargeTime){bBowNeedsRelease=true;FireDrawnBow(true);}
+    }
     if(bAttackHeld&&FSlateApplication::IsInitialized()&&!FApp::IsUnattended()&&!FSlateApplication::Get().IsActive())ResetMeleeChain();
     if(Health<=0||StunTime>0)StopBlock();
     GearHealBudget=FMath::Min(MaxHealth*DungeonBalance::GearHealingPerSecond,GearHealBudget+Dt*MaxHealth*DungeonBalance::GearHealingPerSecond);
@@ -190,14 +196,15 @@ void ADungeonHero::Tick(float Dt)
     UpdateStamina(Dt,Sprinting);
     bWalking=FVector2D::Distance(Next,P)>.01f;
     MoveBlend=HeroLocomotion::Blend(MoveBlend,bWalking?1.f:0.f,Dt,bWalking?15.f:12.f);
-    RunBlend=HeroLocomotion::Blend(RunBlend,Sprinting&&bWalking?1.f:0.f,Dt,10.f);
+    const bool RunningGait=Sprinting&&bWalking&&!IsAttacking()&&!IsBlocking()&&!IsCasting();
+    RunBlend=HeroLocomotion::Blend(RunBlend,RunningGait?1.f:0.f,Dt,10.f);
     if(bWalking) { GaitTravel=(Next-P).GetSafeNormal();if(!IsBlocking())Facing=DungeonView::Direction(GaitTravel); }
     // Playback tracks actual displacement, including boots/slow/attack modifiers.
     // A longer sprint stride keeps the legs from simply cycling twice as fast.
-    const float GaitStep=FVector2D::Distance(Next,P)*144.f/HeroLocomotion::Stride(Sprinting?1.f:0.f);
+    const float GaitStep=FVector2D::Distance(Next,P)*144.f/HeroLocomotion::Stride(RunningGait?1.f:0.f,GaitTravel);
     const int OldContact=FMath::FloorToInt(WalkDistance/72.f);
     WalkDistance+=GaitStep;
-    if(bWalking&&FMath::FloorToInt(WalkDistance/72.f)>OldContact&&!IsAttacking()&&!IsCasting())
+    if(bWalking&&FMath::FloorToInt(WalkDistance/72.f)>OldContact)
         if(auto* G=Mode(this))G->PlaySound(TEXT("Step"),Sprinting?.28f:.24f,FMath::FRandRange(.97f,1.03f));
     WalkDistance=FMath::Fmod(WalkDistance,144.f);
     SetActorLocation(DungeonView::Unproject(Next));
@@ -233,14 +240,14 @@ void ADungeonHero::Tick(float Dt)
     {
         const float RemainingAttack=FMath::Max(0.f,AttackTime-Dt*AttackSpeed);
         // Strike once on the impact pose, not during the wind-up.
-        if(!bAttackHit&&1.f-RemainingAttack/MeleeCombo.Duration()>=MeleeCombo.Impact())
+        if(!bAttackHit&&1.f-RemainingAttack/AttackDuration()>=(IsBowEquipped()?DungeonBow::Release:MeleeCombo.Impact()))
         {
             bAttackHit=true;
-            if(auto* G=Mode(this)) G->PlayerAttack(this);
+            if(auto* G=Mode(this)){if(IsBowEquipped())G->LaunchArrow(this);else G->PlayerAttack(this);}
         }
         AttackTime=RemainingAttack;
     }
-    if(bAttackHeld&&CanStrike())Attack();
+    if(bAttackHeld&&!IsBowEquipped()&&CanStrike())Attack();
 }
 int32 ADungeonHero::GetAnimationFrame() const
 {
@@ -325,12 +332,26 @@ void ADungeonHero::Attack()
         return;
     }
     if(!CanStrike()) return;
-    MeleeCombo.Begin();AttackTime=MeleeCombo.Duration(); bAttackHit=false; AttackAim=Aim; AttackDirection=DungeonView::Direction(AttackAim);
+    if(IsBowEquipped())MeleeCombo.Reset();else MeleeCombo.Begin();
+    AttackTime=AttackDuration(); bAttackHit=false; AttackAim=Aim;
+    if(IsBowEquipped()) {
+        BowShotPower=1;
+        const auto Chest=DungeonView::Project(GetActorLocation())-FVector2D(0,75);
+        BowTarget=Chest+Aim*600;
+        if(auto* PC=Cast<APlayerController>(GetController())) {
+            int W=0,H=0;float X=0,Y=0;PC->GetViewportSize(W,H);const float S=FMath::Min(W/1280.f,H/800.f);
+            if(S>0&&PC->GetMousePosition(X,Y)){const auto Mouse=(FVector2D(X,Y)-FVector2D((W-1280*S)/2,(H-800*S)/2))/S;
+                if(Mouse.X>=0&&Mouse.X<=1280&&Mouse.Y>=0&&Mouse.Y<=800)BowTarget=Mouse;}
+        }
+        const auto Delta=BowTarget-Chest;if(!Delta.IsNearlyZero())AttackAim=Delta.GetSafeNormal();
+        BowTarget=Chest+AttackAim*FMath::Max(100.f,float(Delta.Size()));
+    }
+    AttackDirection=DungeonView::Direction(AttackAim);
     if(QuipCooldown<=0&&FMath::FRand()<.35f)
     {
         AttackQuip=TEXT("Take this you C*NT!"); QuipTime=1.5f; QuipCooldown=4.f;
     }
-    if(auto* G=Mode(this)) G->PlaySound(TEXT("Sword"),.7f,IsComboSwing()?.85f:FMath::FRandRange(.97f,1.03f));
+    if(!IsBowEquipped())if(auto* G=Mode(this)) G->PlaySound(TEXT("Sword"),.7f,IsComboSwing()?.85f:FMath::FRandRange(.97f,1.03f));
 }
 void ADungeonHero::ResolveMeleeSwing(bool Hit)
 {
@@ -344,7 +365,7 @@ void ADungeonHero::ToggleInventory()
     if(Health<=0) return;
     bInventoryOpen=!bInventoryOpen; InventoryMessage.Empty();
     if(bInventoryOpen){StopBlock();ResetMeleeChain();}
-    if(auto* PC=Cast<APlayerController>(GetController())) if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) HUD->CancelInventoryGesture();
+    if(auto* PC=Cast<APlayerController>(GetController())) if(auto* HUD=Cast<ADungeonHUD>(PC->GetHUD())) {HUD->CancelInventoryGesture();HUD->TraderSellSelection.Empty();}
     if(auto* G=Mode(this)) G->PlaySound(bInventoryOpen?TEXT("InventoryOpen"):TEXT("InventoryClose"),.4f);
 }
 bool ADungeonHero::CanPlace(FIntPoint Cell,FIntPoint Size,int32 Ignore) const
@@ -432,11 +453,13 @@ void ADungeonHero::TransitionWalk(FVector2D From,FVector2D To,float Progress,flo
     SetActorLocation(DungeonView::Unproject(FMath::Lerp(From,To,Progress)));
     Facing=DungeonView::Direction(To-From); Aim=(To-From).GetSafeNormal(); bWalking=true;
     // Compressed screen-space stair travel still advances a slow, readable gait.
-    WalkDistance=Progress*FVector2D::Distance(From,To)*GaitScale; AttackTime=RollTime=PowerCastTime=HurtTime=0; IdleBreathBlend=0;RunBlend=0;MoveBlend=1;
+    GaitTravel=(To-From).GetSafeNormal();
+    WalkDistance=FMath::Fmod(Progress*FVector2D::Distance(From,To)*GaitScale*144.f/HeroLocomotion::Stride(0,GaitTravel),144.f); AttackTime=RollTime=PowerCastTime=HurtTime=0; IdleBreathBlend=0;RunBlend=0;MoveBlend=1;
 }
 void ADungeonHero::Equip(const FDungeonItem& Item)
 {
     if(!Equipment.IsValidIndex(Item.Slot)) return;
+    if(Item.Slot==0&&(IsAttacking()||IsBowCharging()))CancelCombatActions();
     if(auto* G=Mode(this))G->BalanceEvent(TEXT("before_equip"),Item.Rarity,Item.CatalogId);
     Equipment[Item.Slot]=Item;
     if(auto* G=Mode(this)) G->PlaySound(TEXT("Equip"),.65f);
@@ -484,6 +507,8 @@ ADungeonGameMode::ADungeonGameMode()
     DefaultPawnClass=ADungeonHero::StaticClass(); HUDClass=ADungeonHUD::StaticClass();
     PrimaryActorTick.bCanEverTick=true;
 }
+#include "DungeonArrowFX.h"
+#include "Engine/TextureRenderTarget2D.h"
 void ADungeonGameMode::BeginPlay()
 {
     Super::BeginPlay();
@@ -493,6 +518,9 @@ void ADungeonGameMode::BeginPlay()
     LoadAudioSettings();
     GConfig->GetBool(TEXT("DungeonAudio"),TEXT("MuteEffects"),bEffectsMuted,GGameUserSettingsIni);
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("BuildArrowNiagara"))) { FPlatformMisc::RequestExitWithStatus(false,ADungeonArrowFX::BuildAssets()?0:1);return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("BowVerify"))) { VerifyBow();return; }
+    if(FParse::Param(FCommandLine::Get(),TEXT("SkillFXVerify"))) { VerifySkillFX();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("RevivalVerify"))) { VerifyRevival();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("TeaSpiritVerify"))) { VerifyTeaSpirit();return; }
     if(FParse::Param(FCommandLine::Get(),TEXT("PotionVerify"))) { VerifyPotions();return; }
@@ -917,9 +945,11 @@ void ADungeonGameMode::PlayerAttack(ADungeonHero* H)
         for(auto& E:Targets) if(IsValid(E)&&E->SpawnTime<=0&&FVector2D::Distance(P,DungeonView::Project(E->GetActorLocation()))<190) E->TakeDungeonDamage(H->AttackPower*.35f);
     }
 }
+#include "DungeonSkillFX.h"
 void ADungeonGameMode::EnemyDefeated(ADungeonEnemy* E)
 {
     if(!IsValid(E)||!Enemies.Contains(E)) return;
+    if(!E->bBoss)DungeonSkillFX::Burst(GetWorld(),DungeonView::Project(E->GetActorLocation())-FVector2D(0,35),DungeonSkillFX::Color(E->Species),110,.6f,11,.45f);
     if(Balance.Active)++Balance.Kills;
     BalanceEvent(TEXT("enemy_killed_melee_hits"),E->BalanceMeleeHits,E->Species);
     if(auto* H=Player(this)) if(H->HasEffect(5)) H->RestoreHealth(DungeonBalance::HarvestHealing,true);
@@ -958,6 +988,8 @@ void ADungeonGameMode::AddImpact(FVector2D P,float Damage,bool Boss)
         FDungeonBlood B; B.Position=P; B.Size=FMath::Clamp(60.f+Damage*.5f,65.f,130.f); B.Variant=FMath::RandRange(0,3); Blood.Add(B);
     }
     FDungeonImpact I; I.Position=P; I.Damage=Damage; I.bBoss=Boss; Impacts.Add(I);
+    if(Damage>=0)if(auto* FX=ADungeonArrowFX::Find(GetWorld(),true))FX->EmitStyled(P-FVector2D(0,Damage>0?38:0),{1,0},
+        Boss?FLinearColor(1,.27f,.06f):FLinearColor(1,.68f,.3f),Damage==0?125:85,.32f,2,Boss?1.2f:.8f);
 }
 FDungeonItem ADungeonGameMode::MakeItem(int32 Icon,int32 Rarity)
 {
@@ -1005,7 +1037,7 @@ void ADungeonGameMode::NextRoom()
     Blood.Empty();
     Potions.Empty();CoinDrops.Empty();
     DialogueLines.Empty(); DialogueIndex=0; DialogueWait=BossGrace=0;
-    bChest=bLootClaimed=bLootRolled=false; LootTimer=0; ++Room; Wave=1;
+    bChest=bLootClaimed=bLootRolled=false; LootTimer=0; Room=DungeonProgression::NextRoom(Room); Wave=1;
     for(bool& Rolled:ChestRolled) Rolled=false;
     Shots.Empty(); Splashes.Empty();
     if(auto* H=Player(this)) H->SetActorLocation(DungeonView::Unproject(FVector2D(640,615)));
@@ -1050,7 +1082,7 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
     if(Name.StartsWith(TEXT("TeaV4_")))Path=FString::Printf(TEXT("/Game/Art/TeaV4/%s.%s"),*Name,*Name);
     if(Name.StartsWith(TEXT("TeaSpirit_")))Path=FString::Printf(TEXT("/Game/Art/TeaSpirit/%s.%s"),*Name,*Name);
     if(!DungeonExpansion::Path(Name).IsEmpty())Path=DungeonExpansion::Path(Name);
-    if(GearId>=60&&GearId<DungeonLootCatalog::Count)Path=FString::Printf(TEXT("/Game/Art/V2/GearSheet_%d.GearSheet_%d"),(GearId-60)/3,(GearId-60)/3);
+    if(GearId>=60&&GearId<72)Path=FString::Printf(TEXT("/Game/Art/V2/GearSheet_%d.GearSheet_%d"),(GearId-60)/3,(GearId-60)/3);
     auto* T=LoadObject<UTexture2D>(nullptr,*Path);
 #if WITH_EDITOR
     if(T&&T->IsCompiling())
@@ -1061,7 +1093,7 @@ UTexture2D* ADungeonHUD::Texture(const FString& Name)
     if(T) T->WaitForPendingInitOrStreaming();
     Textures.Add(Name,T); return T;
 }
-void ADungeonHUD::Sprite(const FString& N,float X,float Y,float W,float H,FLinearColor Tint,float Rotation,FVector2D Pivot)
+void ADungeonHUD::Sprite(const FString& N,float X,float Y,float W,float H,FLinearColor Tint,float Rotation,FVector2D Pivot,bool MirrorX)
 {
     FString Atlas;int Frame=0,Rows=1;
     if(DungeonExpansionV2::Atlas(N,Atlas,Frame,Rows)){
@@ -1070,8 +1102,9 @@ void ADungeonHUD::Sprite(const FString& N,float X,float Y,float W,float H,FLinea
         return;
     }
     const int GearId=N.StartsWith(TEXT("Loot_"))?FCString::Atoi(*N.Mid(5)):-1;
-    const bool Sheet=GearId>=60&&GearId<DungeonLootCatalog::Count;
-    if(auto* T=Texture(N)) DrawTexture(T,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale,Sheet?((GearId-60)%3)/3.f:0,0,Sheet?1.f/3.f:1.f,1,Tint,BLEND_Translucent,1,false,Rotation,Pivot);
+    const bool Sheet=GearId>=60&&GearId<72;
+    const float UVWidth=Sheet?1.f/3.f:1.f,UVStart=Sheet?((GearId-60)%3)/3.f:0;
+    if(auto* T=Texture(N)) DrawTexture(T,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale,UVStart+(MirrorX?UVWidth:0),0,MirrorX?-UVWidth:UVWidth,1,Tint,BLEND_Translucent,1,false,Rotation,Pivot);
 }
 void ADungeonHUD::Box(float X,float Y,float W,float H,FLinearColor Color)
 { DrawRect(Color,Offset.X+X*Scale,Offset.Y+Y*Scale,W*Scale,H*Scale); }
@@ -1116,12 +1149,14 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         if(!H->IsTeaEmpowered())return;
         auto* T=Texture(Art);if(!T)return;
         // Alpha silhouette outlines, not a rectangular overlay. Two gentle pulses/sec.
+        const float ArtSize=Art.StartsWith(TEXT("Grounded"))?160.f:128.f;
         for(int I=0;I<8;++I){
             const float A=I*PI/4,Radius=(2.5f+TeaPulse*1.5f)*HS;
             DrawTexture(T,Offset.X+(P.X-64*HS+FMath::Cos(A)*Radius)*Scale,Offset.Y+(P.Y-116*HS+FMath::Sin(A)*Radius)*Scale,
-                128*HS*Scale,128*HS*Scale,0,0,1,1,FLinearColor(4,2.8f,.8f,Opacity*(.14f+.16f*TeaPulse)),BLEND_Translucent);
+                ArtSize*HS*Scale,ArtSize*HS*Scale,0,0,1,1,FLinearColor(4,2.8f,.8f,Opacity*(.14f+.16f*TeaPulse)),BLEND_Translucent);
         }
     };
+    if(FullBodyHero(H,P,HS,Fade))return;
     if(H->IsDrinking()){
         const float Progress=H->IsDrinkingPotion()?1-H->PotionSip/ADungeonHero::PotionDrinkDuration:H->GetTeaSipProgress();
         const auto& R=DungeonTeaDrink::Regions[DungeonTeaDrink::Frame(Progress*DungeonTeaDrink::Duration)];
@@ -1148,8 +1183,22 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         return;
     }
     const int32 D=H->GetFacingDirection();
+    if(H->IsBowEquipped()&&!H->IsCasting()) {
+        const int F=H->IsBowCharging()?FMath::Clamp(int(H->BowDrawTime/.12f),0,3):H->IsAttacking()?DungeonBow::Frame(H->GetAttackProgress()):H->IsBlocking()?3:H->IsWalking()?1:0;
+        Shadow(P,28*DescentScale,Opacity);
+        if(H->IsWalking())Sprite(FString::Printf(TEXT("GroundedLegs_%s_%d_%d"),H->IsRunAnimation()&&!H->IsAttacking()&&!H->IsBlocking()?TEXT("Run"):TEXT("Walk"),H->GetTravelDirection(),H->GetGroundedFrame()),P.X-64*HS,P.Y-116*HS,160*HS,160*HS,Fade);
+        Sprite(FString::Printf(TEXT("Bow%s_%d_%d"),H->IsWalking()?TEXT("Upper"):TEXT("Hero"),D,F),P.X-80*HS,P.Y-144*HS,192*HS,192*HS,H->HurtTime>0?FLinearColor(1,.35f,.3f,Opacity):Fade);
+        const int Element=DungeonBow::Element(H->Equipment[0].Effect);
+        if(Element&&H->IsAttacking()&&H->GetAttackProgress()<DungeonBow::Release&&F>=2){
+            auto C=DungeonBow::Color(Element);C.A=Opacity*(.3f+.2f*FMath::Sin(GetWorld()->GetTimeSeconds()*18));
+            const auto Tip=P+(BowArt::Muzzle[D]-FVector2D(80,144))*HS;
+            Sprite(FString::Printf(TEXT("BowImpact_%d_0"),Element),Tip.X-14,Tip.Y-14,28,28,C);
+        }
+        DrawGuard(H);return;
+    }
     const bool Guard=H->GetGuardBlend()>.01f&&!H->IsAttacking()&&!H->IsCasting()&&H->Health>0;
     const bool Action=H->IsAttacking()||H->IsCasting();
+    const bool Grounded=H->IsWalking()&&!FParse::Param(FCommandLine::Get(),TEXT("LegacyGait"));
     const int32 View=Action?AthleticHeroSockets::AttackView(D,H->GetAnimationFrame()):D;
     // Reuse the authored right-handed chest-brace poses, not the idle arm with
     // a rotated loose weapon. NE uses its valid raised right-arm pose.
@@ -1179,15 +1228,24 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
     const float Bob=0; // Body motion must not lift the planted soles or shadow.
     FString Name=Action||Guard?FString::Printf(TEXT("Athletic_Attack%s_%d_%d"),View%2?TEXT("Diagonal"):TEXT("Cardinal"),View/2,F):
         FString::Printf(TEXT("Locomotion_%s_%d_%d"),Running?TEXT("Run"):TEXT("Walk"),D,F);
+    if(Grounded){
+        if(Action||Guard)Name=TEXT("GroundedUpper_")+Name;
+        else Name=FString::Printf(TEXT("Grounded_%s_%d_%d"),Running?TEXT("Run"):TEXT("Walk"),D,H->GetGroundedFrame());
+    }
     Shadow(P+FVector2D(0,-2-Bob),28*DescentScale,Opacity);
+    if(Grounded&&(Action||Guard)){
+        const FString Legs=FString::Printf(TEXT("GroundedLegs_Walk_%d_%d"),H->GetTravelDirection(),H->GetGroundedFrame());
+        Sprite(Legs,P.X-64*HS,P.Y-116*HS,160*HS,160*HS,Fade);
+    }
     TeaGlow(Name);
     // Native alpha avoids the old body mask and its mismatched silhouette.
-    auto DrawBody=[&]() { if(auto* T=Texture(Name)) for(int Row=0;Row<128;Row+=2)
+    const int ArtSize=Grounded?160:128;
+    auto DrawBody=[&]() { if(auto* T=Texture(Name)) for(int Row=0;Row<ArtSize;Row+=2)
     {
-        const auto L=Pose(FVector2D(0,Row+1)),R=Pose(FVector2D(128,Row+1));
+        const auto L=Pose(FVector2D(0,Row+1)),R=Pose(FVector2D(ArtSize,Row+1));
         const auto Top=Pose(FVector2D(64,Row)),Bottom=Pose(FVector2D(64,Row+2));
         DrawTexture(T,Offset.X+(P.X+(L.X-64)*HS)*Scale,Offset.Y+(P.Y+(Top.Y-116)*HS)*Scale,
-            (R.X-L.X)*HS*Scale,(Bottom.Y-Top.Y)*HS*Scale,0,Row/128.f,1,2.f/128,H->HurtTime>0?FLinearColor(1,.35f,.3f,Opacity):Fade,BLEND_Translucent);
+            (R.X-L.X)*HS*Scale,(Bottom.Y-Top.Y)*HS*Scale,0,float(Row)/ArtSize,1,2.f/ArtSize,H->HurtTime>0?FLinearColor(1,.35f,.3f,Opacity):Fade,BLEND_Translucent);
     }
     };
     const bool Behind=AthleticHeroSockets::RightHandBehindBody(View);
@@ -1210,20 +1268,22 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         Sprite(ItemArt(H->Equipment[2].Icon),Charm.X-7*HS,Charm.Y-7*HS,14*HS,14*HS,Fade);
     }
     const auto A=H->GetAim();
-    const FVector2D Socket=H->IsAttacking()||Guard?AthleticHeroSockets::Attack[View][F]:HeroLocomotionSockets::Hand[D][F+(Running?8:0)];
+    const FVector2D Socket=H->IsAttacking()||Guard?AthleticHeroSockets::Attack[View][F]:Grounded?HeroGroundedSockets::Hand[D][H->GetGroundedFrame()+(Running?32:0)]:HeroLocomotionSockets::Hand[D][F+(Running?8:0)];
     const FVector2D Origin=P-FVector2D(64,116)*HS;
     const FVector2D Hand=Origin+Pose(Socket)*HS;
     const float Angle=Guard?AthleticHeroSockets::Angles[View][F]+H->GetBlockImpact()/.18f*6.f:H->IsAttacking()?AthleticHeroSockets::Angles[View][F]:(D<=4||D==7?145.f:215.f);
     if(!H->Equipment[0].IsEmpty())
     {
-        const FVector2D Pivot=H->Equipment[0].CatalogId<0?HeroSockets::Grip(H->Equipment[0].Icon)/128.:HeroSockets::CatalogGrip(H->Equipment[0].CatalogId);
+        FVector2D Pivot=H->Equipment[0].CatalogId<0?HeroSockets::Grip(H->Equipment[0].Icon)/128.:HeroSockets::CatalogGrip(H->Equipment[0].CatalogId);
+        const bool Mirror=HeroSockets::MirrorBlade(H->Equipment[0].CatalogId,D);
+        if(Mirror)Pivot.X=1-Pivot.X;
         float WeaponSize=96*HS*H->Equipment[0].EquippedScale();
 #if !UE_BUILD_SHIPPING
         if(FParse::Param(FCommandLine::Get(),TEXT("DungeonWeaponOriginal"))) WeaponSize=96*HS;
 #endif
         DrawSwordTrail(H,Hand,Angle,WeaponSize*Pivot.Y*.85f,Opacity);
         Sprite(H->Equipment[0].Art(),Hand.X-Pivot.X*WeaponSize,Hand.Y-Pivot.Y*WeaponSize,
-            WeaponSize,WeaponSize,Fade,Angle,Pivot);
+            WeaponSize,WeaponSize,Fade,Angle,Pivot,Mirror);
         // The right arm is on the far side in left/rear-left views. Never draw
         // its handle across the near (left) arm or move the grip to that hand.
         if(Behind) DrawBody();
@@ -1232,7 +1292,7 @@ void ADungeonHUD::Hero(ADungeonHero* H,float HS)
         {
             const auto TL=Origin+Pose(Socket-FVector2D(2.5f,2.5f))*HS,BR=Origin+Pose(Socket+FVector2D(2.5f,2.5f))*HS;
             DrawTexture(T,Offset.X+TL.X*Scale,Offset.Y+TL.Y*Scale,(BR.X-TL.X)*Scale,(BR.Y-TL.Y)*Scale,
-                (Socket.X-2.5f)/128.,(Socket.Y-2.5f)/128.,5.f/128,5.f/128,Fade,BLEND_Translucent);
+                (Socket.X-2.5f)/ArtSize,(Socket.Y-2.5f)/ArtSize,5.f/ArtSize,5.f/ArtSize,Fade,BLEND_Translucent);
         }
     }
     if(Behind&&H->Equipment[0].IsEmpty()) DrawBody();
@@ -1443,7 +1503,7 @@ void ADungeonHUD::DrawMenu(ADungeonGameMode* G)
         Row(DungeonKeys::Label(0)+TEXT(" ")+DungeonKeys::Label(2)+TEXT(" ")+DungeonKeys::Label(1)+TEXT(" ")+DungeonKeys::Label(3),TEXT("Move in any direction"),398);
         Row(DungeonKeys::Label(DungeonKeys::Sprint),TEXT("Sprint at twice walking speed"),423);
         Row(DungeonKeys::Label(DungeonKeys::Dodge),TEXT("Dodge / roll"),448);
-        Row(DungeonKeys::Label(DungeonKeys::Attack),TEXT("Hold to attack / third landed hit: combo"),473);
+        Row(DungeonKeys::Label(DungeonKeys::Attack),Player(this)&&Player(this)->IsBowEquipped()?TEXT("Click: arrow / hold 1.5s: auto power shot"):TEXT("Hold to attack / third landed hit: combo"),473);
         Row(DungeonKeys::Label(DungeonKeys::Block),TEXT("Block incoming damage / face attack / up to 5s"),498);
         Row(DungeonKeys::Label(DungeonKeys::Throw),TEXT("Throw tea  -  10s cooldown"),523);
         Row(DungeonKeys::Label(DungeonKeys::Freedom),TEXT("FREEDOM  -  charge with 15 kills"),548);
@@ -1504,10 +1564,12 @@ void ADungeonHUD::InventoryClick()
         return;
     }
     if(!H->IsInventoryOpen()) return;
+    auto* G=Mode(this);
     using namespace DungeonInventoryLayout;
     if(In(1140,63,105,40)) {H->ToggleInventory();return;}
     const int GearSlot=GearAt(P);
     if(GearSlot!=INDEX_NONE&&!H->Equipment[GearSlot].IsEmpty()) {
+        TraderSellSelection.Empty();
         const double Now=FPlatformTime::Seconds();
         if(LastClickedGear==GearSlot&&Now-LastClickTime<=.35&&FVector2D::Distance(P,LastClickPosition)<8)
         {H->Unequip(GearSlot);CancelInventoryGesture();return;}
@@ -1524,7 +1586,13 @@ void ADungeonHUD::InventoryClick()
         for(int I=0;I<H->Inventory.Num();++I) {
             const auto& E=H->Inventory[I];auto S=E.Item.Size();
             if(C.X>=E.Cell.X&&C.X<E.Cell.X+S.X&&C.Y>=E.Cell.Y&&C.Y<E.Cell.Y+S.Y) {
-                H->SelectedItem=I;const double Now=FPlatformTime::Seconds();
+                H->SelectedItem=I;
+                if(G&&G->IsTraderOpen()){
+                    CancelInventoryGesture();
+                    if(TraderSellSelection.Contains(I))TraderSellSelection.Remove(I);else TraderSellSelection.Add(I);
+                    return;
+                }
+                const double Now=FPlatformTime::Seconds();
                 if(LastClickedItem==I&&Now-LastClickTime<=.35&&FVector2D::Distance(P,LastClickPosition)<8)
                 {H->EquipFromInventory(I);CancelInventoryGesture();return;}
                 LastClickedGear=INDEX_NONE;LastClickedItem=I;LastClickTime=Now;LastClickPosition=P;
@@ -1534,10 +1602,12 @@ void ADungeonHUD::InventoryClick()
         }
     }
     CancelInventoryGesture();
-    if(In(456,564,174,44))H->EquipFromInventory(H->SelectedItem);
+    if(In(456,564,174,44)){TraderSellSelection.Empty();H->EquipFromInventory(H->SelectedItem);}
+    if(In(642,564,174,44)&&G&&G->IsTraderOpen()&&!TraderSellSelection.IsEmpty()){
+        if(G->SellTraderItems(H,TraderSellSelection.Array()))TraderSellSelection.Empty();return;
+    }
     if(In(642,564,174,44)&&H->Inventory.IsValidIndex(H->SelectedItem)){
-        if(auto* G=Mode(this);G&&G->IsTraderOpen())G->SellTraderItem(H,H->SelectedItem);
-        else H->DiscardItem(H->SelectedItem);
+        if(!G||!G->IsTraderOpen())H->DiscardItem(H->SelectedItem);
     }
 }
 void ADungeonHUD::ItemLettering(const FString& Text,float X,float Y,FLinearColor Color,float Height,float MaxWidth)
@@ -1616,11 +1686,11 @@ void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* Compare
         CardText(E.Name,892,151,R,23,304);
         CardText(FString::Printf(TEXT("%s / LV %d"),RarityNames[E.Rarity],E.ItemLevel),892,198,R,18,304);
         Sprite(E.Art(),888,230,96,96);
-        CardText(Types[E.Slot],996,231,Gold,20,196);
+        CardText(E.IsBow()?TEXT("BOW"):Types[E.Slot],996,231,Gold,20,196);
         if(E.Slot==0) {
-            CardText(FString::Printf(TEXT("%.1f DPS"),(24+E.Attack)*(1+E.Speed)/.48f),996,252,Pale,28,196);
-            CardText(FString::Printf(TEXT("%.0f-%.0f DMG"),(24+E.Attack)*.9f,(24+E.Attack)*1.1f),996,286,Pale,18,196);
-            CardText(FString::Printf(TEXT("%.2f ATK/SEC"),(1+E.Speed)/.48f),996,307,Pale,18,196);
+            CardText(FString::Printf(TEXT("%.1f DPS"),(24+E.Attack)*(1+E.Speed)*E.DirectDamageScale()/E.AttackPeriod()),996,252,Pale,28,196);
+            CardText(FString::Printf(TEXT("%.0f-%.0f DMG"),(24+E.Attack)*E.DirectDamageScale()*.9f,(24+E.Attack)*E.DirectDamageScale()*1.1f),996,286,Pale,18,196);
+            CardText(FString::Printf(TEXT("%.2f %s"),(1+E.Speed)/E.AttackPeriod(),E.IsBow()?TEXT("SHOTS/SEC"):TEXT("ATK/SEC")),996,307,Pale,18,196);
         } else if(E.Slot==3) {
             const float V=E.BleedChance+E.PoisonChance+E.StaminaBonus+E.Leech+E.Reduction+E.HealthBonus;
             const TCHAR* Kind=E.BleedChance>0?TEXT("BLEED CHANCE"):E.PoisonChance>0?TEXT("POISON CHANCE"):E.StaminaBonus>0?TEXT("MAX STAMINA"):E.Leech>0?TEXT("DAMAGE LEECH"):E.Reduction>0?TEXT("MITIGATION"):TEXT("MAX HEALTH");
@@ -1659,7 +1729,7 @@ void ADungeonHUD::DrawItemCard(const FDungeonItem& E,const ADungeonHero* Compare
         if(CompareHero) {
         const auto* H=CompareHero;const auto& Current=H->Equipment[E.Slot];
         CardText(TEXT("EQUIPPED: ")+(Current.IsEmpty()?TEXT("NONE"):Current.Name),892,586,Gold,16,304);
-        const float Delta=E.Slot==0?(24+E.Attack)*(1+E.Speed)/.48f-(24+Current.Attack)*(1+Current.Speed)/.48f:E.Slot==4?100*(E.StaminaBonus-Current.StaminaBonus):E.Slot==5?100*(E.Speed-Current.Speed):E.Slot==7?100*(E.Movement-Current.Movement):E.Defense-Current.Defense;
+        const float Delta=E.Slot==0?(24+E.Attack)*(1+E.Speed)*E.DirectDamageScale()/E.AttackPeriod()-(24+Current.Attack)*(1+Current.Speed)*Current.DirectDamageScale()/Current.AttackPeriod():E.Slot==4?100*(E.StaminaBonus-Current.StaminaBonus):E.Slot==5?100*(E.Speed-Current.Speed):E.Slot==7?100*(E.Movement-Current.Movement):E.Defense-Current.Defense;
         float FlatHP=150,BonusHP=0;
         for(int I=0;I<H->Equipment.Num();++I)if(I!=E.Slot&&!H->Equipment[I].IsEmpty()){FlatHP+=H->Equipment[I].Vitality;BonusHP+=H->Equipment[I].HealthBonus;}
         const float HealthDelta=(FlatHP+E.Vitality)*(1+FMath::Clamp(BonusHP+E.HealthBonus,0.f,1.f))-H->MaxHealth;
@@ -1684,9 +1754,9 @@ void ADungeonHUD::DrawAdventurerStats(const ADungeonHero* H)
     Row(TEXT("Stamina"),FString::Printf(TEXT("%.1f / %.1f"),H->Stamina,H->MaxStamina),Green);
     Row(TEXT("Stamina recovery"),FString::Printf(TEXT("%.1f / sec"),25*H->StaminaRegen),Green);
     Row(TEXT("Movement speed"),FString::Printf(TEXT("%+.1f%%"),100*(H->MovementSpeed-1)),Green);
-    Row(TEXT("Hit damage"),FString::Printf(TEXT("%.1f - %.1f"),H->AttackPower*.9f,H->AttackPower*1.1f),Pale);
-    Row(TEXT("Attacks / sec"),FString::Printf(TEXT("%.2f"),H->AttackSpeed/.48f),Pale);
-    Row(TEXT("DPS (before crits)"),FString::Printf(TEXT("%.1f"),H->AttackPower*H->AttackSpeed/.48f),Pale);
+    Row(TEXT("Hit damage"),FString::Printf(TEXT("%.1f - %.1f"),H->AttackPower*H->Equipment[0].DirectDamageScale()*.9f,H->AttackPower*H->Equipment[0].DirectDamageScale()*1.1f),Pale);
+    Row(H->IsBowEquipped()?TEXT("Shots / sec"):TEXT("Attacks / sec"),FString::Printf(TEXT("%.2f"),H->AttackSpeed/H->Equipment[0].AttackPeriod()),Pale);
+    Row(TEXT("DPS (before crits)"),FString::Printf(TEXT("%.1f"),H->AttackPower*H->AttackSpeed*H->Equipment[0].DirectDamageScale()/H->Equipment[0].AttackPeriod()),Pale);
     Row(TEXT("Critical chance"),FString::Printf(TEXT("%.1f%%"),100*H->CritChance),Purple);
     Row(TEXT("Critical damage"),FString::Printf(TEXT("%.0f%% of hit"),100*H->CritMultiplier),Purple);
     Row(TEXT("Armor / mitigation"),FString::Printf(TEXT("%.0f / %.0f%%"),H->Armor,100*DungeonBalance::ArmorReduction(H->Armor)),Green);
@@ -1739,11 +1809,13 @@ void ADungeonHUD::DrawInventory(ADungeonHero* H)
         if(bDragging&&I==DragItem)continue;
         const auto& B=H->Inventory[I];auto S=B.Item.Size();
         float X=BagX+B.Cell.X*CellSize,Y=BagY+B.Cell.Y*CellSize,W=S.X*CellSize-2,HH=S.Y*CellSize-2;
-        Box(X,Y,W,HH,I==H->SelectedItem?Gold:RarityColor(B.Item.Rarity));
+        const bool SaleMarked=Mode(this)&&Mode(this)->IsTraderOpen()&&TraderSellSelection.Contains(I);
+        Box(X,Y,W,HH,SaleMarked?FLinearColor(.2f,1,.55f):I==H->SelectedItem?Gold:RarityColor(B.Item.Rarity));
         Box(X+2,Y+2,W-4,HH-4,FLinearColor(.008f,.012f,.012f));
         const float Icon=FMath::Min(W-6,HH-6);
         if(B.Item.Slot==0&&B.Item.CatalogId>=0)Sprite(B.Item.BagArt(),X+3,Y+3,W-6,HH-6);
         else Sprite(B.Item.Art(),X+(W-Icon)/2,Y+(HH-Icon)/2,Icon,Icon);
+        if(SaleMarked){Box(X+4,Y+4,16,16,FLinearColor(.05f,.25f,.1f,.95f));CardText(TEXT("+"),X+6,Y+3,FLinearColor(.4f,1,.6f),18,16,20);}
         if(In(Mouse,X,Y,W,HH))Hover=&B.Item;
     }
     // Central portrait hit area excludes the equipment slots on either side.
@@ -1751,11 +1823,14 @@ void ADungeonHUD::DrawInventory(ADungeonHero* H)
     if(HoverAdventurer)DrawAdventurerStats(H);
     else if(Hover||H->Inventory.IsValidIndex(H->SelectedItem)) DrawItemCard(Hover?*Hover:H->Inventory[H->SelectedItem].Item,H);
     else Sprite(TEXT("InventoryCard"),842,104,400,628);
-    if(H->Inventory.IsValidIndex(H->SelectedItem)) {
+    if(H->Inventory.IsValidIndex(H->SelectedItem)||!TraderSellSelection.IsEmpty()) {
         Sprite(TEXT("InventoryFrame"),456,564,174,44);ItemLettering(TEXT("EQUIP"),501,574,Pale,22,150);
         Sprite(TEXT("InventoryFrame"),642,564,174,44);
-        if(auto* G=Mode(this);G&&G->IsTraderOpen())
-            CardText(FString::Printf(TEXT("SELL  %lld GOLD"),G->TraderSellPrice(H->Inventory[H->SelectedItem].Item)),654,578,Pale,17,150);
+        if(auto* G=Mode(this);G&&G->IsTraderOpen()){
+            int64 Total=0;for(int I:TraderSellSelection)if(H->Inventory.IsValidIndex(I))Total+=G->TraderSellPrice(H->Inventory[I].Item);
+            CardText(FString::Printf(TEXT("SELL %d / %lld GOLD"),TraderSellSelection.Num(),Total),650,578,Pale,15,158);
+            CardText(TEXT("Click items to mark / unmark for sale"),456,610,Gold,15,360,20);
+        }
         else ItemLettering(TEXT("DROP"),689,574,Pale,22,120);
     }
     DrawInventoryDrag(H);
@@ -1842,6 +1917,21 @@ void ADungeonHUD::DrawHUD()
         }
         return;
     }
+    if(FParse::Param(FCommandLine::Get(),TEXT("MeleeRigReview"))){DrawMeleeRigReview(H);return;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("BowPoseReview")))
+    {
+        Box(0,0,1280,800,FLinearColor(.035f,.045f,.05f,1));
+        const auto Position=H->GetActorLocation();H->HurtTime=0;
+        const float T=FMath::Fmod(GetWorld()->GetTimeSeconds(),1.f);
+        for(int D=0;D<8;++D)for(int Moving=0;Moving<2;++Moving){
+            const float X=150+(D%4)*320,Y=180+(D/4*2+Moving)*195;
+            H->SetActorLocation(DungeonView::Unproject(FVector2D(X,Y)));
+            if(Moving)H->SetGroundedReviewPose(D,T);else H->SetIdleReviewPose(D,0);
+            H->SetBowReviewPose(D,T);Hero(H,1.15f);
+            Label(FString::Printf(TEXT("D%d / %s"),D,Moving?TEXT("MOVING"):TEXT("PLANTED")),X-70,Y+8,Pale,.7f);
+        }
+        H->SetActorLocation(Position);return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("LocomotionPreview")))
     {
         Box(0,0,1280,800,FLinearColor(.035f,.045f,.05f,1));
@@ -1850,9 +1940,10 @@ void ADungeonHUD::DrawHUD()
         for(int D=0;D<8;++D)for(int Run=0;Run<2;++Run)
         {
             const int Row=(D/4)*2+Run;const float X=160+(D%4)*320,Y=195+Row*190;
-            const int Frame=FMath::FloorToInt(GetWorld()->GetTimeSeconds()*(Run?12.f:10.f))%8;
+            const float Phase=FMath::Fmod(GetWorld()->GetTimeSeconds()*(Run?1.8f:1.35f),1.f);
+            const int Frame=FMath::FloorToInt(Phase*32);
             H->SetActorLocation(DungeonView::Unproject(FVector2D(X,Y)));
-            H->SetWalkReviewPose(D,Frame);if(Run)H->SetSprintReviewPose();Hero(H,1.2f);
+            H->SetGroundedReviewPose(D,Phase);if(Run)H->SetSprintReviewPose();Hero(H,1.2f);
             Label(FString::Printf(TEXT("%s / D%d / %d"),Run?TEXT("RUN"):TEXT("WALK"),D,Frame),X-65,Y+12,Pale,.8f);
         }
         H->SetActorLocation(Position);return;
@@ -2004,6 +2095,7 @@ void ADungeonHUD::DrawHUD()
     DrawReward(G,H);
     for(const auto& FX:G->GetSplashes())
     {
+        if(FX.bNiagara||FX.BowElement>=0)continue; // Niagara composites after actors.
         if(FX.TeaKind){
             if(FX.TeaKind==1&&TeaV4::Alive(FX.Life)){
                 const int F=TeaV4::Frame(TeaV4::GroundDuration-FX.Life,6);const auto& M=TeaV4::Ground[F];
@@ -2054,7 +2146,7 @@ void ADungeonHUD::DrawHUD()
     for(auto& E:G->GetEnemies()) if(IsValid(E)) Actors.Add(E);
     Actors.Sort([](const AActor& A,const AActor& B){return DungeonView::Project(A.GetActorLocation()).Y<DungeonView::Project(B.GetActorLocation()).Y;});
     for(auto* A:Actors) { if(A==H){if(!G->IsDeathSequence())Hero(H);} else Enemy(CastChecked<ADungeonEnemy>(A)); }
-    for(const auto& FX:G->GetSplashes())if(FX.TeaKind==2&&TeaV4::Alive(FX.Life)){
+    for(const auto& FX:G->GetSplashes())if(!FX.bNiagara&&FX.TeaKind==2&&TeaV4::Alive(FX.Life)){
         const int F=TeaV4::Frame(TeaV4::EnemyDuration-FX.Life,4);const auto& M=TeaV4::Enemy[F];
         Sprite(FString::Printf(TEXT("TeaV4_Enemy_%d"),F),FX.Position.X-M.X,FX.Position.Y-M.Y,M.W,M.H);
     }
@@ -2062,6 +2154,13 @@ void ADungeonHUD::DrawHUD()
     for(const auto& Shot:G->GetShots())
     {
         FVector2D P=Shot.Position;
+        if(Shot.Style==DungeonBow::ShotStyle){
+            const auto Dir=Shot.Velocity.GetSafeNormal();P-=Dir*22;
+            const float A=FMath::RadiansToDegrees(FMath::Atan2(Dir.Y,Dir.X));
+            if(Shot.BowElement){auto C=DungeonBow::Color(Shot.BowElement);C.A=.20f+.10f*FMath::Sin(Shot.Age*25);
+                Sprite(FString::Printf(TEXT("BowFlight_%d"),Shot.BowElement),P.X-29,P.Y-29,58,58,C,A);}
+            Sprite(FString::Printf(TEXT("BowFlight_%d"),Shot.BowElement),P.X-26,P.Y-26,52,52,FLinearColor::White,A);continue;
+        }
         if(DungeonExpansion::Is(Shot.ExpansionSpecies)){
             const int S=Shot.ExpansionSpecies;const float Size=DungeonExpansionV2::Is(S)&&DungeonExpansionV2::Get(S).Elite?176.f:S==50?60.f:120.f;
             float Angle=FMath::RadiansToDegrees(FMath::Atan2(Shot.Velocity.Y,Shot.Velocity.X));
@@ -2124,10 +2223,17 @@ void ADungeonHUD::DrawHUD()
         const float Size=Shot.Art==1||Shot.Art==2?46:Shot.Art==3?42:Shot.bFriendly?42:48;
         KeySprite(FString::Printf(TEXT("TeaFX_%d"),Shot.Art),P.X-Size*.5f,P.Y-Size*.5f,Size,Size,FLinearColor::White,false,Angle);
     }
+    if(auto* FX=ADungeonArrowFX::Find(GetWorld()))if(auto* RT=FX->Capture()){
+        FCanvasTileItem Tile(Offset,RT->GetResource(),FVector2D(1280,800)*Scale,FLinearColor::White);
+        Tile.BlendMode=SE_BLEND_Additive;Canvas->DrawItem(Tile);
+    }
     DrawCoinDrops(G,true);
     DrawHitFeedback(G);
     DrawCombatFX(G,true);
     Offset=StableOffset; // Shake the dungeon, never the HUD or mouse-input mapping.
+#if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("GateArtReview")))return; // Unobstructed south-door art inspection.
+#endif
     if(G->IsDeathSequence()){DrawDeathSequence(G,H);return;}
     if(!G->IsAtlasFloor())Label(FString::Printf(TEXT("%s / ROOM %02d"),DungeonRoster::Biome(G->GetBiome()),G->GetRoom()),900,28,Gold,.85f);
     for(int I=0;!G->IsAtlasFloor()&&I<3&&I<H->Equipment.Num();++I)
@@ -2219,7 +2325,7 @@ void ADungeonGameMode::VerifyGameplay()
         const int BeforeRoom=Room;
         bLootClaimed=true; TransitionCooldown=0; PendingSpawns=0;
         H->SetActorLocation(DungeonView::Unproject(DoorPosition(I))); PlayerInteract(H);
-        Check(Room==BeforeRoom+1,TEXT("All three visible doors usable"));
+        Check(Room==DungeonProgression::NextRoom(BeforeRoom),TEXT("All three visible doors usable"));
     }
     H->Restart(); H->Inventory.Empty();
     for(int I=0;I<18;++I) Check(H->AddToInventory(MakeItem(I%3,I%5)),TEXT("18 weapons fit the 6x6 grid"));

@@ -1,4 +1,5 @@
 #include "DungeonActors.h"
+#include "DungeonSkillFX.h"
 #include "DungeonCombatBalance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Texture2D.h"
@@ -14,6 +15,7 @@ void ADungeonHero::DrinkPotion()
     --PotionCharges;
     PotionSip=PotionDrinkDuration;
     RestoreHealth(MaxHealth*.25f);
+    DungeonSkillFX::Burst(GetWorld(),DungeonView::Project(GetActorLocation())-FVector2D(0,45),{.3f,1,.48f},130,.75f,9);
     if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this)))G->PlaySound(TEXT("Equip"),.4f,1.15f);
 }
 
@@ -190,7 +192,7 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
                     0,Top,1,Charge,FLinearColor::White,BLEND_Translucent);
             }
         }
-        if(I==4)Sprite(TEXT("Hotbar_Attack"),Tile.X,Tile.Y,S,S,Tint);
+        if(I==4)Sprite(H->IsBowEquipped()?H->Equipment[0].Art():TEXT("Hotbar_Attack"),Tile.X,Tile.Y,S,S,Tint);
         if(I==1){
             Sprite(TEXT("Hotbar_TeaSpirit"),Tile.X,Tile.Y,S,S,H->IsTeaEmpowered()?FLinearColor(1,.95f,.75f):Tint);
             if(H->IsTeaEmpowered()){
@@ -200,7 +202,7 @@ void ADungeonHUD::DrawVitals(ADungeonHero* H)
         }
         if(I==5)KeySprite(TEXT("TeaFX_0"),Tile.X+4,Tile.Y+4,S-8,S-8,Tint);
         if(I>1&&I<4)Sprite(TEXT("AudioThumb"),Tile.X+S*.32f,Tile.Y+S*.3f,S*.36f,S*.4f,FLinearColor(.32f,.3f,.22f,.8f));
-        const float Cooldown=I==1?H->GetTeaSpiritCooldown():I==5?H->GetPowerCooldown():I==4&&H->IsAttacking()?(1-H->GetAttackProgress())*.48f/FMath::Max(.01f,H->AttackSpeed):0;
+        const float Cooldown=I==1?H->GetTeaSpiritCooldown():I==5?H->GetPowerCooldown():I==4&&H->IsAttacking()?(1-H->GetAttackProgress())*H->AttackDuration()/FMath::Max(.01f,H->AttackSpeed):0;
         const float Fraction=I==1?1-H->GetTeaSpiritCooldown()/FDungeonTeaSpirit::Recharge:I==0?FMath::Clamp(G->FreedomKills/15.f,0.f,1.f):I==4?H->IsAttacking()?H->GetAttackProgress():1.f:I==5?1-H->GetPowerCooldown()/10.f:0;
         if(Cooldown>0){
             Box(Tile.X,Tile.Y,S,S*(1-Fraction),FLinearColor(0,0,0,.60f));
@@ -291,10 +293,10 @@ void ADungeonHUD::MeterArc(FVector2D C,float Radius,float Start,float Sweep,floa
 void ADungeonHUD::DrawGuard(ADungeonHero* H)
 {
     if(!H->IsBlocking())return;
-    const auto P=DungeonView::Project(H->GetActorLocation())-FVector2D(0,39),Aim=H->GetVisualFacing();
-    const float A=FMath::Atan2(Aim.Y,Aim.X),Flash=H->GetBlockImpact()/.18f;
-    MeterArc(P,52,A-PI*.5f,PI,1,FLinearColor(.08f,.7f,.42f,.3f+Flash*.5f),3+Flash*3);
-    if(Flash>0)Sprite(TEXT("Hotbar_Block"),P.X+Aim.X*47-17,P.Y+Aim.Y*47-17,34,34,FLinearColor(.8f,1,.85f,Flash));
+    // The stance and reserve meter communicate held guard; Niagara handles contact.
+    // Avoid the old flat semicircle and floating shield icon obscuring the impact.
+    const auto P=DungeonView::Project(H->GetActorLocation())-FVector2D(0,65)+H->GetVisualFacing()*25;
+    SoftEllipse(P,{13,18},FLinearColor(.16f,.55f,.35f,.055f));
 }
 void ADungeonHUD::DrawPotions(ADungeonGameMode* G)
 {

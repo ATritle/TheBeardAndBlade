@@ -1,4 +1,5 @@
 #include "DungeonActors.h"
+#include "HeroSockets.h"
 #include "Kismet/GameplayStatics.h"
 
 // Stable IDs: 24 weapons, 12 armors, 12 amulets, 12 rings, and 3 per new armor slot.
@@ -25,7 +26,9 @@ const FBaseLoot Catalog[]={
  {TEXT("Ranger's Cowl"),.10f,0,0},{TEXT("Keepwatch Helm"),.12f,0,0},{TEXT("Helm of Endurance"),.14f,0,0},
  {TEXT("Duelist's Grips"),.07f,0,0},{TEXT("Swiftsteel Gauntlets"),.09f,0,0},{TEXT("Amberstrike Gloves"),.11f,0,0},
  {TEXT("Trailguard Trousers"),5,0,0},{TEXT("Sentinel Legplates"),7,0,0},{TEXT("Bastion Greaves"),9,0,0},
- {TEXT("Trailrunner Boots"),.05f,0,0},{TEXT("Windstep Sabatons"),.07f,0,0},{TEXT("Stormstriders"),.09f,0,0}
+ {TEXT("Trailrunner Boots"),.05f,0,0},{TEXT("Windstep Sabatons"),.07f,0,0},{TEXT("Stormstriders"),.09f,0,0},
+ {TEXT("Wayfarer Longbow"),22,.05f,0},{TEXT("Cinderstring"),26,-.05f,11},{TEXT("Winterthorn"),24,0,3},
+ {TEXT("Serpentwood"),21,.12f,2},{TEXT("Tempest Recurve"),25,0,7}
 };
 static_assert(UE_ARRAY_COUNT(Catalog)==DungeonLootCatalog::Count);
 }
@@ -35,8 +38,8 @@ FString FDungeonItem::EffectText() const
  TEXT("Chill: slow movement 35% for 3s"),TEXT("Leech: heal 2.5% of direct damage; shared heal cap"),TEXT("Harvest: heal 2 health per kill; shared heal cap"),
  TEXT("Second wind: critical hits restore 6 stamina"),TEXT("Echo: every third strike splashes 35% damage"),
  TEXT("Execute: +35% damage below 30% enemy health"),TEXT("Berserk: +30% damage below 40% health"),
- TEXT("Aegis: reduce incoming damage by 8%")};
- return Texts[FMath::Clamp(Effect,0,10)];
+ TEXT("Aegis: reduce incoming damage by 8%"),TEXT("Cinder: arrows deal +15% direct damage")};
+ return Texts[FMath::Clamp(Effect,0,11)];
 }
 float FDungeonItem::EquippedScale() const
 {
@@ -45,13 +48,14 @@ float FDungeonItem::EquippedScale() const
  const float Scales[]={.90f,.82f,.90f,.68f,.82f,.85f,.80f,.78f,
      .67f,.90f,.86f,.80f,.86f,.80f,.94f,.83f,
      .90f,.72f,.84f,.82f,.80f,.86f,.66f,.94f};
- return CatalogId>=0&&CatalogId<24?Scales[CatalogId]:Icon==1?.85f:.92f;
+ const float Base=CatalogId>=0&&CatalogId<24?Scales[CatalogId]:Icon==1?.85f:.92f;
+ return Base*(IsBow()?1.f:HeroSockets::MeleeSizeMultiplier);
 }
 FDungeonItem ADungeonGameMode::RollItem(int32 Definition,int32 Rarity,int32 Level)
 {
  FDungeonItem I; I.CatalogId=FMath::Clamp(Definition,0,DungeonLootCatalog::Count-1); I.ItemLevel=FMath::Clamp(Level,1,100);
  I.Rarity=FMath::Clamp(Rarity,0,4); const auto& B=Catalog[I.CatalogId]; I.Name=B.Name;
- I.Slot=I.CatalogId<24?0:I.CatalogId<36?1:I.CatalogId<48?2:I.CatalogId<60?3:4+(I.CatalogId-60)/3;
+ I.Slot=I.CatalogId<24||DungeonBow::Is(I.CatalogId)?0:I.CatalogId<36?1:I.CatalogId<48?2:I.CatalogId<60?3:4+(I.CatalogId-60)/3;
  I.Icon=I.Slot*3+(I.CatalogId%3);
  const float Scale=DungeonBalance::PrimaryScale(I.ItemLevel,I.Rarity)*FMath::FRandRange(.94f,1.06f);
  if(I.Slot==0) { I.Attack=B.Power*Scale; I.Speed=B.Speed; }

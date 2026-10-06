@@ -166,7 +166,7 @@ void ADungeonGameMode::TickAtlasTravel(float Dt)
         if(H){if(T<.35f)H->TransitionWalk(AtlasTravelFrom,Door,T/.35f);else H->TransitionWalk(Door,Beyond,FMath::Clamp((T-.35f)/.43f,0.f,1.f),2.f);}
         if(AtlasTravelTime<=0){
             if(bAtlasDescending){
-                const int NextChapter=AtlasChapter+1;
+                const int NextChapter=DungeonProgression::NextChapter(AtlasChapter);
                 InitializeAtlasFloor(FMath::Rand(),NextChapter);
                 AtlasArrivalFrom=AtlasDoor(2);AtlasArrivalTo=AtlasArrivalFrom-AtlasDirection(2)*75;AtlasArrivalTime=ArrivalDuration;
                 if(H)H->TransitionWalk(AtlasArrivalFrom,AtlasArrivalTo,0);
@@ -188,7 +188,7 @@ void ADungeonHUD::DrawAtlas(ADungeonGameMode* G,ADungeonHero* H)
     Sprite(TEXT("AtlasMapIcon"),215,95,70,70);
     // Trim transparent title padding at draw time; keep the source artwork intact.
     if(auto* Title=Texture(TEXT("AtlasTitle")))DrawTexture(Title,Offset.X+300*Scale,Offset.Y+96*Scale,420*Scale,68*Scale,0,.24f,1,.48f,FLinearColor::White,BLEND_Translucent);
-    CardText(FString::Printf(TEXT("Floor %d  /  %s"),G->GetAtlasChapter()+1,DungeonRoster::Biome(G->GetBiome())),300,158,Pale,16,620);
+    CardText(FString::Printf(TEXT("Floor %d  /  %s"),DungeonProgression::ActiveFloor(G->GetAtlasChapter())+1,DungeonRoster::Biome(G->GetBiome())),300,158,Pale,16,620);
     CardText(TEXT("M  /  CLOSE"),940,112,Gold,17,145);
     Box(220,183,850,1,FLinearColor(.5f,.38f,.18f));
     const auto& Rooms=G->GetAtlasRooms();FIntPoint Min(999,999),Max(-999,-999);
@@ -227,14 +227,37 @@ void ADungeonHUD::DrawAtlasDoors(ADungeonGameMode* G,ADungeonHero* H)
     auto P=DungeonView::Project(H->GetActorLocation());
     for(int D=0;D<4;++D){const auto Door=G->AtlasDoor(D);bool Exists=G->AtlasHasDoor(D);bool Open=Exists&&G->AreDoorsOpen();
         if(G->bAtlasScroll&&G->IsAtlasTravel()&&Exists&&(G->AtlasCurrent==G->AtlasScrollSource||D==(G->AtlasTravelDoor+2)%4))Open=true;
-        const float W=D%2?78:104,HH=D%2?90:104;
-        const FVector2D Centers[]={{640,75},{1235,392},{640,740},{45,392}};
-        const FVector2D Center=Centers[D];
         if(!Open){
-            // Portcullis bars visually close unused arches and lock active combat exits.
-            Box(Center.X-W/2,Center.Y-HH/2,W,HH,FLinearColor(.013f,.02f,.023f,Exists?.62f:.90f));
-            for(int I=0;I<7;++I){const float X=Center.X-W/2+8+I*(W-16)/6;Box(X-1,Center.Y-HH/2,5,HH,FLinearColor(.035f,.04f,.04f));Box(X,Center.Y-HH/2,3,HH,FLinearColor(.11f,.14f,.14f));Box(X+1,Center.Y-HH/2,1,HH,FLinearColor(.25f,.24f,.20f));}
-            for(float Rail:{-.24f,.25f}){Box(Center.X-W/2,Center.Y+HH*Rail,W,5,FLinearColor(.09f,.11f,.11f));Box(Center.X-W/2,Center.Y+HH*Rail,W,1,FLinearColor(.28f,.24f,.16f));for(int I=0;I<4;++I)Box(Center.X-W/2+9+I*(W-18)/3,Center.Y+HH*Rail+1,2,2,FLinearColor(.35f,.29f,.18f));}
+            // Each silhouette is authored for this wall, not a rotated front sprite.
+            // Mounts sit on the jambs; transparent gaps retain the original recess.
+            const TCHAR* Names[]={TEXT("AtlasLock_N"),TEXT("AtlasLock_E"),TEXT("AtlasLock_S"),TEXT("AtlasLock_W")};
+            struct FLockRect{float X,Y,Z,W;};
+            const FLockRect Rects[]={{578,46,124,70},{1197,347,80,113},{578,706,124,66},{3,347,80,113}};
+            const FLockRect UVs[]={{35.f/1254,287.f/1254,1188.f/1254,646.f/1254},{141.f/1086,100.f/1448,824.f/1086,1256.f/1448},{0,0,1,1},{81.f/1086,119.f/1448,942.f/1086,1149.f/1448}};
+            const auto R=Rects[D],U=UVs[D];
+            if(auto* T=Texture(Names[D])){
+                if(D==3){
+                    // The west source's far mounts are staggered vertically. Fit
+                    // that authored trapezoid to the actual lintel and sill instead
+                    // of squeezing its bounding box into an upright rectangle.
+                    // UV-only remapping preserves the original texture and alpha.
+                    constexpr int Strips=40;
+                    for(int I=0;I<Strips;++I){
+                        const float X=I/float(Strips),Mid=(I+.5f)/Strips;
+                        const float Top=.30f*(1-Mid),Bottom=1-.10f*Mid;
+                        const float PX=-5+91*X,PY=339+11*Mid;
+                        const float UW=U.Z/Strips,V=U.Y+U.W*Top,VH=U.W*(Bottom-Top);
+                        DrawTexture(T,Offset.X+(PX+1)*Scale,Offset.Y+(PY+2)*Scale,(91.f/Strips+.08f)*Scale,106*Scale,U.X+U.Z*X,V,UW,VH,FLinearColor(0,0,0,.65f),BLEND_Translucent);
+                        const float Shade=Exists?.78f:.6f;
+                        DrawTexture(T,Offset.X+PX*Scale,Offset.Y+PY*Scale,(91.f/Strips+.08f)*Scale,106*Scale,U.X+U.Z*X,V,UW,VH,FLinearColor(Shade,Shade,Shade,1),BLEND_Translucent);
+                    }
+                }else{
+                // Tight contact shadow, never an opaque rectangle over the doorway.
+                DrawTexture(T,Offset.X+(R.X+1)*Scale,Offset.Y+(R.Y+2)*Scale,R.Z*Scale,R.W*Scale,U.X,U.Y,U.Z,U.W,FLinearColor(0,0,0,.65f),BLEND_Translucent);
+                const float Shade=Exists?.78f:.6f;
+                DrawTexture(T,Offset.X+R.X*Scale,Offset.Y+R.Y*Scale,R.Z*Scale,R.W*Scale,U.X,U.Y,U.Z,U.W,FLinearColor(Shade,Shade,Shade,1),BLEND_Translucent);
+                }
+            }
         }else{
             const int J=G->GetAtlasRooms()[G->GetAtlasRoom()].Links[D];
             const bool Trader=J>=0&&G->GetAtlasRooms()[J].Type==EAtlasRoom::Trader;
@@ -261,6 +284,15 @@ void ADungeonGameMode::VerifyAtlas()
     int Errors=0;auto Check=[&](bool B,const TCHAR* Why){if(!B){++Errors;UE_LOG(LogTemp,Error,TEXT("ATLAS: %s"),Why);}};
     auto* H=AtlasHero(this);if(!H){FPlatformMisc::RequestExitWithStatus(false,1);return;}
     bMenu=false;bHasRun=true;
+    const int ActiveChapters[]={0,2,3,4,5,6,7};
+    int Route=0;
+    for(int I=0;I<UE_ARRAY_COUNT(ActiveChapters);++I){
+        Check(Route==ActiveChapters[I]&&DungeonProgression::IsEnabled(Route),TEXT("Active campaign skips Grease and preserves remaining order"));
+        Check(DungeonProgression::ActiveFloor(Route)==I,TEXT("Consecutive visible floor and balance tier"));
+        Route=DungeonProgression::NextChapter(Route);
+    }
+    Check(Route==DungeonProgression::Chapters,TEXT("Active route ends after Iron Matriarch"));
+    Check(DungeonProgression::NextRoom(4)==9&&DungeonProgression::NextRoom(3)==4,TEXT("Legacy progression also skips Grease"));
     for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter)for(int Seed=0;Seed<128;++Seed){
         InitializeAtlasFloor(Seed,Chapter);TSet<FIntPoint> Cells;int Traders=0,Rewards=0,Bosses=0,Edges=0;
         Check(GetBiome()==DungeonProgression::Themes[Chapter]&&GetBossSpecies()==DungeonProgression::Bosses[Chapter],TEXT("Floor retains theme and boss order"));
@@ -381,11 +413,11 @@ void ADungeonGameMode::VerifyAtlas()
     CancelBossIntro();DialogueLines.Empty();DialogueIndex=0;BossGrace=0;if(!Enemies.IsEmpty())EnemyDefeated(Enemies[0]);
     Check(AtlasRooms[5].Cleared&&AreDoorsOpen(),TEXT("Boss defeat opens descent"));SaveAtlasRoom();EnterAtlasRoom(4,-1);EnterAtlasRoom(5,-1);Check(Enemies.IsEmpty()&&PendingSpawns==0,TEXT("Defeated boss stays dead"));
     int Exit=0;while(Exit<4&&!AtlasIsDescentDoor(Exit))++Exit;Check(Exit<4,TEXT("Descent has free doorway"));
-    StartAtlasTravel(Exit);TickAtlasTravel(5);Check(bAtlasActive&&AtlasChapter==1&&AtlasCurrent==0&&Room==5&&GetBiome()==6,TEXT("Descent starts second theme atlas"));TickAtlasTravel(1);
+    StartAtlasTravel(Exit);TickAtlasTravel(5);Check(bAtlasActive&&AtlasChapter==2&&AtlasCurrent==0&&Room==9&&GetBiome()==5,TEXT("First descent skips Grease and starts military bunker"));TickAtlasTravel(1);
     // Walk the full campaign's systems: level-scaled roster/rewards/stock,
     // persistent branch purchases, non-respawning clears and final victory.
     RestartRun();H->Coins=100000;
-    for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter){
+    for(int Chapter=0;Chapter<DungeonProgression::Chapters;Chapter=DungeonProgression::NextChapter(Chapter)){
         Check(AtlasChapter==Chapter&&AtlasCurrent==0&&!HasEnding(),TEXT("Sequential floor arrival"));
         Check(AtlasRooms.FilterByPredicate([](const FAtlasRoom& R){return R.Visited;}).Num()==1,TEXT("New floor starts undiscovered"));
         const FString Art=Chapter==0?TEXT("AtlasChamber"):FString::Printf(TEXT("AtlasChamber%d"),GetBiome());
@@ -398,7 +430,7 @@ void ADungeonGameMode::VerifyAtlas()
         for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();PendingSpawns=0;CompleteRoom();
         Check(AtlasRooms[1].Cleared&&AreDoorsOpen(),TEXT("Normal clear unlocks floor exits"));
         Breakables[0].BrokenAge=2;Breakables[0].Loot=RollItem(48,3,Room);const auto Drop=Breakables[0].Loot;SaveAtlasRoom();
-        EnterAtlasRoom(6,-1);Check(bTraderOpen&&TraderStock.Num()>=3&&TraderStock.Num()<=5&&TraderStock[0].ItemLevel==FMath::Min(25,2+Chapter*3),TEXT("Each floor has premium level-scaled shop"));
+        EnterAtlasRoom(6,-1);Check(bTraderOpen&&TraderStock.Num()>=3&&TraderStock.Num()<=5&&TraderStock[0].ItemLevel==FMath::Min(25,2+DungeonProgression::ActiveFloor(Chapter)*3),TEXT("Each floor has premium level-scaled shop"));
         H->Inventory.Empty();Check(BuyTraderItem(H,0),TEXT("Purchase on each floor"));ContinueFromTrader();TickAtlasTravel(ArrivalDuration);
         Check(AtlasCurrent==1&&Enemies.IsEmpty()&&PendingSpawns==0&&Breakables[0].BrokenAge==2&&Breakables[0].Loot.Stats()==Drop.Stats(),TEXT("Parent clear and floor loot survive shop visit"));
         SaveAtlasRoom();EnterAtlasRoom(6,-1);Check(TraderStock[0].IsEmpty(),TEXT("Each floor preserves sold stock"));ContinueFromTrader();TickAtlasTravel(ArrivalDuration);
@@ -413,7 +445,7 @@ void ADungeonGameMode::VerifyAtlas()
             Check(Enemies.IsEmpty()&&PendingSpawns==0,TEXT("Every defeated boss stays defeated"));
             const auto Health=H->Health,Stamina=H->Stamina;const int64 Coins=H->Coins;const int Items=H->Inventory.Num();
             int D=0;while(D<4&&!AtlasIsDescentDoor(D))++D;Check(D<4,TEXT("Next floor descent available"));StartAtlasTravel(D);TickAtlasTravel(5);
-            Check(bAtlasActive&&AtlasChapter==Chapter+1&&H->Health==Health&&H->Stamina==Stamina&&H->Coins==Coins&&H->Inventory.Num()==Items,TEXT("Descent preserves hero and inventory"));
+            Check(bAtlasActive&&AtlasChapter==DungeonProgression::NextChapter(Chapter)&&H->Health==Health&&H->Stamina==Stamina&&H->Coins==Coins&&H->Inventory.Num()==Items,TEXT("Descent skips disabled floors and preserves hero and inventory"));
         }
     }
     RestartRun();Check(bAtlasActive&&AtlasCurrent==0&&H->Coins==0,TEXT("New run resets floor and wallet"));

@@ -23,6 +23,31 @@ bool ADungeonGameMode::SellTraderItem(ADungeonHero* H,int32 Index)
     H->Coins+=Value;H->Inventory.RemoveAt(Index);H->SelectedItem=INDEX_NONE;
     H->InventoryMessage.Empty();PlaySound(TEXT("Equip"),.5f);return true;
 }
+bool ADungeonGameMode::SellTraderItems(ADungeonHero* H,const TArray<int32>& Indices)
+{
+    if(!bTraderOpen||!H||Indices.IsEmpty())return false;
+    TArray<int32> Unique;int64 Total=0;
+    for(int I:Indices){
+        if(!H->Inventory.IsValidIndex(I))return false;
+        if(Unique.Contains(I))continue;
+        const int64 Value=TraderSellPrice(H->Inventory[I].Item);
+        if(Total>MAX_int64-Value)return false;
+        Total+=Value;Unique.Add(I);
+    }
+    if(H->Coins>MAX_int64-Total)return false;
+    Unique.Sort([](int32 A,int32 B){return A>B;});
+    for(int I:Unique){BalanceEvent(TEXT("sold"),float(TraderSellPrice(H->Inventory[I].Item)),H->Inventory[I].Item.CatalogId);H->Inventory.RemoveAt(I);}
+    H->Coins+=Total;H->SelectedItem=INDEX_NONE;H->InventoryMessage.Empty();
+    PlaySound(TEXT("Equip"),.5f);return true;
+}
+bool ADungeonGameMode::BuyTraderPotion(ADungeonHero* H)
+{
+    if(!bTraderOpen||!H)return false;
+    if(H->PotionCharges>=ADungeonHero::PotionCapacity){TraderMessage=TEXT("Potion belt is full (4/4).");return false;}
+    if(H->Coins<TraderPotionPrice){TraderMessage=TEXT("Not enough gold for a potion.");return false;}
+    H->Coins-=TraderPotionPrice;++H->PotionCharges;
+    TraderMessage=TEXT("Health potion added to your belt.");PlaySound(TEXT("Equip"),.45f);return true;
+}
 TArray<FDungeonItem> ADungeonGameMode::CreateTraderStock(int32 Level)
 {
     TArray<FDungeonItem> Stock;TSet<int32> Definitions;
@@ -122,7 +147,12 @@ void ADungeonHUD::DrawTrader(ADungeonGameMode* G,ADungeonHero* H)
     }
     if(Stock.IsValidIndex(Inspect)&&!Stock[Inspect].IsEmpty())DrawItemCard(Stock[Inspect],H,true);
     else Sprite(TEXT("InventoryCard"),842,104,400,628);
-    CardText(G->TraderMessage,456,607,Pale,18,360,40);
+    Sprite(TEXT("InventoryFrame"),450,600,374,47);
+    Sprite(TEXT("HUD_Potion"),458,602,42,42);
+    CardText(FString::Printf(TEXT("POTION  %d/4"),H->PotionCharges),506,607,Gold,16,185,20);
+    CardText(TEXT("Restores 25% health"),506,626,Pale,13,185,18);
+    CardText(H->PotionCharges>=ADungeonHero::PotionCapacity?TEXT("FULL"):TEXT("BUY 250"),711,615,Gold,17,105,24);
+    CardText(G->TraderMessage,456,705,Pale,15,360,38);
     Sprite(TEXT("InventoryFrame"),456,653,174,42);CardText(TEXT("INVENTORY / SELL"),467,663,Gold,16,158);
     Sprite(TEXT("InventoryFrame"),642,653,174,42);CardText(G->IsAtlasFloor()?TEXT("LEAVE SHOP"):FString::Printf(TEXT("ENTER ROOM %d"),G->GetRoom()+1),661,663,Gold,18,145);
 }
@@ -170,6 +200,7 @@ void ADungeonHUD::TraderClick()
     float X=0,Y=0;if(!G||!G->IsTraderOpen()||!H||!PC||Scale<=0||!PC->GetMousePosition(X,Y))return;
     const auto P=(FVector2D(X,Y)-Offset)/Scale;
     using namespace DungeonInventoryLayout;
+    if(In(P,704,600,120,47)){G->BuyTraderPotion(H);return;}
     if(In(P,456,653,174,42)){H->ToggleInventory();return;}
     if(In(P,642,653,174,42)){G->ContinueFromTrader();return;}
     for(int I=0;I<G->GetTraderStock().Num();++I) {
@@ -187,9 +218,22 @@ int32 ADungeonHUD::VerifyTraderUI()
     const int64 Price=G->TraderPrice(G->GetTraderStock()[0]),Before=H->Coins;
     const int Count=H->Inventory.Num();Click(748,218);
     Check(H->Coins==Before-Price&&H->Inventory.Num()==Count+1);Click(748,218);Check(H->Coins==Before-Price);
+    const auto PotionCoins=H->Coins;const int OldCharges=H->PotionCharges;H->Coins=1000;H->PotionCharges=3;
+    Click(756,623);Check(H->Coins==750&&H->PotionCharges==4);Click(756,623);Check(H->Coins==750&&H->PotionCharges==4);
+    H->Coins=PotionCoins;H->PotionCharges=OldCharges;
     Click(510,671);Check(H->IsInventoryOpen());
-    H->SelectedItem=H->Inventory.Num()-1;const int64 Value=G->TraderSellPrice(H->Inventory[H->SelectedItem].Item);
+    H->SelectedItem=H->Inventory.Num()-1;TraderSellSelection.Add(H->SelectedItem);const int64 Value=G->TraderSellPrice(H->Inventory[H->SelectedItem].Item);
     Click(720,582);Check(H->Coins==Before-Price+Value&&H->Inventory.Num()==Count);
+    const auto Bag=H->Inventory;const auto Wallet=H->Coins;
+    H->Inventory.Empty();TraderSellSelection.Empty();
+    for(int I=0;I<3;++I)H->AddToInventory(G->RollItem(48+I,1,3));
+    auto ClickBag=[&](int I){const auto Cell=H->Inventory[I].Cell;Click(DungeonInventoryLayout::BagX+Cell.X*60+24,DungeonInventoryLayout::BagY+Cell.Y*60+24);};
+    const auto Bulk=G->TraderSellPrice(H->Inventory[0].Item)+G->TraderSellPrice(H->Inventory[2].Item);
+    ClickBag(0);ClickBag(2);Check(TraderSellSelection.Num()==2);
+    ClickBag(2);Check(TraderSellSelection.Num()==1);ClickBag(2);Check(TraderSellSelection.Num()==2);
+    Click(720,582);Check(H->Inventory.Num()==1&&H->Coins==Wallet+Bulk&&TraderSellSelection.IsEmpty());
+    Click(720,582);Check(H->Inventory.Num()==1&&H->Coins==Wallet+Bulk);
+    H->Inventory=Bag;H->Coins=Wallet;H->SelectedItem=INDEX_NONE;
     Click(1190,80);Check(!H->IsInventoryOpen()&&G->IsTraderOpen());
     const int Room=G->GetRoom();Click(720,671);Check(!G->IsTraderOpen()&&G->GetRoom()==Room+1);
     return Errors;
@@ -234,6 +278,20 @@ void ADungeonGameMode::VerifyTrader()
         TickAtlasTravel(1);
         PendingSpawns=0;
     }
+    bTraderOpen=true;H->Inventory.Empty();H->Coins=1000;
+    H->AddToInventory(RollItem(48,1,3));H->AddToInventory(RollItem(49,1,3));H->AddToInventory(RollItem(50,1,3));
+    const int64 Sale=TraderSellPrice(H->Inventory[0].Item)+TraderSellPrice(H->Inventory[2].Item);
+    const auto Retained=H->Inventory[1].Item.Name;
+    Check(SellTraderItems(H,{0,2,0})&&H->Coins==1000+Sale&&H->Inventory.Num()==1&&H->Inventory[0].Item.Name==Retained,TEXT("bulk sale deduplicates and preserves unselected gear"));
+    const auto Wallet=H->Coins;Check(!SellTraderItems(H,{0,99})&&H->Coins==Wallet&&H->Inventory.Num()==1,TEXT("invalid batch has no partial sales"));
+    Check(!SellTraderItems(H,{}),TEXT("empty batch does nothing"));
+    H->Coins=MAX_int64;Check(!SellTraderItems(H,{0})&&H->Inventory.Num()==1,TEXT("sale overflow rejected atomically"));
+    H->Coins=1000;H->PotionCharges=0;
+    for(int I=0;I<4;++I)Check(BuyTraderPotion(H),TEXT("purchase potion charge"));
+    Check(H->Coins==0&&H->PotionCharges==4,TEXT("four potions cost 1000 and fill belt"));
+    H->Coins=1000;Check(!BuyTraderPotion(H)&&H->Coins==1000&&H->PotionCharges==4,TEXT("full potion belt cannot spend gold"));
+    H->PotionCharges=0;H->Coins=249;Check(!BuyTraderPotion(H)&&H->Coins==249&&H->PotionCharges==0,TEXT("unaffordable potion leaves wallet and stock intact"));
+    bTraderOpen=false;H->Coins=1000;Check(!BuyTraderPotion(H)&&!SellTraderItems(H,{0}),TEXT("transactions require open trader"));
     RestartRun();Check(H->Coins==0&&!IsTraderOpen(),TEXT("New run resets wallet and shop"));
     UE_LOG(LogTemp,Display,TEXT("TRADER_VERIFY_COMPLETE errors=%d"),Errors);FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);
 #endif

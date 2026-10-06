@@ -1,0 +1,50 @@
+Grounded adventurer animation test - 2026-10-05
+
+Scope
+32 walk frames and 32 run frames for each of eight movement directions.
+Separate lower-body layers keep walking during melee, casting and guarding.
+The inventory portrait, enemy art, original locomotion, rolls and drink sheets
+are unchanged. Actual movement speed, attack damage and attack timings are unchanged.
+These are locally rigged derivatives of the existing pixels, not newly painted
+independent poses. The rejected AI-generated sheet was not imported.
+
+Authoring
+Run Tools/prepare_grounded_hero.py with Python, Pillow and NumPy.
+Inputs: local Content/Art/V2/Locomotion_Walk_D_0.png and Athletic_Attack* PNGs,
+plus ArtSource/HeroLocomotionV2/registration.json. ArtSource is locally retained
+and ignored by Git; shipped .uasset files do not require it.
+Output: local ArtSource/HeroGroundedV3, generated HeroGroundedSockets.h.
+Run Tools/verify_grounded_hero.py before importing.
+Import via Unreal Python Tools/import_grounded_hero.py while the editor is closed.
+
+Measured donor leg masks feed continuous triangle-mesh skinning, with a two-bone
+knee solve and separate ankle pitch. Occluded shin/thigh pixels are filled only
+inside measured limb tubes. Character pixels retain their original 3x scale;
+480x480 is extra transparent canvas, not a resize. Logical root stays (64,116).
+Hands use the same torso/arm deformation as the body. No whole-character mirrors.
+
+Stride contract
+Horizontal stride: walk 112 / run 210 gameplay pixels per full left-right cycle.
+Directional projection factor: 1 / sqrt(dx^2 + (dy / 0.6)^2).
+Hero scale 1.375; source logical scale 3; 32 samples per cycle.
+Walk stance 60%; run stance 36% with flight. Walk lift 7; run lift 17 logical px.
+Time comes from actual displacement, so slow, gear, tea and attack modifiers
+also change cadence. The mathematical contact check is an ankle check, not a
+claim that every pixel of the heel/toe stays fixed while the foot rolls.
+
+Verification
+Tools/verify_grounded_hero.py: 4665 asset/contact checks.
+Unreal -LocomotionVerify: all 1072 new layers and legacy fallbacks; directional
+phase; 60/120Hz; modifiers; idle; walls; doorway; moving attacks.
+Other checks: ComboVerify, PolishVerify, PotionVerify, TeaSpiritVerify, SettingsVerify.
+Development-only -LocomotionPreview creates an eight-direction review.
+Development-only -GroundedReplay records walking, running and moving attacks.
+Tools/preview_grounded_hero.py encodes the engine frames without retouching them.
+Package script checks all 1072 assets in the final IoStore container.
+
+Review focus
+Test naturalness at gameplay size, especially diagonal legs and changing between
+walk/run and attacks. This rig has eight facings, not smooth 360-degree rotation.
+Upper attack poses keep their existing animation timing and do not receive new
+intermediate attack artwork. A standalone test is for visual approval, not a
+claim that mathematical checks can replace a human judgment of animation feel.

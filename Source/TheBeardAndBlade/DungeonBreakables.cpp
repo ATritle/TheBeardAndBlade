@@ -24,6 +24,12 @@ void ADungeonGameMode::StrikeBreakables(ADungeonHero* H)
     if(!H||H->Health<=0||IsGameplayBlocked()||H->IsInventoryOpen())return;
     const auto P=DungeonView::Project(H->GetActorLocation());
     for(auto& B:Breakables)if(B.BrokenAge<0&&DungeonCombatBalance::MeleeHits(B.Position-P,H->GetAim(),80,false)) {
+        BreakProp(B);
+    }
+}
+void ADungeonGameMode::BreakProp(FDungeonBreakable& B)
+{
+        if(B.BrokenAge>=0)return;
         B.BrokenAge=0;
         // Once-only roll, ordinary rarity odds even in a boss room; no kill/proc rewards.
         if(DungeonCombatBalance::PropDropsLoot(FMath::FRand())){
@@ -31,7 +37,6 @@ void ADungeonGameMode::StrikeBreakables(ADungeonHero* H)
             BalanceEvent(TEXT("prop_offer"),B.Loot.Rarity,B.Loot.CatalogId);
         }
         PlaySound(TEXT("PropBreak"),.6f,FMath::FRandRange(.97f,1.03f));
-    }
 }
 bool ADungeonGameMode::CollectBreakableLoot(ADungeonHero* H)
 {

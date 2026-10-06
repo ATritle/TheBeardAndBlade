@@ -1,4 +1,11 @@
-# v0.4.2 playtest
+# v0.4.4 playtest
+
+Current focus: test full-body melee and bow movement in all eight directions;
+check one-handed grip, smaller weapon size and blade orientation; tap bow attack
+and hold to the 1.5-second automatic power shot, then release/rearm. Inspect
+independently fading arrow wakes, skill/enemy effects and doorway chains. Check
+trader batch sales and potion purchases. Finance's descent must enter the bunker
+as floor two, with no Grease encounter. Boss-effect refinements are deferred.
 
 Use the Windows release archive for normal gameplay. One-off CMD test launchers have been retired.
 

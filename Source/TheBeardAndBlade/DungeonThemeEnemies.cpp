@@ -1,4 +1,5 @@
 #include "DungeonActors.h"
+#include "DungeonSkillFX.h"
 #include "DungeonRoster.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Texture2D.h"
@@ -17,8 +18,9 @@ void ADungeonGameMode::FireThemeAttack(ADungeonEnemy* E)
     }
     if(Spec.AttackStyle==0||Spec.AttackStyle==4)
     {
+        DungeonSkillFX::Melee(E);
         FDungeonSplash FX;FX.Position=P;FX.Radius=Spec.Range;
-        FX.Art=E->Species==31?50:E->Species==47?51:49;Splashes.Add(FX);
+        FX.Art=E->Species==31?50:E->Species==47?51:49;FX.bNiagara=!E->bBoss;Splashes.Add(FX);
         PlaySound(Spec.AttackStyle==0?TEXT("Sword"):TEXT("Explosion"),.6f);
         auto D=DungeonView::Project(H->GetActorLocation())-P;D.Y/=.7f;
         if(D.Size()<Spec.Range+20)H->ReceiveMeleeHit(Spec.Damage*1.8f,P);
@@ -35,7 +37,7 @@ void ADungeonGameMode::FireThemeAttack(ADungeonEnemy* E)
     const float Base=FMath::Atan2(AimDelta.Y,AimDelta.X);
     for(int I=0;I<Count;++I)
     {
-        FDungeonShot S;S.Origin=S.Position=Muzzle;S.Target=DungeonView::Clamp(E->AttackTarget);S.HitHeight=Grenade||Arc?0:65;
+        FDungeonShot S;S.SourceEnemy=E;S.bBossAttack=E->bBoss;S.Origin=S.Position=Muzzle;S.Target=DungeonView::Clamp(E->AttackTarget);S.HitHeight=Grenade||Arc?0:65;
         S.Style=Grenade?13:Bullet?11:Arc?14:15;S.Art=Grenade?20:Bullet?18:Art;
         S.Damage=Spec.Damage*1.8f;S.Radius=Bullet?5:10;S.BlastRadius=Grenade?180:Arc?85:28;
         const float A=Radial?I*2*PI/Count:Base+(I-(Count-1)*.5f)*.18f;

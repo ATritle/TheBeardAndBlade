@@ -12,6 +12,12 @@
 void ADungeonGameMode::StartGame()
 {
     bMenu=false; bHasRun=true; bShowControls=bShowSettings=bConfirmQuit=false; RestartRun();
+    // Explicit local test loadout only; normal new games and saves are unchanged.
+    if(FParse::Param(FCommandLine::Get(),TEXT("BowTest")))
+        if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))){
+            H->Equip(RollItem(72,0,1));
+            for(int Id=73;Id<77;++Id)H->AddToInventory(RollItem(Id,4,1));
+        }
     PlaySound(TEXT("UI"));
 }
 void ADungeonHero::TestFinance() { if(auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this))) G->StartPlaytestRoom(DungeonProgression::BossRoom(24)); }
@@ -64,6 +70,7 @@ void ADungeonGameMode::StartTransition(int32 Door)
     PlaySound(TEXT("Door"),.65f);
     if(auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0))) TransitionFrom=DungeonView::Project(H->GetActorLocation());
 }
+#include "DungeonSkillFX.h"
 void ADungeonEnemy::Tick(float Dt)
 {
     Super::Tick(Dt);
@@ -72,6 +79,15 @@ void ADungeonEnemy::Tick(float Dt)
     if(!G||G->IsGameplayBlocked()||!H||H->IsInventoryOpen()||H->Health<=0) return;
     if(Species==IronMatriarch::Species&&Iron.DeathAge>=0){TickIronMatriarch(Dt,H,G);return;}
     if(Health<=0)return;
+    if(!bBoss&&SpawnTime>0&&!bSpawnEffect){bSpawnEffect=true;DungeonSkillFX::Burst(GetWorld(),DungeonView::Project(GetActorLocation())-FVector2D(0,30),DungeonSkillFX::Color(Species),125,.6f,10,.6f);}
+    if(!bBoss){
+        StatusEffectClock+=Dt;
+        if(StatusEffectClock>=.25f){
+            StatusEffectClock=0;const auto P=DungeonView::Project(GetActorLocation());
+            if(ChargeTime>0)DungeonSkillFX::Burst(GetWorld(),P,{.4f,.35f,.25f},90,.45f,6,2);
+            if(PoisonTime>0||BleedTime>0||SlowTime>0)DungeonSkillFX::Burst(GetWorld(),P-FVector2D(0,35),PoisonTime>0?FLinearColor(.3f,.65f,.1f):BleedTime>0?FLinearColor(.55f,.06f,.025f):FLinearColor(.3f,.5f,.8f),85,.5f,9,.3f);
+        }
+    }
     StaggerGuard=FMath::Max(0.f,StaggerGuard-Dt);
     const auto& S=DungeonRoster::Get(Species);
     HurtTime=FMath::Max(0.f,HurtTime-Dt); FreedomImmuneTime=FMath::Max(0.f,FreedomImmuneTime-Dt); bWalking=false;
@@ -237,6 +253,7 @@ void ADungeonGameMode::FireAttack(ADungeonEnemy* E)
     if(S.AttackStyle==2) { E->ChargeTime=E->bBoss?.65f:.45f; return; }
     if(S.AttackStyle==0||S.AttackStyle==4)
     {
+        DungeonSkillFX::Melee(E);
         const float Radius=S.AttackStyle==4?(E->bBoss?145.f:S.Range):S.Range;
         FVector2D Delta=DungeonView::Project(H->GetActorLocation())-E->AttackTarget; Delta.Y/=.65f;
         if(Delta.Size()<Radius) H->ReceiveMeleeHit(S.Damage*1.8f,P,E->bBoss);
@@ -427,11 +444,11 @@ void ADungeonGameMode::VerifyCampaign()
         E->Destroy(); H->Restart();
     }
     Shots.Empty();
-    for(int R=1;R<=DungeonProgression::CampaignRooms;++R)
+    for(int R=1;R<=DungeonProgression::CampaignRooms;R=DungeonProgression::NextRoom(R))
     {
         Check(Room==R,TEXT("Sequential room progression"));
         Check(IsBossRoom()==(R%DungeonProgression::RoomsPerChapter==0),TEXT("Boss every fourth room"));
-        const int32 ExpectedThemes[]={0,6,5,1,2,3,4};
+        const int32 ExpectedThemes[]={0,6,5,1,2,3,4,7};
         Check(GetBiome()==ExpectedThemes[DungeonProgression::Chapter(R)],TEXT("Boss-matched four-room biome progression"));
         int Guard=0;
         while(!bChest&&!HasEnding()&&++Guard<20)

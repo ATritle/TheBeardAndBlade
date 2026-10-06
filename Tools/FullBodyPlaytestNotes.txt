@@ -1,0 +1,33 @@
+2026-10-05: Full-body adventurer playable integration
+
+User approved current candidate visuals for in-game testing. This authorization
+does not certify every source pose or manually approve the estimated sockets.
+
+Entry point: -FullBodyTest. Default renderer and original assets are unchanged.
+Generated package: Builds/FullBody-Playtest-20261005
+Launcher: Play-New-Adventurer.cmd (no UE installation required).
+Comparison launcher: Play-Previous-Sprites.cmd.
+
+prepare_fullbody_test.py builds 152 isolated FullBody_* atlases and generated
+FullBodyArtMetrics.h. The corrected SE walk is used; other actions use measured
+selected crops. Eight directions are independently authored, never mirrored.
+import_fullbody_test.py imports bilinear, no-mip UI textures into /Game/Art/V2.
+DungeonFullBody.cpp uses complete-body animations; no split torso/leg overlays.
+Existing gameplay damage/cooldown/release timing remains unchanged. Bow and tea
+release origins use the new socket table only when the test flag is active.
+
+Verified:
+- Editor Development and standalone Shipping compilation succeeded.
+- 152 atlas imports completed and all 152 verified in the final IoStore archive.
+- Eight-direction walk/run and bow poses rendered in-engine and captures inspected.
+- Bow regression test with -FullBodyTest: 167 checks, zero errors.
+
+Remaining polish / scope notes:
+- Anchors are normalized landmark estimates, not final manually certified sockets.
+- Moving attacks/guard use a complete action pose, not authored strafing variants.
+- BowStow and recovery source artwork is packaged but transition playback is not
+  yet wired. Death currently selects the prone frame; existing revival/ghost logic
+  remains unchanged. No gameplay behavior is claimed for unused source sequences.
+- Original source-art strict quality gate stays unapproved; user is testing this
+  integration before further pose/transition polish.
+- No GitHub commit/push or release replacement performed.

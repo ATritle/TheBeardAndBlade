@@ -117,11 +117,36 @@ void ADungeonHero::ToggleEffects() { if(auto* G=Cast<ADungeonGameMode>(UGameplay
 void ADungeonGameMode::RunPackagedSmokeTest()
 {
 #if !UE_BUILD_SHIPPING
+    if(FParse::Param(FCommandLine::Get(),TEXT("MeleeRigReview"))){ReviewMeleeRig();return;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("CombatFXReview"))){ReviewCombatFX();return;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("SkillFXReview"))){ReviewSkillFX();return;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("GateArtReview"))){ReviewGateArt();return;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("ArrowFXReview"))||FParse::Param(FCommandLine::Get(),TEXT("BowReview"))||FParse::Param(FCommandLine::Get(),TEXT("BowPoseReview"))){ReviewBow();return;}
+    if(FParse::Param(FCommandLine::Get(),TEXT("GroundedReplay"))) {
+        static float Start=-1;static int Frame=-1,LastSection=-1;const float Now=GetWorld()->GetTimeSeconds();
+        auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));if(!H)return;
+        if(Start<0) {
+            StartGame();DisableAtlas();bMenu=false;PendingSpawns=0;CancelBossIntro();DialogueLines.Empty();BossGrace=0;
+            for(auto& E:Enemies)if(IsValid(E))E->Destroy();Enemies.Empty();
+            Start=Now;
+        }
+        const float T=Now-Start;const int Section=T<4.4f?0:T<6.64f?1:2;
+        const float Local=T-(Section==0?0:Section==1?4.4f:6.64f),Interval=Section==1?.28f:.55f;
+        if(Section!=LastSection){H->Restart();H->SetActorLocation(DungeonView::Unproject(FVector2D(510,260)));LastSection=Section;}
+        const int D=(2+FMath::Min(7,FMath::FloorToInt(Local/Interval)))%8;
+        H->MoveRight(FMath::Sin(D*PI/4));H->MoveForward(FMath::Cos(D*PI/4));
+        if(Section==1)H->SprintPressed();else H->SprintReleased();
+        H->SetFlashReviewAim(FVector2D(1,0));if(Section==2&&!H->IsAttacking())H->Attack();
+        const int Index=FMath::FloorToInt(T*24);
+        if(Index!=Frame){Frame=Index;FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/FString::Printf(TEXT("Screenshots/GroundedReplay/Frame%04d.png"),Index),false,false);}
+        if(T>11.04f)FPlatformMisc::RequestExit(false);
+        return;
+    }
     if(FParse::Param(FCommandLine::Get(),TEXT("LocomotionPreview"))) {
         static int Stage=0;const float T=GetWorld()->GetTimeSeconds();
         if(Stage==0&&T>1) { StartGame();DisableAtlas();bMenu=false;PendingSpawns=0;CancelBossIntro();DialogueLines.Empty();BossGrace=0;++Stage; }
         if(Stage>=1&&Stage<=16&&T>2+(Stage-1)*.12f) {
-            FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/FString::Printf(TEXT("Screenshots/LocomotionV2/Frame%02d.png"),Stage-1),false,false);++Stage;
+            FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/FString::Printf(TEXT("Screenshots/GroundedV3/Frame%02d.png"),Stage-1),false,false);++Stage;
         }
         if(Stage==17&&T>4.5f) { FPlatformMisc::RequestExit(false);++Stage; }
         return;
@@ -134,6 +159,18 @@ void ADungeonGameMode::RunPackagedSmokeTest()
         auto Check=[&](bool OK){if(!OK)++Errors;};
         StartGame();DisableAtlas();bMenu=false;PendingSpawns=0;CancelBossIntro();DialogueLines.Empty();BossGrace=0;
         for(int D=0;D<8;++D) {
+            for(const TCHAR* State:{TEXT("Walk"),TEXT("Run")})for(int F=0;F<32;++F)for(const TCHAR* Prefix:{TEXT("Grounded"),TEXT("GroundedLegs")}) {
+                const FString Name=FString::Printf(TEXT("%s_%s_%d_%d"),Prefix,State,D,F);
+                auto* Texture=LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/%s.%s"),*Name,*Name));
+                Check(Texture&&Texture->Filter==TF_Nearest&&Texture->NeverStream);
+#if WITH_EDITORONLY_DATA
+                Check(Texture&&Texture->Source.GetSizeX()==480&&Texture->Source.GetSizeY()==480);
+#endif
+            }
+            for(int F=0;F<6;++F) {
+                const FString Name=FString::Printf(TEXT("GroundedUpper_Athletic_Attack%s_%d_%d"),D%2?TEXT("Diagonal"):TEXT("Cardinal"),D/2,F);
+                Check(LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/%s.%s"),*Name,*Name))!=nullptr);
+            }
             for(const TCHAR* State:{TEXT("Walk"),TEXT("Run")})for(int F=0;F<8;++F) {
                 const FString Name=FString::Printf(TEXT("Locomotion_%s_%d_%d"),State,D,F);
                 auto* Texture=LoadObject<UTexture2D>(nullptr,*FString::Printf(TEXT("/Game/Art/V2/%s.%s"),*Name,*Name));
@@ -158,15 +195,21 @@ void ADungeonGameMode::RunPackagedSmokeTest()
             H->MoveRight(FMath::Sin(D*PI/4));H->MoveForward(FMath::Cos(D*PI/4));H->Tick(.05f);
             Check(H->GetFacingDirection()==D);
             Check(H->GetLocomotionFrame()>=0&&H->GetLocomotionFrame()<8);
+            Check(H->GetGroundedFrame()>=0&&H->GetGroundedFrame()<32);
+            const FVector2D Travel(FMath::Sin(D*PI/4),-FMath::Cos(D*PI/4));
+            const float Expected=FMath::Fmod(190.f*.05f/HeroLocomotion::Stride(0,Travel),1.f)*2*PI;
+            Check(FMath::IsNearlyEqual(H->WalkCycle(),Expected,.003f));
         }
         H->TransitionWalk(FVector2D(640,450),FVector2D(640,400),.5f);Check(!H->IsRunAnimation()&&H->GetFacingDirection()==0);
 #if !UE_BUILD_SHIPPING
         H->Restart();H->SetFlashReviewAim(FVector2D(1,0));H->MoveForward(1);H->Tick(.05f);
         Check(H->GetFacingDirection()==0&&H->GetAim().Equals(FVector2D(1,0)));
         H->Attack();Check(H->IsAttacking()&&H->GetFacingDirection()==2);
+        const float AttackPhase=H->WalkCycle();H->Tick(.05f);
+        Check(H->IsWalking()&&H->WalkCycle()!=AttackPhase&&H->GetTravelDirection()==0);
         H->CancelCombatActions();H->MoveForward(0);H->Tick(.05f);Check(!H->IsWalking());
 #endif
-        UE_LOG(LogTemp,Display,TEXT("LOCOMOTION_VERIFY errors=%d; 128 authored frames; eight movement-facing directions; speed modifiers; 60/120Hz; idle; walls; doorway walk"),Errors);
+        UE_LOG(LogTemp,Display,TEXT("LOCOMOTION_VERIFY errors=%d; 1072 grounded layers plus 128 legacy frames; eight directions; projected stride; moving attacks; speed modifiers; 60/120Hz; idle; walls; doorway walk"),Errors);
         FPlatformMisc::RequestExitWithStatus(false,Errors?1:0);return;
     }
     if(FParse::Param(FCommandLine::Get(),TEXT("CoinVacuumReview"))) {

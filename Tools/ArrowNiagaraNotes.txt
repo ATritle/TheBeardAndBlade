@@ -1,0 +1,33 @@
+Arrow effects implementation — 2026-10-06
+
+Runtime: DungeonArrowFX.cpp/h. Dedicated Niagara system and unlit animated material
+live in /Game/Effects/Arrows. Existing arrow damage, lifetime, swept collision and
+elemental status application are unchanged. The attached canvas sine-wave trail
+and old arrow-impact flipbooks are replaced by Niagara release/wake/impact phases.
+
+Each wake particle is emitted at a fixed 18-unit distance interval in a private
+orthographic scene plane. It is independent of the arrow after emission, spreads
+and fades over 0.55 seconds, and survives projectile impact/destruction. Material
+age follows gameplay time, including inventory pause. Components are destroyed
+after 0.62 seconds and bounded to 160. Menu, trader and room travel clear effects.
+Scene capture uses a show-only particle list and is composited additively before
+the HUD. Its 1280x800 logical coordinates follow HUD letterboxing and scale.
+
+Gold/fire/frost/poison/arcane tint and power-shot intensity are per-instance.
+Charge remains 1.5 seconds, auto-fires once, and requires release before rearming.
+
+Editor-only BuildArrowNiagara flag regenerates the two assets; this builder uses
+UE 5.8 stateless Niagara editor APIs. Runtime does not depend on those editor APIs.
+DefaultGame.ini explicitly cooks the effects; package_windows.ps1 audits them.
+
+Preview: -game -FullBodyTest -ArrowFXReview -UseFixedTimeStep -FPS=30
+-RenderOffscreen -ForceRes -ResX=1280 -ResY=800 -unattended -nosound
+Scripted in-game capture, quick then power shot per bow, 600 frames at 30 FPS.
+The fixed frame-rate override exists only behind the non-Shipping review flag.
+Saved/ArrowNiagaraPreview/arrow-effects-gameplay-mobile.mp4 is a cropped 20-second
+960x540 H.264/YUV420p/faststart capture (not a concept animation).
+Saved/ArrowNiagaraPreview/frost-arrow-gameplay.gif is the frost excerpt.
+
+Validation: ArrowNiagara-Verify.log reports 176 bow checks, zero errors.
+Editor compilation and live offscreen Niagara rendering verified.
+No GitHub release or packaged distribution was updated for this preview.

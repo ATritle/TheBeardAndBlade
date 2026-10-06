@@ -42,7 +42,33 @@ void ADungeonHero::GameplayAttack()
 {
     auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
     if(UIClickFrame!=GFrameCounter&&G&&!G->IsGameplayBlocked()&&!IsInventoryOpen()&&Health>0&&StunTime<=0&&!IsBlocking()&&!IsRolling()&&!IsDrinking()&&!IsCasting())
-    {bAttackHeld=true;Attack();}
+    {
+        if(IsBowEquipped()){
+            if(!CanStrike()||bBowDrawing||bBowNeedsRelease)return;
+            bAttackHeld=true;bBowDrawing=true;BowDrawTime=0;BowShotPower=1;
+        }else{bAttackHeld=true;Attack();}
+    }
+}
+void ADungeonHero::GameplayAttackReleased()
+{
+    bAttackHeld=false;
+    bBowNeedsRelease=false;
+    if(!bBowDrawing)return;
+    const bool Powered=BowDrawTime>=DungeonBow::ChargeTime-.001f;
+    FireDrawnBow(Powered);
+}
+void ADungeonHero::FireDrawnBow(bool Powered)
+{
+    if(!bBowDrawing)return;
+    bBowDrawing=false;BowDrawTime=0;
+    auto* G=Cast<ADungeonGameMode>(UGameplayStatics::GetGameMode(this));
+    if(!G||G->IsGameplayBlocked()||IsInventoryOpen()||!IsBowEquipped()||!CanStrike())return;
+    Attack();
+    if(!IsAttacking())return;
+    BowShotPower=Powered?DungeonBow::PowerDamage:1.f;
+    // Draw happened while held. Completion/release fires once, then follows through.
+    AttackTime=AttackDuration()*(1-DungeonBow::Release);bAttackHit=true;
+    G->LaunchArrow(this);
 }
 
 void ADungeonGameMode::LoadAudioSettings()

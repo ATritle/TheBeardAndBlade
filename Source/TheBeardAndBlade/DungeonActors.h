@@ -12,9 +12,10 @@
 #include "DungeonRevival.h"
 #include "DungeonSettings.h"
 #include "DungeonMeleeCombo.h"
+#include "DungeonBow.h"
 #include "DungeonActors.generated.h"
 
-namespace DungeonLootCatalog { constexpr int32 Count=72,EquipmentSlots=8; }
+namespace DungeonLootCatalog { constexpr int32 Count=77,EquipmentSlots=8; }
 class UCameraComponent;
 class UTexture2D;
 class UFont;
@@ -46,6 +47,9 @@ struct FDungeonItem
     FString Art() const { return CatalogId<0?FString::Printf(TEXT("Item_%d_%d"),Icon/3,Icon%3):FString::Printf(TEXT("Loot_%d"),CatalogId); }
     FString BagArt() const {return CatalogId>=0&&CatalogId<24?FString::Printf(TEXT("BagWeapon_%d"),CatalogId):Art();}
     FString EffectText() const;
+    bool IsBow() const {return Slot==0&&DungeonBow::Is(CatalogId);}
+    float AttackPeriod() const {return IsBow()?DungeonBow::Duration:.48f;}
+    float DirectDamageScale() const {return IsBow()&&Effect==11?1.15f:1.f;}
     float EquippedScale() const;
     FString Stats() const;
     FIntPoint Size() const { return Slot==0||Slot==6?FIntPoint(1,2):Slot==1?FIntPoint(2,2):FIntPoint(1,1); }
@@ -97,6 +101,10 @@ struct FDungeonImpact
 };
 struct FDungeonShot
 {
+    float EffectDistance=0;
+    int32 BowElement=0,BowEffects=0;
+    float BowBleed=0,BowPoison=0,BowWakeDistance=0;
+    bool BowCritical=false,BowEcho=false,BowPower=false;
     int32 ExpansionSpecies=-1;
     TWeakObjectPtr<class ADungeonEnemy> SourceEnemy;
     FVector2D Position,Velocity;
@@ -113,6 +121,8 @@ struct FDungeonShot
 };
 struct FDungeonSplash
 {
+    bool bNiagara=false;
+    int32 BowElement=-1;
     int32 TeaKind=0; // 0 shared/non-TEA, 1 ground, 2 confirmed enemy overlay
     TWeakObjectPtr<class ADungeonEnemy> TeaEnemy;
     float TeaHeight=0;
@@ -137,10 +147,19 @@ public:
     uint64 UIClickFrame=MAX_uint64;
     void InputClick();
     void GameplayAttack();
-    void GameplayAttackReleased(){bAttackHeld=false;}
-    void ResetMeleeChain(){bAttackHeld=false;MeleeCombo.Reset();AttackTime=0;bAttackHit=true;}
+    void GameplayAttackReleased();
+    void FireDrawnBow(bool Powered);
+    bool bBowNeedsRelease=false;
+    void ResetMeleeChain(){bAttackHeld=false;bBowDrawing=false;BowDrawTime=0;BowShotPower=1;MeleeCombo.Reset();AttackTime=0;bAttackHit=true;}
+    bool bBowDrawing=false;
+    float BowDrawTime=0,BowShotPower=1;
+    bool IsBowCharging()const{return bBowDrawing&&IsBowEquipped();}
+    float GetBowCharge()const{return FMath::Clamp(BowDrawTime/DungeonBow::ChargeTime,0.f,1.f);}
     void ResolveMeleeSwing(bool Hit);
     float MeleeDamageScale()const{return MeleeCombo.DamageScale();}
+    bool IsBowEquipped()const{return Equipment.Num()>0&&Equipment[0].IsBow();}
+    float AttackDuration()const{return IsBowEquipped()?DungeonBow::Duration:MeleeCombo.Duration();}
+    FVector2D BowTarget=FVector2D::ZeroVector;
     bool IsComboSwing()const{return IsAttacking()&&MeleeCombo.Finisher;}
     float ComboPopupTime=0;
     FVector2D ComboPopupPosition=FVector2D::ZeroVector;
@@ -234,8 +253,10 @@ public:
 #if !UE_BUILD_SHIPPING
     void SetComboReviewPose(int32 D,float T){MeleeCombo.Reset();MeleeCombo.Landed=2;MeleeCombo.Remaining=1;MeleeCombo.Begin();Facing=AttackDirection=D;AttackTime=MeleeCombo.Duration()*(1-T);bAttackHit=true;}
     void SetReviewPose(int32 D,int32 F) { Facing=AttackDirection=D; AttackTime=.48f*(1.f-(F+.01f)/6.f); bAttackHit=true; }
+    void SetBowReviewPose(int32 D,float T) { Facing=AttackDirection=D; AttackTime=AttackDuration()*(1-T); bAttackHit=true; }
     void SetWalkReviewPose(int32 D,int32 F) { Facing=D;AttackTime=PowerCastTime=RollTime=0;bWalking=true;WalkDistance=(F+.01f)*18;IdleBreathBlend=0;MoveBlend=1;RunBlend=0;GaitTravel=FVector2D(FMath::Sin(D*PI/4),-FMath::Cos(D*PI/4)); }
     void SetSprintReviewPose() { RunBlend=1; }
+    void SetGroundedReviewPose(int32 D,float Phase){SetWalkReviewPose(D,0);WalkDistance=FMath::Fmod(Phase,1.f)*144;}
     void SetIdleReviewPose(int32 D,float Phase) { Facing=D;AttackTime=PowerCastTime=RollTime=HurtTime=0;bWalking=false;IdleBreathBlend=1;BreathPhase=Phase; }
     void SetFlashReviewAim(FVector2D Direction) { Aim=Direction;Facing=DungeonView::Direction(Aim); }
 #endif
@@ -258,12 +279,14 @@ public:
     float GetMoveBlend() const { return MoveBlend; }
     float GetRunBlend() const { return RunBlend; }
     FVector2D GetGaitTravel() const { return GaitTravel; }
-    int32 GetFacingDirection() const { return IsCasting()?PowerDirection:IsAttacking()?AttackDirection:Facing; }
+    int32 GetFacingDirection() const { return IsCasting()?PowerDirection:IsAttacking()?AttackDirection:IsBowCharging()?DungeonView::Direction(Aim):Facing; }
     int32 GetAnimationFrame() const;
     int32 GetLocomotionFrame() const { return bWalking?FMath::FloorToInt(WalkDistance/18.f)%8:2; }
+    int32 GetGroundedFrame() const { return FMath::FloorToInt(WalkDistance/144.f*32)%32; }
+    int32 GetTravelDirection() const { return GaitTravel.IsNearlyZero()?Facing:DungeonView::Direction(GaitTravel); }
     bool IsRunAnimation() const { return bWalking&&RunBlend>.5f; }
     FVector2D GetVisualFacing() const { const float A=GetFacingDirection()*PI/4;return FVector2D(FMath::Sin(A),-FMath::Cos(A)); }
-    float GetAttackProgress() const { return 1.f-AttackTime/MeleeCombo.Duration(); }
+    float GetAttackProgress() const { return 1.f-AttackTime/AttackDuration(); }
     FVector2D GetAim() const { return IsCasting()?PowerAim:IsAttacking()?AttackAim:Aim; }
     float Health=150,MaxHealth=150,AttackPower=24,Armor=8,HurtTime=0;
     float StunTime=0,SlowTime=0,StatusClock=0;
@@ -333,6 +356,8 @@ public:
     float AttackWindup=1,AttackRadius=90;
     float ChargeTime=0;
     FVector2D ChargeAim=FVector2D::ZeroVector;
+    bool bSpawnEffect=false;
+    float StatusEffectClock=0;
     float Health=50,MaxHealth=50,HurtTime=0,SpawnTime=.6f,Windup=0,Recovery=0,FreedomImmuneTime=0;
     float WalkDistance=0;
     float FlightSoundCooldown=0;
@@ -359,6 +384,15 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float Dt) override;
     void PlayerAttack(ADungeonHero* Hero);
+    void LaunchArrow(ADungeonHero* Hero);
+    void UpdateArrow(FDungeonShot& Shot,float Dt,ADungeonHero* Hero);
+    void VerifyBow();
+    void ReviewBow();
+    void ReviewCombatFX();
+    void ReviewSkillFX();
+    void ReviewGateArt();
+    void ReviewMeleeRig();
+    void VerifySkillFX();
     int BalanceFloor() const;
     int BalanceDepth() const;
     int LootLevel() const;
@@ -477,6 +511,9 @@ public:
     void ContinueFromTrader();
     bool BuyTraderItem(ADungeonHero* Hero,int32 Index);
     bool SellTraderItem(ADungeonHero* Hero,int32 Index);
+    bool SellTraderItems(ADungeonHero* Hero,const TArray<int32>& Indices);
+    bool BuyTraderPotion(ADungeonHero* Hero);
+    static constexpr int64 TraderPotionPrice=250;
     static int64 TraderSellPrice(const FDungeonItem& Item) { return FMath::Max<int64>(1,Item.CoinValue/2); }
     bool DropInventoryItem(ADungeonHero* Hero,const FDungeonItem& Item);
     void UpdateCoinDrops(float Dt);
@@ -513,6 +550,7 @@ public:
     void UpdateReward(float Dt);
     void SpawnBreakables();
     void StrikeBreakables(ADungeonHero* Hero);
+    void BreakProp(FDungeonBreakable& Prop);
     bool CollectBreakableLoot(ADungeonHero* Hero);
     void VerifyBreakables();
     const TArray<FDungeonBreakable>& GetBreakables() const { return Breakables; }
@@ -614,6 +652,7 @@ public:
     void DrawAtlasDoors(ADungeonGameMode* G,ADungeonHero* H);
     void DrawAtlasScroll(ADungeonGameMode* G,ADungeonHero* H);
     int32 TraderSelection=INDEX_NONE;
+    TSet<int32> TraderSellSelection;
     void CancelInventoryGesture();
     int32 VerifyInventoryGestures(ADungeonHero* H);
     void DialogueClick();
@@ -630,6 +669,7 @@ private:
     TArray<FMovementDust> MovementDust;
     FVector2D LastDustPosition=FVector2D::ZeroVector;
     float AtmosphereClock=0,DustDistance=0;
+    float SwordFXClock=-1,FlameFXClock=-1,MistFXClock=-1;
     int32 AtmosphereRoom=-1;
     TSharedPtr<SBackgroundBlur> FlashBlur;
     TSharedPtr<SBorder> FlashWhite;
@@ -691,7 +731,7 @@ private:
     void DrawEnding(ADungeonGameMode* G);
     void DrawDeathSequence(ADungeonGameMode* G,ADungeonHero* H);
     UTexture2D* Texture(const FString& Name);
-    void Sprite(const FString& Name,float X,float Y,float W,float H,FLinearColor Tint=FLinearColor::White,float Rotation=0,FVector2D Pivot=FVector2D(.5,.5));
+    void Sprite(const FString& Name,float X,float Y,float W,float H,FLinearColor Tint=FLinearColor::White,float Rotation=0,FVector2D Pivot=FVector2D(.5,.5),bool MirrorX=false);
     void KeySprite(const FString& Name,float X,float Y,float W,float H,FLinearColor Tint,bool Flip=false,float Rotation=0);
     void Box(float X,float Y,float W,float H,FLinearColor Color);
     void Label(const FString& Text,float X,float Y,FLinearColor Color,float Size=1);
@@ -704,6 +744,14 @@ private:
     void Ring(FVector2D Center,float Radius,FLinearColor Color,float Width=2);
     void Shadow(FVector2D Center,float Radius,float Opacity=1.f);
     void Hero(ADungeonHero* H,float HS=1.375f);
+    bool FullBodyHero(ADungeonHero* H,FVector2D P,float HS,FLinearColor Fade);
+    void DrawMeleeRigReview(ADungeonHero* H);
+    float FullBodyLastAttack=1.f;
+    int32 FullBodySwing=0;
+#if !UE_BUILD_SHIPPING
+    int32 MeleeReviewClip=-1,MeleeReviewDirection=0,MeleeReviewFrame=0;
+    float MeleeReviewFraction=0;
+#endif
     void Enemy(ADungeonEnemy* E);
     void Rustblade(ADungeonEnemy* E);
     void ExpansionEnemy(ADungeonEnemy* E);

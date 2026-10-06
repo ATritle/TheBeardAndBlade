@@ -21,7 +21,7 @@ void AppendReport(const FString& Run,const TCHAR* Kind,const FString& Header,con
 }
 int ADungeonGameMode::BalanceFloor() const
 {
-    return bAtlasActive?AtlasChapter:DungeonProgression::Chapter(Room);
+    return DungeonProgression::ActiveFloor(bAtlasActive?AtlasChapter:DungeonProgression::Chapter(Room));
 }
 int ADungeonGameMode::BalanceDepth() const
 {
@@ -108,8 +108,9 @@ void ADungeonGameMode::VerifyBalance()
     StartGame();
     auto* H=Cast<ADungeonHero>(UGameplayStatics::GetPlayerPawn(this,0));
     if(!H){FPlatformMisc::RequestExitWithStatus(false,1);return;}
-    for(int F=0;F<8;++F){
-        InitializeAtlasFloor(4201,F);
+    for(int Chapter=0;Chapter<DungeonProgression::Chapters;++Chapter){
+        const int F=DungeonProgression::ActiveFloor(Chapter);
+        InitializeAtlasFloor(4201,Chapter);
         EnterAtlasRoom(1,-1);SpawnOneEnemy();
         Check(BalanceFloor()==F&&BalanceDepth()==1,TEXT("floor and initial depth"));
         Check(Enemies.Num()==1,TEXT("one scheduled spawn"));

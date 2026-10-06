@@ -1,4 +1,5 @@
 #include "DungeonExpansion.h"
+#include "DungeonSkillFX.h"
 #include "DungeonActors.h"
 #include "DungeonRoster.h"
 #include "DungeonCombatBalance.h"
@@ -59,11 +60,12 @@ void ADungeonGameMode::ReleaseExpansion(ADungeonEnemy* E,ADungeonHero* H)
     const auto P=DungeonView::Project(E->GetActorLocation()),Target=DungeonView::Project(H->GetActorLocation());
     const float Damage=DungeonRoster::Get(E->Species).Damage;
     if(!E->bExpansionRanged){
+        DungeonSkillFX::Melee(E);
         PlaySound(TEXT("Sword"),.42f);
         if(DungeonExpansion::MeleeHit(E->Species,Target-P,E->ChargeAim)&&DungeonExpansion::WallHit(P,Target)>1)H->ReceiveMeleeHit(Damage,P);
         return;
     }
-    FDungeonShot S;S.ExpansionSpecies=E->Species;S.SourceEnemy=E;
+    FDungeonShot S;S.ExpansionSpecies=E->Species;S.SourceEnemy=E;S.bBossAttack=E->bBoss;
     S.Position=S.Origin=P;S.Target=Target;S.Life=S.FlightTime=2.6f;S.Damage=Damage;S.Radius=8;
     const bool New=DungeonExpansionV2::Is(E->Species);
     const float Speed=New?DungeonExpansionV2::Get(E->Species).ProjectileSpeed:E->Species==50?280.f:E->Species==52?230.f:270.f;
@@ -117,11 +119,12 @@ void ADungeonGameMode::UpdateExpansionShot(FDungeonShot& S,float Dt,ADungeonHero
         // Dodge/invulnerability consumes the shot without a fake impact on the player.
         if(!HitPlayer||H->Health<HealthBefore){
             FDungeonSplash FX;FX.Position=HitPlayer?FMath::Lerp(VisualBefore,VisualAfter,Player):S.Position;FX.ExpansionSpecies=S.ExpansionSpecies;
-            FX.bExpansionPlayerHit=HitPlayer;FX.Life=.84f;FX.Radius=45;Splashes.Add(FX);
+            FX.bExpansionPlayerHit=HitPlayer;FX.Life=.84f;FX.Radius=45;FX.bNiagara=DungeonSkillFX::Impact(GetWorld(),S,FX.Position);Splashes.Add(FX);
             PlaySound(S.ExpansionSpecies==50?TEXT("TeaSplash"):TEXT("Magic"),.35f);
         }
         S.Life=0;
     }
+    DungeonSkillFX::Trail(GetWorld(),S,VisualBefore,Wall<=1||Player<=1?FMath::Lerp(VisualBefore,VisualAfter,FMath::Min(Wall,Player)):VisualAfter);
     // Expiry is harmless: no ResolveProjectile/splash damage on timeout.
 }
 

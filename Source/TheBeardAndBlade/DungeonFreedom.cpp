@@ -73,10 +73,5 @@ void ADungeonHUD::DrawCombatFX(ADungeonGameMode* G,bool Foreground)
     {
         const float T=G->FreedomProgress(),X=FMath::Lerp(-220.f,1500.f,T),Y=280.f+FMath::Sin(T*PI*2)*55.f;
         Sprite(FString::Printf(TEXT("Eagle_%d"),int(T*36)%8),X-180,Y-150,360,300);
-        for(int I=0;I<3;++I)
-        {
-            const float Phase=FMath::Fmod(T*2.f+I/3.f,1.f);
-            Sprite(TEXT("Ornate_2"),X-120-Phase*180,Y-140-I*42,210,42,FLinearColor(1,1,1,1-Phase));
-        }
     }
 }
